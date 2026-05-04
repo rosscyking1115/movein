@@ -1,0 +1,21 @@
+# Copy this to ~/.dbt/profiles.yml (preferred) or to ./profiles.yml (also supported).
+# DO NOT commit the real profiles.yml — kit lesson L1.
+#
+# Targets:
+#   dev — local developer warehouse on disk (./data/warehouse.duckdb)
+#   ci  — in-memory DuckDB for GitHub Actions (Phase 7)
+
+uk_property_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "./data/warehouse.duckdb"
+      threads: 4
+      # Read kit lesson L4: only one process can hold the file open in write mode on
+      # Windows. Connect Streamlit with read_only=True, never run dbt while the
+      # dashboard dev server is open against the same file.
+    ci:
+      type: duckdb
+      path: ":memory:"
+      threads: 2

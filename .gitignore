@@ -1,0 +1,49 @@
+# --- dbt + DuckDB ---
+target/
+dbt_packages/
+logs/
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+
+# Real profile must never be committed (kit lesson L1).
+profiles.yml
+
+# Raw + intermediate downloads.
+data/
+!data/.gitkeep
+
+# Built dbt docs site (published to Pages from CI).
+docs/
+
+# --- Python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Jupyter / Streamlit ---
+.ipynb_checkpoints/
+.streamlit/secrets.toml
+
+# --- IDE / OS noise ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Secrets ---
+.env
+.env.local
+*.pem

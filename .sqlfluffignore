@@ -1,0 +1,6 @@
+# Don't lint dbt-generated or downloaded SQL.
+target/
+dbt_packages/
+logs/
+analyses/
+macros/_generated/

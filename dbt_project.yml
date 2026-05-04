@@ -1,0 +1,52 @@
+name: 'uk_property_analytics'
+version: '0.1.0'
+config-version: 2
+
+# Profile name in profiles.yml — keep in sync with profiles.yml.example
+profile: 'uk_property_analytics'
+
+# Source paths
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Build artifact paths (gitignored)
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "logs"
+
+# Default model materialisations by folder.
+# - staging: views (cheap, recompute on every run)
+# - intermediate: ephemeral by default (compose into marts)
+# - marts: tables (consumed by dashboard, lineage tests)
+models:
+  uk_property_analytics:
+    staging:
+      +materialized: view
+      +schema: staging
+      +description: "Light type casting + renaming. No business logic."
+    intermediate:
+      +materialized: ephemeral
+      +schema: intermediate
+      +description: "Joins and computed columns that compose into marts."
+    marts:
+      +materialized: table
+      +schema: marts
+      +description: "Dimensions, facts, and reporting marts. Consumed by the dashboard."
+      core:
+        +schema: core
+      analytics:
+        +schema: analytics
+
+seeds:
+  uk_property_analytics:
+    +schema: seeds
+
+# dbt 1.8 requires this for state:modified to behave correctly with fresh sources
+flags:
+  send_anonymous_usage_stats: false
