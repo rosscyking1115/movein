@@ -1,9 +1,15 @@
 # Pinned per kit lesson L2 — never use floating versions.
 # Versions verified May 2026 against the dbt package hub.
+#
+# Note (vs. kit §4): the package landscape moved since the kit was written.
+#   - calogica/dbt_expectations → metaplane/dbt_expectations (transferred Dec 2024)
+#   - calogica/dbt_date → godatadriven/dbt_date (transferred 2026)
+#   - dbt_date is NOT declared here directly because metaplane/dbt_expectations
+#     pulls it in transitively; declaring both causes a duplicate-project error.
+#     `dbt_date.get_date_dimension(...)` macros are still available from the
+#     transitive dep — same import path, same API.
 packages:
   - package: dbt-labs/dbt_utils
-    version: 1.3.1
-  - package: calogica/dbt_expectations
-    version: 0.10.4
-  - package: calogica/dbt_date
-    version: 0.11.0
+    version: 1.3.3
+  - package: metaplane/dbt_expectations
+    version: 0.10.10
