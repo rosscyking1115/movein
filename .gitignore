@@ -10,13 +10,18 @@ logs/
 profiles.yml
 
 # Raw + intermediate downloads.
-data/
-!data/.gitkeep
+# NOTE: we deliberately don't ignore the whole `data/` directory because
+# that would block the dashboard warehouse exception below — git won't
+# re-include a file inside an ignored directory.
+data/raw/
+data/*.csv
+data/*.parquet
 
 # EXCEPTION: the slim dashboard warehouse IS committed so Streamlit Cloud can
 # load it without rebuilding the full pipeline on cold start. Built by
 # scripts/build_dashboard_db.py from the full warehouse — only ~700 rows
 # total across the three rpt_* tables, well under GitHub's 100MB hard limit.
+# The leading `*.duckdb` rule (above) ignores it; this rule re-includes it.
 !data/dashboard.duckdb
 
 # Built dbt docs site (published to Pages from CI).
