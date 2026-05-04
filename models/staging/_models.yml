@@ -1,0 +1,112 @@
+version: 2
+
+models:
+  - name: stg_landreg__transactions
+    description: |
+      One row per HM Land Registry Price Paid transaction. Types are cast,
+      columns are renamed to analytics-friendly names, postcodes are
+      normalised, and obvious junk (price <= 0) is filtered out. No joins,
+      no business measures — those land in intermediate / marts.
+    config:
+      materialized: view
+    columns:
+      - name: transaction_id
+        description: |
+          Land Registry's transaction unique identifier (UUID-like). Used
+          as the natural key throughout the rest of the pipeline. Note that
+          amendments to historic transactions can cause repeated IDs across
+          monthly snapshots; for the snapshot range we load (one yearly file
+          per year), uniqueness should hold.
+        tests:
+          - not_null
+          - unique
+
+      - name: price_gbp
+        description: Sale price in GBP, integer (bigint). Always positive after the staging filter.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: transferred_on
+        description: Calendar date of the property transfer (date, not timestamp).
+        tests:
+          - not_null
+
+      - name: postcode
+        description: |
+          Outward + inward postcode at time of sale, normalised to upper-case
+          and trimmed. NULL for the very rare records where the source had
+          no postcode (typically pre-1996 records).
+
+      - name: property_type_code
+        description: |
+          Single-character code: D=detached, S=semi, T=terraced, F=flat, O=other.
+          Decoded to a human label in dim_property_type (Phase 3).
+          Note: F means 'flat' here, NOT 'freehold' — that's `tenure_code`.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['D', 'S', 'T', 'F', 'O']
+                quote: true
+
+      - name: is_new_build_flag
+        description: Y if newly built, N if existing. (Kept as raw flag; boolean conversion happens in the fact model.)
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Y', 'N']
+                quote: true
+
+      - name: tenure_code
+        description: |
+          F=freehold, L=leasehold, U=unknown. Decoded to a human label in
+          dim_tenure (Phase 3).
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['F', 'L', 'U']
+                quote: true
+
+      - name: primary_address
+        description: PAON — primary addressable object name (e.g. house number).
+      - name: secondary_address
+        description: SAON — secondary addressable object name (e.g. flat number).
+      - name: street
+        description: Street name.
+      - name: locality
+        description: Locality. Often NULL.
+      - name: town_city
+        description: Town or city.
+      - name: district
+        description: Local authority district.
+      - name: county
+        description: County.
+
+      - name: ppd_category
+        description: |
+          'standard' (arm's-length sale at full market value) or 'additional'
+          (corrections, transfers under power of sale, etc.). Decoded inline
+          here because the lookup is just two values — no separate dim worth
+          building.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['standard', 'additional']
+
+      - name: record_status
+        description: |
+          A=added, C=changed, D=deleted. Land Registry publishes a full snapshot
+          each month; later records supersede earlier ones with the same
+          transaction_id.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['A', 'C', 'D']
+                quote: true
+
+      - name: _loaded_at
+        description: UTC timestamp when the row was written into the warehouse by load_to_duckdb.py.
+        tests:
+          - not_null

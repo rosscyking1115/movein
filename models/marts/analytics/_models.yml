@@ -1,0 +1,162 @@
+version: 2
+
+models:
+
+  - name: rpt_price_yoy_by_region
+    description: |
+      Median + mean sale price per region per year, with year-on-year %
+      change. Excludes 'Unknown' region. The headline narrative chart for
+      the dashboard.
+      Grain: one row per (region, transferred_year).
+    config:
+      materialized: table
+    columns:
+      - name: region
+        description: ONS region of England + Wales (10 values).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - London
+                  - North East
+                  - North West
+                  - Yorkshire and the Humber
+                  - East Midlands
+                  - West Midlands
+                  - East of England
+                  - South East
+                  - South West
+                  - Wales
+      - name: transferred_year
+        description: Calendar year of transfer (2021-2025 in current load).
+        tests:
+          - not_null
+      - name: sales_count
+        description: Number of arm's-length sales in this region+year.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: mean_price_gbp
+        description: Arithmetic mean sale price in GBP. Sensitive to high-value tail.
+        tests:
+          - not_null
+      - name: median_price_gbp
+        description: Median sale price in GBP. Robust to outliers — preferred metric for headline.
+        tests:
+          - not_null
+      - name: p10_price_gbp
+        description: 10th percentile sale price in GBP. Lower-end of the market.
+      - name: p90_price_gbp
+        description: 90th percentile sale price in GBP. Upper-end.
+      - name: prior_year_median_price_gbp
+        description: Median price for the same region in the prior year. NULL for the earliest year (2021 here).
+      - name: prior_year_mean_price_gbp
+        description: Mean price for the same region in the prior year. NULL for the earliest year.
+      - name: median_yoy_pct
+        description: |
+          Year-on-year % change in median price. Positive = appreciation,
+          negative = decline. Rounded to 1 decimal. NULL for first year.
+      - name: mean_yoy_pct
+        description: Year-on-year % change in mean price. Same convention.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - region
+              - transferred_year
+
+  - name: rpt_top_postcodes_by_volume
+    description: |
+      Postcode-area leaderboard by transaction volume per year. Includes
+      mean and median prices for context. rank_within_year = 1 is the
+      busiest area in that year.
+      Grain: one row per (postcode_area, transferred_year).
+    config:
+      materialized: table
+    columns:
+      - name: postcode_area
+        description: Leading 1-2 letters of the postcode (e.g. 'SW', 'M', 'BT').
+        tests:
+          - not_null
+      - name: region
+        description: ONS region the postcode area maps to.
+        tests:
+          - not_null
+      - name: transferred_year
+        description: Calendar year of transfer.
+        tests:
+          - not_null
+      - name: sales_count
+        description: Number of arm's-length sales in this area+year.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: mean_price_gbp
+        description: Arithmetic mean sale price.
+      - name: median_price_gbp
+        description: Median sale price.
+      - name: rank_within_year
+        description: |
+          Dense rank by sales_count (descending) within each transferred_year.
+          1 = highest-volume area that year. Ties share rank, no gaps.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 1"
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - postcode_area
+              - transferred_year
+
+  - name: rpt_new_build_premium
+    description: |
+      New-build vs. existing-property mean and median price by region and
+      year, with the % premium that new builds command over existing.
+      Excludes 'Unknown' region.
+      Grain: one row per (region, transferred_year).
+    config:
+      materialized: table
+    columns:
+      - name: region
+        description: ONS region.
+        tests:
+          - not_null
+      - name: transferred_year
+        description: Calendar year.
+        tests:
+          - not_null
+      - name: new_build_count
+        description: Number of new-build sales in this region+year.
+        tests:
+          - not_null
+      - name: existing_count
+        description: Number of existing-property sales.
+        tests:
+          - not_null
+      - name: new_build_mean_price_gbp
+        description: Mean price of new builds. Can be NULL if region+year had no new-build sales.
+      - name: existing_mean_price_gbp
+        description: Mean price of existing properties.
+      - name: new_build_median_price_gbp
+        description: Median price of new builds.
+      - name: existing_median_price_gbp
+        description: Median price of existing properties.
+      - name: premium_pct
+        description: |
+          Median-price premium that new builds command over existing in this
+          region+year. Positive = new builds cost more (the typical case);
+          negative = unusual. NULL where either side has no sales.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - region
+              - transferred_year

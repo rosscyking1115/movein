@@ -1,0 +1,248 @@
+version: 2
+
+models:
+
+  - name: dim_date
+    description: |
+      Generated 7-year calendar (2020-01-01 → 2026-12-31) via dbt_date.get_date_dimension.
+      One row per calendar day, with ~30 derived columns (day-of-week, month, quarter, ISO week, fiscal year, etc).
+      Grain: one row per calendar day.
+    config:
+      materialized: table
+    columns:
+      - name: date_day
+        description: Calendar date (PK).
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_postcode
+    description: |
+      One row per distinct postcode that appears in fct_transactions, with three levels of geographic rollup (outward → area → region).
+      Grain: one row per postcode.
+    config:
+      materialized: table
+    columns:
+      - name: postcode_key
+        description: Surrogate key — sha256(postcode).
+        tests:
+          - not_null
+          - unique
+      - name: postcode
+        description: Full postcode at time of sale (e.g. 'SW1A 1AA').
+        tests:
+          - not_null
+          - unique
+      - name: postcode_outward
+        description: Outward code (e.g. 'SW1A').
+      - name: postcode_area
+        description: Postcode area, leading 1-2 letters (e.g. 'SW').
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_match_regex:
+              arguments:
+                regex: '^[A-Z]{1,2}$'
+      - name: region
+        description: ONS region or 'Unknown'.
+        tests:
+          - not_null
+
+  - name: dim_property_type
+    description: |
+      Lookup decoding Land Registry's 5 property-type codes. Hand-built inline.
+      Grain: one row per property-type code.
+    config:
+      materialized: table
+    columns:
+      - name: property_type_code
+        description: Single-character code (D/S/T/F/O).
+        tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ['D', 'S', 'T', 'F', 'O']
+                quote: true
+      - name: property_type_label
+        description: Human-readable label (Detached / Semi-detached / Terraced / Flat / Other).
+        tests:
+          - not_null
+
+  - name: dim_tenure
+    description: |
+      Lookup decoding Land Registry's 3 tenure codes.
+      Grain: one row per tenure code.
+    config:
+      materialized: table
+    columns:
+      - name: tenure_code
+        description: Single-character code (F/L/U).
+        tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ['F', 'L', 'U']
+                quote: true
+      - name: tenure_label
+        description: Human-readable label (Freehold / Leasehold / Unknown).
+        tests:
+          - not_null
+
+  - name: fct_transactions
+    description: |
+      Headline fact: one row per arm's-length residential property sale
+      recorded by HM Land Registry in England + Wales (2021–2025).
+      Excludes ppd_category='additional' (corrections, repossessions, etc).
+      Grain: one row per Land Registry transaction.
+    config:
+      materialized: table
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1000000
+            max_value: 10000000
+    columns:
+      - name: transaction_key
+        description: Surrogate key — sha256(transaction_id). Stable across schema changes.
+        tests:
+          - not_null
+          - unique
+      - name: transaction_id
+        description: Natural key from Land Registry (UUID-like).
+        tests:
+          - not_null
+          - unique
+      - name: date_key
+        description: FK to dim_date (the calendar date of transfer).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: postcode_key
+        description: FK to dim_postcode. May be NULL for the rare records with no postcode.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_postcode')
+                field: postcode_key
+      - name: property_type_code
+        description: FK to dim_property_type.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_code
+      - name: tenure_code
+        description: FK to dim_tenure.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_tenure')
+                field: tenure_code
+      - name: price_gbp
+        description: Sale price in GBP.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 1
+                max_value: 100000000
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.5
+                min_value: 50000
+                max_value: 2000000
+      - name: is_new_build
+        description: TRUE if newly built, FALSE if existing.
+        tests:
+          - not_null
+      - name: transferred_on
+        description: Date of property transfer (denormalised from date_key for ad-hoc queries).
+        tests:
+          - not_null
+      - name: transferred_year
+        description: Year of transfer, integer.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 2021
+                max_value: 2025
+      - name: transferred_month
+        description: Month of transfer (1-12), integer.
+      - name: region
+        description: ONS region (denormalised from postcode_key).
+        tests:
+          - not_null
+          # All 10 ONS regions of England + Wales must be PRESENT in the
+          # data. _to_contain_set ensures the 10 are all there but allows
+          # 'Unknown' (and any future extras) without false-positives.
+          # _to_equal:10 was wrong — the data has 11 distinct values
+          # (10 + 'Unknown' for postcodes that don't match the seed).
+          - dbt_expectations.expect_column_distinct_values_to_contain_set:
+              arguments:
+                value_set:
+                  - London
+                  - North East
+                  - North West
+                  - Yorkshire and the Humber
+                  - East Midlands
+                  - West Midlands
+                  - East of England
+                  - South East
+                  - South West
+                  - Wales
+      - name: postcode
+        description: Full postcode at sale (denormalised).
+        tests:
+          - dbt_expectations.expect_column_value_lengths_to_be_between:
+              arguments:
+                min_value: 5
+                max_value: 8
+                row_condition: "postcode is not null"
+      - name: postcode_area
+        description: Postcode area (denormalised).
+      - name: town_city
+        description: Town or city (denormalised from raw).
+      - name: district
+        description: Local authority district (denormalised from raw).
+      - name: _loaded_at
+        description: UTC load timestamp (lineage).
+        tests:
+          - not_null
+
+seeds:
+  - name: ref_postcode_area_region
+    description: |
+      Hand-curated mapping from postcode area (1-2 leading letters) to one
+      of the 10 ONS regions of England + Wales. ~104 areas covered.
+      Outer-London postcode areas (BR / CR / DA / EN / HA / IG / KT / RM / SM / TW / UB)
+      classified as 'London' for analytical clarity.
+    columns:
+      - name: postcode_area
+        description: Postcode area, 1-2 letters.
+        tests:
+          - not_null
+          - unique
+      - name: region
+        description: ONS region or 'Wales'.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - London
+                  - North East
+                  - North West
+                  - Yorkshire and the Humber
+                  - East Midlands
+                  - West Midlands
+                  - East of England
+                  - South East
+                  - South West
+                  - Wales
