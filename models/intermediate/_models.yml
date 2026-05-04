@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: int_transactions__enriched
+    description: |
+      Intermediate enrichment of staging transactions with postcode-area
+      extraction and ONS regional join. Filters to ppd_category='standard'
+      so all downstream marts see only arm's-length sales.
+    config:
+      materialized: ephemeral
+    columns:
+      - name: transaction_id
+        description: Land Registry transaction identifier (passed through from staging).
+        tests:
+          - not_null
+      - name: postcode
+        description: Normalised postcode from staging.
+      - name: postcode_outward
+        description: Outward code (the part before the space, e.g. 'SW1A').
+      - name: postcode_area
+        description: Postcode area (leading 1-2 letters, e.g. 'SW'). Joins to seed lookup.
+      - name: region
+        description: |
+          ONS region of England + Wales, or 'Unknown' for postcodes that
+          didn't match the seed (e.g. malformed source data).
+        tests:
+          - not_null
