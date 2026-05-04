@@ -1,0 +1,79 @@
+version: 2
+
+sources:
+  - name: landreg
+    description: |
+      HM Land Registry Price Paid Data — every recorded property transaction
+      in England & Wales since 1995. Public dataset, monthly refresh.
+      Loaded by scripts/download_raw.py + scripts/load_to_duckdb.py.
+
+      Source page: https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads
+      Data dictionary: https://www.gov.uk/guidance/about-the-price-paid-data
+    schema: raw_landreg
+    loader: scripts/load_to_duckdb.py
+    loaded_at_field: cast(_loaded_at as timestamp)
+    freshness:
+      warn_after: { count: 35, period: day }
+      error_after: { count: 90, period: day }
+    tables:
+      - name: transactions
+        description: |
+          One row per recorded property sale. Untransformed — staging in
+          Phase 2 is responsible for casting, renaming, and light cleanup.
+        columns:
+          - name: transaction_id
+            description: Unique transaction reference issued by Land Registry (UUID-like).
+            tests:
+              - not_null
+          - name: price
+            description: Sale price in GBP, stored as text in the source CSV.
+            tests:
+              - not_null
+          - name: date_of_transfer
+            description: Date the property was transferred (YYYY-MM-DD HH:MM:SS in source).
+            tests:
+              - not_null
+          - name: postcode
+            description: Postcode at time of sale; may be empty for very old records.
+          - name: property_type
+            description: |
+              Single-character code:
+                D = detached
+                S = semi-detached
+                T = terraced
+                F = flat / maisonette
+                O = other
+              Note: F means 'flat' here, NOT 'freehold' — see kit lesson L16.
+              'freehold' is encoded in the `duration` column.
+          - name: old_new
+            description: Y if newly built, N if existing.
+          - name: duration
+            description: |
+              F = freehold, L = leasehold. Some old records use U = unknown.
+          - name: paon
+            description: Primary Addressable Object Name (e.g. house number).
+          - name: saon
+            description: Secondary Addressable Object Name (e.g. flat number).
+          - name: street
+            description: Street name.
+          - name: locality
+            description: Locality (often empty).
+          - name: town_city
+            description: Town or city.
+          - name: district
+            description: Local authority district.
+          - name: county
+            description: County.
+          - name: ppd_category_type
+            description: |
+              A = standard transactions (arm's-length sale at full market value)
+              B = additional (corrections, transfers under power of sale, etc.)
+          - name: record_status
+            description: |
+              A = added, C = changed, D = deleted. The Land Registry publishes
+              a full snapshot each month; later records supersede earlier ones
+              with the same transaction_id.
+          - name: _loaded_at
+            description: UTC ISO-8601 timestamp injected by load_to_duckdb.py.
+            tests:
+              - not_null
