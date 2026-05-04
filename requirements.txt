@@ -23,4 +23,5 @@ pre-commit==4.0.1
 pandas==2.2.3
 pyarrow==18.0.0
 streamlit==1.57.0    # 1.40 capped protobuf<6 and conflicted with dbt-core 1.11; 1.57 has protobuf<8,>=3.20
+plotly==5.24.1       # Phase 6 dashboard charts — interactive + recruiter-friendly polish
 requests==2.32.3

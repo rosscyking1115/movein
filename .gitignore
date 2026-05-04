@@ -13,6 +13,12 @@ profiles.yml
 data/
 !data/.gitkeep
 
+# EXCEPTION: the slim dashboard warehouse IS committed so Streamlit Cloud can
+# load it without rebuilding the full pipeline on cold start. Built by
+# scripts/build_dashboard_db.py from the full warehouse — only ~700 rows
+# total across the three rpt_* tables, well under GitHub's 100MB hard limit.
+!data/dashboard.duckdb
+
 # Built dbt docs site (published to Pages from CI).
 docs/
 
