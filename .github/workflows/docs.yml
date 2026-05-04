@@ -1,0 +1,111 @@
+# Build and publish dbt docs to GitHub Pages.
+#
+# Triggers:
+#   - push to main: auto-publishes whenever the source of truth changes
+#   - workflow_dispatch: manual trigger for testing from any branch
+#
+# What it does:
+#   1. Set up Python 3.13 + the pinned dbt stack from requirements.txt
+#   2. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
+#   3. Stage a profiles.yml from the committed example file
+#   4. Download a single year of Land Registry data (--sample, ~30s, ~140MB CSV → 27MB Parquet)
+#   5. Load it into DuckDB
+#   6. dbt build (5 marts + 91 tests against sample data — ~10s)
+#   7. dbt docs generate (manifest + catalog from the live warehouse)
+#   8. Upload target/ as a Pages artifact
+#   9. Deploy to GitHub Pages
+#
+# After first deploy, docs site lives at:
+#   https://<owner>.github.io/<repo>/
+#
+# Pre-requisites (one-time setup, see README "Live links" section):
+#   In GitHub repo Settings → Pages, set Source = "GitHub Actions".
+
+name: Publish dbt docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages-deploy permissions — these three are the standard set required by
+# actions/deploy-pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deploy at a time; queue subsequent ones rather than cancel
+# (we want the latest commit's docs to be the live site, not a half-built one).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+
+  build:
+    name: Build dbt docs (with catalog from sample data)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Stage profiles.yml from committed example
+        run: |
+          mkdir -p ~/.dbt
+          cp profiles.yml.example ~/.dbt/profiles.yml
+
+      - name: Download Land Registry sample (1 year)
+        run: python scripts/download_raw.py --sample
+
+      - name: Load sample into DuckDB
+        run: python scripts/load_to_duckdb.py
+
+      - name: dbt seed
+        run: dbt seed --target dev
+
+      - name: dbt build (warehouse + 91 tests)
+        run: dbt build --target dev
+
+      - name: dbt docs generate (produces manifest + catalog)
+        run: dbt docs generate --target dev
+
+      - name: Stage docs as Pages artifact
+        # The dbt docs SPA is a self-contained index.html that fetches
+        # manifest.json + catalog.json from the same directory at runtime.
+        # Copying target/ wholesale is the simplest reliable approach.
+        run: |
+          mkdir -p _site
+          cp -r target/. _site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
