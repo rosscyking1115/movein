@@ -1,0 +1,82 @@
+# PR gate — proves every change still builds + passes 91 tests + lints clean.
+#
+# Triggers:
+#   - pull_request to main: every PR is gated
+#   - workflow_dispatch: manual trigger from any branch (debugging)
+#
+# What it does:
+#   1. Set up Python 3.13 + the pinned dbt stack
+#   2. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
+#   3. Stage profiles.yml from the committed example
+#   4. Download a single year of Land Registry data (--sample, ~30s)
+#   5. Load it into DuckDB
+#   6. dbt build — runs all marts + 91 tests against the sample
+#   7. sqlfluff lint — model SQL must satisfy .sqlfluff rules
+#
+# Branch protection on main requires the "build-and-test" check to pass before
+# merging. See repo Settings → Branches.
+#
+# Why a sample, not the full 5-year Parquet:
+#   - Full pull is ~157MB Parquet across 5 years and would burn 3-5min of CI
+#     time per PR. The 1-year sample exercises the same SQL paths, hits all
+#     91 tests, and finishes in ~90s. Row-count test bounds were calibrated
+#     to pass on either full or sample data.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same PR — saves CI minutes when pushing
+# fixup commits in quick succession.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build-and-test:
+    name: dbt build + 91 tests + sqlfluff lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Stage profiles.yml from committed example
+        run: |
+          mkdir -p ~/.dbt
+          cp profiles.yml.example ~/.dbt/profiles.yml
+
+      - name: Download Land Registry sample (1 year)
+        run: python scripts/download_raw.py --sample
+
+      - name: Load sample into DuckDB
+        run: python scripts/load_to_duckdb.py
+
+      - name: dbt seed
+        run: dbt seed --target dev
+
+      - name: dbt build (runs all marts + 91 tests)
+        run: dbt build --target dev
+
+      - name: sqlfluff lint (model SQL only)
+        # Lint the model layer; analyses/ and macros/_generated/ are excluded
+        # via .sqlfluffignore. Use the project's pinned .sqlfluff config.
+        run: sqlfluff lint models/ --dialect duckdb --templater dbt
