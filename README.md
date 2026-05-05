@@ -9,7 +9,7 @@ docs published to GitHub Pages on every push.
 ## Live links
 
 - 📊 **Live dbt docs site (lineage + column catalogue):** https://rosscyking1115.github.io/uk-property-analytics/
-- 📈 **Live Streamlit dashboard:** *(deployed in Phase 6 — placeholder)*
+- 📈 **Live Streamlit dashboard:** https://ross-uk-property-analytics.streamlit.app/
 - ✅ **CI status:** *(branch protection + CI gate land in Phase 7)*
 
 ## Architecture
