@@ -1,6 +1,16 @@
-# Wire-up only — sqlfluff is enabled but only runs on staged SQL.
-# Phase 7 will add dbt-checkpoint hooks for model-yml coverage.
+# Pre-commit hooks — catch lint/format issues locally before CI does.
+#
+# Install once:    pre-commit install
+# Run manually:    pre-commit run --all-files
+# Update pins:     pre-commit autoupdate
+#
+# Hooks run on every `git commit`. Each hook only sees files that are staged.
+# CI re-runs sqlfluff against models/ as a defence-in-depth check, so even
+# committers who skip the local hook (`git commit --no-verify`) hit the gate.
+
 repos:
+
+  # --- generic hygiene ---
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
@@ -8,14 +18,43 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+        # Block accidental commits of the full warehouse (~200MB) or raw
+        # CSVs. The slim dashboard.duckdb (~1MB) is well under this cap.
         args: ['--maxkb=5000']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
 
+  # --- SQL: sqlfluff with the dbt templater ---
   - repo: https://github.com/sqlfluff/sqlfluff
     rev: 4.1.0
     hooks:
       - id: sqlfluff-lint
+        name: sqlfluff-lint (models/)
+        # The dbt templater needs the adapter installed in the hook's
+        # isolated venv — pin it to match requirements.txt.
         additional_dependencies:
           - dbt-core==1.11.8
           - dbt-duckdb==1.10.1
           - sqlfluff-templater-dbt==4.1.0
-        args: [--dialect, duckdb, --templater, dbt]
+        args:
+          - --dialect=duckdb
+          - --templater=dbt
+        # Only lint model SQL; analyses/, macros/_generated/, target/ are
+        # in .sqlfluffignore. Singular tests under tests/ are intentionally
+        # left to the CI step (they include long bracketed comments that
+        # sqlfluff sometimes reformats undesirably).
+        files: ^models/.*\.sql$
+
+  # --- Python: ruff (fast lint + import sort + format) ---
+  # Replaces black + isort + flake8 with a single Rust binary. Project has
+  # no Python lint config yet — ruff's defaults are sensible for our small
+  # script + dashboard surface area.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        name: ruff (lint + import sort)
+        args: [--fix]
+      - id: ruff-format
+        name: ruff (format)

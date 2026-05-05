@@ -10,7 +10,7 @@ docs published to GitHub Pages on every push.
 
 - 📊 **Live dbt docs site (lineage + column catalogue):** https://rosscyking1115.github.io/uk-property-analytics/
 - 📈 **Live Streamlit dashboard:** https://ross-uk-property-analytics.streamlit.app/
-- ✅ **CI status:** *(branch protection + CI gate land in Phase 7)*
+- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml) — every PR runs `dbt build` + 91 tests + sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
 
 ## Architecture
 

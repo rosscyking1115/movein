@@ -5,6 +5,10 @@ max_line_length = 100
 runaway_limit = 10
 indent_unit = space
 output_line_length = 120
+# Some rules are noisy in dbt projects — disable selectively.
+# structure.column_order = column ordering, can fight with our staging convention.
+# references.qualification = single-table references; macro-heavy code trips it.
+exclude_rules = structure.column_order, references.qualification
 
 # dbt templating context — these fixtures keep linting fast even before
 # `dbt deps` has run. The templater itself uses your real profile.
@@ -48,10 +52,3 @@ aliasing = explicit
 
 [sqlfluff:rules:aliasing.column]
 aliasing = explicit
-
-# Some rules are noisy in dbt projects — disable selectively.
-# L034 = column ordering, can fight with our staging convention.
-# RF01 = single-table references; macro-heavy code trips it.
-# ST06 = column-order in select; same as L034.
-[sqlfluff]
-exclude_rules = structure.column_order, references.qualification

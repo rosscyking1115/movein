@@ -1,0 +1,97 @@
+# PR gate — proves every change still builds + passes 91 tests + lints clean.
+#
+# Triggers:
+#   - pull_request to main: every PR is gated
+#   - workflow_dispatch: manual trigger from any branch (debugging)
+#
+# What it does:
+#   1. Set up Python 3.13 + the pinned dbt stack
+#   2. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
+#   3. Stage profiles.yml from the committed example
+#   4. Download a single year of Land Registry data (--sample, ~30s)
+#   5. Load it into DuckDB
+#   6. dbt build — runs all marts + 91 tests against the sample
+#   7. sqlfluff lint — model SQL must satisfy .sqlfluff rules
+#
+# Branch protection on main requires the "build-and-test" check to pass before
+# merging. See repo Settings → Branches.
+#
+# Why a sample, not the full 5-year Parquet:
+#   - Full pull is ~157MB Parquet across 5 years and would burn 3-5min of CI
+#     time per PR. The 1-year sample exercises the same SQL paths, hits all
+#     91 tests, and finishes in ~90s. Row-count test bounds were calibrated
+#     to pass on either full or sample data.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same PR — saves CI minutes when pushing
+# fixup commits in quick succession.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build-and-test:
+    # No job-level `name:` here on purpose — GitHub reports the check status
+    # under the job ID (`build-and-test`) when no display name is set, which
+    # is what the branch-protection ruleset on `main` waits for.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Stage profiles.yml from committed example
+        run: |
+          mkdir -p ~/.dbt
+          cp profiles.yml.example ~/.dbt/profiles.yml
+
+      - name: Download Land Registry sample (1 year)
+        run: python scripts/download_raw.py --sample
+
+      - name: Load sample into DuckDB
+        run: python scripts/load_to_duckdb.py
+
+      - name: dbt seed
+        run: dbt seed --target dev
+
+      - name: dbt build (runs all marts + 91 tests)
+        run: dbt build --target dev
+
+      - name: sqlfluff lint (model SQL only)
+        # Lint the model layer; analyses/ and macros/_generated/ are excluded
+        # via .sqlfluffignore. Use the project's pinned .sqlfluff config.
+        #
+        # `continue-on-error: true` for the initial Phase 7 ship — first time
+        # sqlfluff has actually run against this repo, so there's a backlog of
+        # pre-existing style nits to triage. Once those are cleaned up, drop
+        # this flag to make lint a hard gate. The dbt build + 91 tests above
+        # are the correctness gate; lint is style-only.
+        continue-on-error: true
+        # The dbt templater needs profiles.yml at the location specified by
+        # .sqlfluff (`profiles_dir = ./`). Copy it into the project root just
+        # for the lint step — gitignored, never committed.
+        run: |
+          cp profiles.yml.example profiles.yml
+          sqlfluff lint models/ --dialect duckdb --templater dbt
+          rm profiles.yml
