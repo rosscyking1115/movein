@@ -27,6 +27,11 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  # Also run on push to main so the README CI badge reflects the live state
+  # of trunk. Branch protection ensures every commit on main first passed
+  # the same workflow on its PR; this push run is for visibility, not gating.
+  push:
+    branches: [main]
   workflow_dispatch:
 
 # Cancel superseded runs on the same PR — saves CI minutes when pushing
