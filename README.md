@@ -83,9 +83,9 @@ flowchart LR
 | Transform | **dbt-core 1.11** + **dbt-duckdb 1.10** | Industry-standard analytics-engineering tool. The version bump from the kit's 1.8 happened because by May 2026 1.11 is current stable with broader Python 3.13 wheel coverage. |
 | Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Three layers: row-shape (built-in `not_null`/`unique`/`relationships`), value-shape (dbt-expectations distribution checks), and named-hypothesis (8 SQL files in `tests/`, one per mart). 91 tests total. |
 | Docs | `dbt docs` to **GitHub Pages** | Free hosting, lineage graph, column-level catalog. See `.github/workflows/docs.yml`. |
-| Dashboard | **Streamlit** | (Phase 6) Python-native, easy DuckDB read-only connection. |
-| CI | **GitHub Actions** | (Phase 7 will add a build+test workflow alongside the existing docs publish.) |
-| Lint | **sqlfluff 4.1** + dbt templater | (Wired via `pre-commit` in Phase 7.) |
+| Dashboard | **Streamlit** | Python-native, easy DuckDB read-only connection. Free tier hosting on Streamlit Community Cloud. |
+| CI | **GitHub Actions** | Two workflows: `docs.yml` publishes dbt docs to Pages on every push to main; `ci.yml` runs `dbt build` + 91 tests + `sqlfluff lint` on every PR. Branch protection on `main` requires the CI check before merging. |
+| Lint | **sqlfluff 4.1** + dbt templater | Wired via `pre-commit` (local) and as a soft CI step (informational). Will tighten to a hard gate once the existing-style backlog is cleaned up. |
 
 The full `requirements.txt` pins are verified May 2026 against PyPI metadata to
 ensure every package has a Python 3.13 wheel — no source builds required, which
@@ -155,9 +155,8 @@ because they're the kind of thing that catches everyone the first time:
 
 ## Future work
 
-- **Phase 6:** Streamlit dashboard, deployed to Streamlit Community Cloud
-- **Phase 7:** CI workflow (`build + test` on every PR), branch protection requiring green CI
 - **Phase 8:** Portfolio site write-up + LinkedIn announcement
+- **Tighten the SQL lint gate:** sqlfluff currently runs in CI as `continue-on-error: true` because the first lint pass surfaced ~40 pre-existing layout nits (mostly `LT01` whitespace-before-`as`). Clean those up, then drop the soft-fail flag so style regressions block merges
 - **GH Actions Node 24 migration:** Action runners deprecate Node.js 20 by September 2026; bump `actions/*` pins as v5+ versions ship
 - **Postcode coverage:** the seed currently maps ~104 postcode areas to 10 regions; ~2K rows fall to `'Unknown'`. A more granular ONS Postcode Directory join would shrink that
 - **Multi-year refresh:** `download_raw.py` is idempotent (skips parquet that already exists); rerun with `--years 2026` once the year is complete
