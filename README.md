@@ -174,21 +174,36 @@ Contains HM Land Registry data © Crown copyright and database right.
 ```
 .
 ├── .github/workflows/
+│   ├── ci.yml                    # GH Actions: dbt build + 88 tests + sqlfluff on every PR
 │   └── docs.yml                  # GH Actions: build dbt + publish docs to GH Pages
-├── dbt_project.yml
+├── .pre-commit-config.yaml       # sqlfluff + ruff hooks (local style gate)
+├── .sqlfluff                     # sqlfluff rules + dbt templater config
+├── .sqlfluffignore               # paths skipped by sqlfluff (target/, dbt_packages/, etc)
+├── .gitignore                    # excludes target/, raw data; re-includes slim dashboard.duckdb
+├── LICENSE                       # MIT
+├── PROJECT-2-KIT.md              # the original two-week sprint plan
+├── README.md                     # this file
+├── dbt_project.yml               # project name, paths, default materialisations
+├── package-lock.yml              # pinned dbt-package versions
 ├── packages.yml                  # dbt-utils, dbt_expectations, dbt_date
-├── profiles.yml.example          # commit; real profiles.yml is gitignored
-├── requirements.txt              # pinned May 2026
-├── seeds/
-│   └── ref_postcode_area_region.csv
-├── scripts/
-│   ├── download_raw.py           # idempotent yearly Land Registry download
-│   ├── load_to_duckdb.py         # Parquet → raw_landreg.transactions
-│   └── check_marts.py            # spot-check helper for the rpt_ marts
+├── profiles.yml.example          # committed; real profiles.yml is gitignored
+├── requirements.txt              # Python pins, verified May 2026 for cp313 wheels
+├── data/
+│   └── dashboard.duckdb          # slim 3-table extract committed for Streamlit Cloud
+├── dashboard/                    # Streamlit app — deployed to share.streamlit.io
+│   ├── _utils.py                 # cached DuckDB connection + load helpers
+│   ├── requirements.txt          # slim Streamlit deps (loose pins, see comments)
+│   ├── streamlit_app.py          # home page — 3 KPIs + 3 thumbnail charts
+│   └── pages/
+│       ├── 1_Price_YoY_by_region.py
+│       ├── 2_Top_postcode_areas.py
+│       ├── 3_New_build_premium.py
+│       └── 4_About.py
 ├── models/
+│   ├── _exposures.yml            # declares the Streamlit dashboard as a downstream consumer
 │   ├── staging/
-│   │   ├── _sources.yml
 │   │   ├── _models.yml
+│   │   ├── _sources.yml
 │   │   └── stg_landreg__transactions.sql
 │   ├── intermediate/
 │   │   ├── _models.yml
@@ -203,11 +218,25 @@ Contains HM Land Registry data © Crown copyright and database right.
 │       │   └── fct_transactions.sql
 │       └── analytics/
 │           ├── _models.yml
+│           ├── rpt_new_build_premium.sql
 │           ├── rpt_price_yoy_by_region.sql
-│           ├── rpt_top_postcodes_by_volume.sql
-│           └── rpt_new_build_premium.sql
-├── tests/                         # 8 singular tests, one per mart
-└── PROJECT-2-KIT.md               # the original two-week sprint plan
+│           └── rpt_top_postcodes_by_volume.sql
+├── scripts/
+│   ├── build_dashboard_db.py     # builds slim data/dashboard.duckdb from full warehouse
+│   ├── check_marts.py            # spot-check helper for the rpt_ marts
+│   ├── download_raw.py           # idempotent yearly Land Registry download
+│   └── load_to_duckdb.py         # Parquet → raw_landreg.transactions
+├── seeds/
+│   └── ref_postcode_area_region.csv   # 104-row postcode-area → ONS-region lookup
+└── tests/                         # 8 singular SQL tests, one named-risk hypothesis per mart
+    ├── assert_dim_date_continuous.sql
+    ├── assert_dim_postcode_outward_derived_when_postcode_set.sql
+    ├── assert_dim_property_type_codes_complete.sql
+    ├── assert_dim_tenure_codes_complete.sql
+    ├── assert_fct_no_future_transactions.sql
+    ├── assert_rpt_new_build_premium_within_bounds.sql
+    ├── assert_rpt_top_postcodes_one_per_year.sql
+    └── assert_rpt_yoy_pct_within_bounds.sql
 ```
 
 ## License
