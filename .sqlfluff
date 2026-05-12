@@ -8,7 +8,11 @@ output_line_length = 120
 # Some rules are noisy in dbt projects — disable selectively.
 # structure.column_order = column ordering, can fight with our staging convention.
 # references.qualification = single-table references; macro-heavy code trips it.
-exclude_rules = structure.column_order, references.qualification
+# aliasing.unused (AL05) = false-positive on VALUES tables — sqlfluff fix will
+#     strip the `t(col_a, col_b)` clause thinking it's a redundant table alias,
+#     but those clauses are how a VALUES table names its columns. Removing them
+#     breaks dim_tenure / dim_property_type and any future inline-VALUES dim.
+exclude_rules = structure.column_order, references.qualification, aliasing.unused
 
 # dbt templating context — these fixtures keep linting fast even before
 # `dbt deps` has run. The templater itself uses your real profile.

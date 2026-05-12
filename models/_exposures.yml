@@ -1,0 +1,31 @@
+version: 2
+
+# Exposures declare downstream consumers of the warehouse. dbt renders them as
+# leaf nodes in the lineage graph, so the dbt-docs site now shows the Streamlit
+# dashboard as a real downstream node instead of the three rpt_* marts dangling
+# with no consumers. Each exposure also surfaces in the `dbt list --resource-type
+# exposure` and `dbt run --select +exposure:streamlit_dashboard` commands, which
+# is how teams answer "what runs feed this dashboard?" in real codebases.
+
+exposures:
+
+  - name: streamlit_dashboard
+    label: "UK Property Analytics dashboard (Streamlit)"
+    type: dashboard
+    maturity: medium                       # not production — portfolio piece
+    url: https://ross-uk-property-analytics.streamlit.app/
+    description: |
+      Public Streamlit dashboard answering three business questions
+      (regional YoY price change, top postcode areas by volume, new-build
+      premium by region). Reads a slim 3-table DuckDB extract built by
+      `scripts/build_dashboard_db.py` from the full warehouse — the rpt_*
+      tables below are the upstream source of truth.
+
+    owner:
+      name: Ross King
+      email: leaffeng1115@gmail.com
+
+    depends_on:
+      - ref('rpt_price_yoy_by_region')      # → page: Price YoY by region
+      - ref('rpt_top_postcodes_by_volume')  # → page: Top postcode areas
+      - ref('rpt_new_build_premium')        # → page: New build premium

@@ -10,7 +10,7 @@ docs published to GitHub Pages on every push.
 
 - 📊 **Live dbt docs site (lineage + column catalogue):** https://rosscyking1115.github.io/uk-property-analytics/
 - 📈 **Live Streamlit dashboard:** https://ross-uk-property-analytics.streamlit.app/
-- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml) — every PR runs `dbt build` + 91 tests + sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
+- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml) — every PR runs `dbt build` + 88 data tests + sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
 
 ## Architecture
 
@@ -81,11 +81,11 @@ flowchart LR
 |---|---|---|
 | Warehouse | **DuckDB** | Free, zero-ops, single-file, runs in CI. Whole 5-year warehouse fits in 200 MB; queries return in milliseconds. |
 | Transform | **dbt-core 1.11** + **dbt-duckdb 1.10** | Industry-standard analytics-engineering tool. The version bump from the kit's 1.8 happened because by May 2026 1.11 is current stable with broader Python 3.13 wheel coverage. |
-| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Three layers: row-shape (built-in `not_null`/`unique`/`relationships`), value-shape (dbt-expectations distribution checks), and named-hypothesis (8 SQL files in `tests/`, one per mart). 91 tests total. |
+| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Three layers: row-shape (built-in `not_null`/`unique`/`relationships`), value-shape (dbt-utils + dbt-expectations distribution checks), and named-hypothesis (8 SQL files in `tests/`, one per mart). 88 data tests total, +1 source-freshness check. |
 | Docs | `dbt docs` to **GitHub Pages** | Free hosting, lineage graph, column-level catalog. See `.github/workflows/docs.yml`. |
 | Dashboard | **Streamlit** | Python-native, easy DuckDB read-only connection. Free tier hosting on Streamlit Community Cloud. |
-| CI | **GitHub Actions** | Two workflows: `docs.yml` publishes dbt docs to Pages on every push to main; `ci.yml` runs `dbt build` + 91 tests + `sqlfluff lint` on every PR. Branch protection on `main` requires the CI check before merging. |
-| Lint | **sqlfluff 4.1** + dbt templater | Wired via `pre-commit` (local) and as a soft CI step (informational). Will tighten to a hard gate once the existing-style backlog is cleaned up. |
+| CI | **GitHub Actions** | Two workflows: `docs.yml` publishes dbt docs to Pages on every push to main; `ci.yml` runs `dbt build` + 88 data tests + `sqlfluff lint` on every PR. Branch protection on `main` requires the CI check before merging. |
+| Lint | **sqlfluff 4.1** + dbt templater | Wired via `pre-commit` (local) and as a hard CI gate. A style violation in `models/` fails the PR check, same as a failing dbt test. |
 
 The full `requirements.txt` pins are verified May 2026 against PyPI metadata to
 ensure every package has a Python 3.13 wheel — no source builds required, which
@@ -115,18 +115,19 @@ dbt seed
 dbt build
 ```
 
-A fresh clone reproduces the full warehouse + 91 tests in under 5 minutes on a
-laptop. To re-publish docs locally: `dbt docs generate && dbt docs serve`.
+A fresh clone reproduces the full warehouse + 88 data tests in under 5 minutes
+on a laptop. To re-publish docs locally: `dbt docs generate && dbt docs serve`.
 
 ## Test coverage
 
 | Layer | Count | What it catches |
 |---|---|---|
 | Source freshness | 1 | Stale upstream data (warn if no rows newer than 35 days) |
-| Built-in row-shape (`not_null`, `unique`, `relationships`, `accepted_values`) | 73 | Schema bugs, FK orphans, enum drift |
-| `dbt-expectations` (range, regex, length, distinct, quantile) | 10 | Type-cast bugs, statistical drift, format regressions |
+| Built-in row-shape (`not_null`, `unique`, `accepted_values`, `relationships`) | 65 | Schema bugs, FK orphans, enum drift |
+| `dbt-utils` (`expression_is_true`, `unique_combination_of_columns`) | 8 | Sign / range invariants, multi-column uniqueness on the reporting marts |
+| `dbt-expectations` (range, regex, length, distinct, quantile, row count) | 7 | Type-cast bugs, statistical drift, format regressions |
 | Singular (`tests/assert_*.sql`) | 8 | Domain-specific anomalies — one named risk hypothesis per mart |
-| **Total** | **91** | All passing on every `dbt build` |
+| **Total** | **88** | All passing on every `dbt build` (source freshness runs separately) |
 
 ## Lessons learned
 
@@ -156,10 +157,10 @@ because they're the kind of thing that catches everyone the first time:
 ## Future work
 
 - **Phase 8:** Portfolio site write-up + LinkedIn announcement
-- **Tighten the SQL lint gate:** sqlfluff currently runs in CI as `continue-on-error: true` because the first lint pass surfaced ~40 pre-existing layout nits (mostly `LT01` whitespace-before-`as`). Clean those up, then drop the soft-fail flag so style regressions block merges
 - **GH Actions Node 24 migration:** Action runners deprecate Node.js 20 by September 2026; bump `actions/*` pins as v5+ versions ship
 - **Postcode coverage:** the seed currently maps ~104 postcode areas to 10 regions; ~2K rows fall to `'Unknown'`. A more granular ONS Postcode Directory join would shrink that
 - **Multi-year refresh:** `download_raw.py` is idempotent (skips parquet that already exists); rerun with `--years 2026` once the year is complete
+- **`fct_transactions` → `incremental` when it scales:** at 4.2M rows a full table rebuild is ~5s — fine. Past ~50M rows the natural migration is `materialized='incremental'`, `unique_key='transaction_key'`, with an `is_incremental()` filter on `_loaded_at` (the loader is already idempotent on that column). See the inline comment in `models/marts/core/fct_transactions.sql`
 
 ## Source attribution
 

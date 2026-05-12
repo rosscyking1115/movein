@@ -24,16 +24,16 @@ with pivoted as (
     select
         region,
         transferred_year,
-        count(*) filter (where is_new_build)                    as new_build_count,
-        count(*) filter (where not is_new_build)                as existing_count,
+        count(*) filter (where is_new_build) as new_build_count,
+        count(*) filter (where not is_new_build) as existing_count,
         cast(avg(price_gbp) filter (where is_new_build) as bigint)
-                                                                as new_build_mean_price_gbp,
+            as new_build_mean_price_gbp,
         cast(avg(price_gbp) filter (where not is_new_build) as bigint)
-                                                                as existing_mean_price_gbp,
+            as existing_mean_price_gbp,
         cast(median(price_gbp) filter (where is_new_build) as bigint)
-                                                                as new_build_median_price_gbp,
+            as new_build_median_price_gbp,
         cast(median(price_gbp) filter (where not is_new_build) as bigint)
-                                                                as existing_median_price_gbp
+            as existing_median_price_gbp
     from {{ ref('fct_transactions') }}
     where region <> 'Unknown'
     group by region, transferred_year
@@ -54,16 +54,18 @@ select
     -- costs vs. an existing property of unknown type in the same region
     -- and year. Median-based — robust to outliers.
     case
-        when existing_median_price_gbp is null
+        when
+            existing_median_price_gbp is null
             or existing_median_price_gbp = 0
             or new_build_median_price_gbp is null
-        then null
+            then null
         else round(
             100.0
             * (new_build_median_price_gbp - existing_median_price_gbp)
-            / existing_median_price_gbp
-        , 1)
-    end                                                         as premium_pct
+            / existing_median_price_gbp,
+            1
+        )
+    end as premium_pct
 
 from pivoted
 order by region, transferred_year

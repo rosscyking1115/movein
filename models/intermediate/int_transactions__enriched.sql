@@ -29,14 +29,14 @@ postcode_parts as (
             when position(' ' in postcode) > 0
                 then substr(postcode, 1, position(' ' in postcode) - 1)
             else postcode
-        end                                                    as postcode_outward,
+        end as postcode_outward,
 
         -- Postcode area = leading 1 or 2 letters before any digit
         -- e.g. 'SW1A' → 'SW', 'B12' → 'B', 'EC1A' → 'EC'.
         case
             when postcode is null then null
             else regexp_extract(postcode, '^[A-Z]+', 0)
-        end                                                    as postcode_area
+        end as postcode_area
 
     from transactions
 
@@ -46,9 +46,9 @@ with_region as (
 
     select
         pp.*,
-        coalesce(rg.region, 'Unknown')                         as region
-    from postcode_parts pp
-    left join {{ ref('ref_postcode_area_region') }} rg
+        coalesce(rg.region, 'Unknown') as region
+    from postcode_parts as pp
+    left join {{ ref('ref_postcode_area_region') }} as rg
         on pp.postcode_area = rg.postcode_area
 
 )

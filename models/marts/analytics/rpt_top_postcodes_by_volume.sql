@@ -25,9 +25,9 @@ with by_area_year as (
         postcode_area,
         region,
         transferred_year,
-        count(*)                                                as sales_count,
-        avg(price_gbp)::bigint                                  as mean_price_gbp,
-        cast(median(price_gbp) as bigint)                       as median_price_gbp
+        count(*) as sales_count,
+        avg(price_gbp)::bigint as mean_price_gbp,
+        (median(price_gbp))::bigint as median_price_gbp
     from {{ ref('fct_transactions') }}
     where postcode_area is not null
     group by postcode_area, region, transferred_year
@@ -44,6 +44,6 @@ select
     dense_rank() over (
         partition by transferred_year
         order by sales_count desc
-    )                                                           as rank_within_year
+    ) as rank_within_year
 from by_area_year
 order by transferred_year, rank_within_year

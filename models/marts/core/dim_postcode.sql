@@ -29,7 +29,7 @@ with distinct_postcodes as (
 )
 
 select
-    {{ dbt_utils.generate_surrogate_key(['postcode']) }}      as postcode_key,
+    {{ dbt_utils.generate_surrogate_key(['postcode']) }} as postcode_key,
     postcode,
     postcode_outward,
     postcode_area,

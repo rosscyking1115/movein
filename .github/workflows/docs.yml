@@ -10,7 +10,7 @@
 #   3. Stage a profiles.yml from the committed example file
 #   4. Download a single year of Land Registry data (--sample, ~30s, ~140MB CSV → 27MB Parquet)
 #   5. Load it into DuckDB
-#   6. dbt build (5 marts + 91 tests against sample data — ~10s)
+#   6. dbt build (5 marts + 88 data tests against sample data — ~10s)
 #   7. dbt docs generate (manifest + catalog from the live warehouse)
 #   8. Upload target/ as a Pages artifact
 #   9. Deploy to GitHub Pages
@@ -79,7 +79,7 @@ jobs:
       - name: dbt seed
         run: dbt seed --target dev
 
-      - name: dbt build (warehouse + 91 tests)
+      - name: dbt build (warehouse + 88 data tests)
         run: dbt build --target dev
 
       - name: dbt docs generate (produces manifest + catalog)

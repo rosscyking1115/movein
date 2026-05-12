@@ -1,4 +1,4 @@
-# PR gate — proves every change still builds + passes 91 tests + lints clean.
+# PR gate — proves every change still builds + passes 88 data tests + lints clean.
 #
 # Triggers:
 #   - pull_request to main: every PR is gated
@@ -10,7 +10,7 @@
 #   3. Stage profiles.yml from the committed example
 #   4. Download a single year of Land Registry data (--sample, ~30s)
 #   5. Load it into DuckDB
-#   6. dbt build — runs all marts + 91 tests against the sample
+#   6. dbt build — runs all marts + 88 data tests against the sample
 #   7. sqlfluff lint — model SQL must satisfy .sqlfluff rules
 #
 # Branch protection on main requires the "build-and-test" check to pass before
@@ -19,7 +19,7 @@
 # Why a sample, not the full 5-year Parquet:
 #   - Full pull is ~157MB Parquet across 5 years and would burn 3-5min of CI
 #     time per PR. The 1-year sample exercises the same SQL paths, hits all
-#     91 tests, and finishes in ~90s. Row-count test bounds were calibrated
+#     88 data tests, and finishes in ~90s. Row-count test bounds were calibrated
 #     to pass on either full or sample data.
 
 name: CI
@@ -80,19 +80,15 @@ jobs:
       - name: dbt seed
         run: dbt seed --target dev
 
-      - name: dbt build (runs all marts + 91 tests)
+      - name: dbt build (runs all marts + 88 data tests)
         run: dbt build --target dev
 
       - name: sqlfluff lint (model SQL only)
-        # Lint the model layer; analyses/ and macros/_generated/ are excluded
-        # via .sqlfluffignore. Use the project's pinned .sqlfluff config.
+        # Hard gate: a style violation in models/ fails the PR check, same as
+        # a failing dbt test. The lint config (.sqlfluff) excludes a handful
+        # of noisy rules — see the comments in that file. analyses/ and
+        # macros/_generated/ are excluded via .sqlfluffignore.
         #
-        # `continue-on-error: true` for the initial Phase 7 ship — first time
-        # sqlfluff has actually run against this repo, so there's a backlog of
-        # pre-existing style nits to triage. Once those are cleaned up, drop
-        # this flag to make lint a hard gate. The dbt build + 91 tests above
-        # are the correctness gate; lint is style-only.
-        continue-on-error: true
         # The dbt templater needs profiles.yml at the location specified by
         # .sqlfluff (`profiles_dir = ./`). Copy it into the project root just
         # for the lint step — gitignored, never committed.

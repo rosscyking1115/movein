@@ -7,12 +7,17 @@
 -- dim_property_type — Land Registry's 5 property-type codes decoded.
 -- Hand-built rather than seeded because it's tiny, never changes, and
 -- inlining the mapping here keeps the dictionary co-located with the dim.
+-- The `as t (col_a, col_b)` clause names the VALUES table's columns;
+-- without it DuckDB falls back to col0/col1 and downstream tests break.
 
-select * from (
+select
+    property_type_code,
+    property_type_label
+from (
     values
-        ('D', 'Detached'),
-        ('S', 'Semi-detached'),
-        ('T', 'Terraced'),
-        ('F', 'Flat / Maisonette'),
-        ('O', 'Other')
-) as t(property_type_code, property_type_label)
+    ('D', 'Detached'),
+    ('S', 'Semi-detached'),
+    ('T', 'Terraced'),
+    ('F', 'Flat / Maisonette'),
+    ('O', 'Other')
+) as t (property_type_code, property_type_label)
