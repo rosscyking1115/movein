@@ -10,7 +10,7 @@ docs published to GitHub Pages on every push.
 
 - 📊 **Live dbt docs site (lineage + column catalogue):** https://rosscyking1115.github.io/uk-property-analytics/
 - 📈 **Live Streamlit dashboard:** https://ross-uk-property-analytics.streamlit.app/
-- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml) — every PR runs `dbt build` + 88 data tests + sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
+- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-property-analytics/actions/workflows/ci.yml) — every PR runs Python unit tests, Streamlit render/browser smoke tests, source freshness, `dbt build`, 154 data tests, dashboard extract smoke tests, and sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
 
 ## Architecture
 
@@ -81,10 +81,10 @@ flowchart LR
 |---|---|---|
 | Warehouse | **DuckDB** | Free, zero-ops, single-file, runs in CI. Whole 5-year warehouse fits in 200 MB; queries return in milliseconds. |
 | Transform | **dbt-core 1.11** + **dbt-duckdb 1.10** | Industry-standard analytics-engineering tool. The version bump from the kit's 1.8 happened because by May 2026 1.11 is current stable with broader Python 3.13 wheel coverage. |
-| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Three layers: row-shape (built-in `not_null`/`unique`/`relationships`), value-shape (dbt-utils + dbt-expectations distribution checks), and named-hypothesis (8 SQL files in `tests/`, one per mart). 88 data tests total, +1 source-freshness check. |
+| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Three layers: row-shape (built-in `not_null`/`unique`/`relationships`), value-shape (dbt-utils + dbt-expectations distribution checks), and named-hypothesis (12 SQL files in `tests/`). 154 data tests total, +1 source-freshness check. |
 | Docs | `dbt docs` to **GitHub Pages** | Free hosting, lineage graph, column-level catalog. See `.github/workflows/docs.yml`. |
 | Dashboard | **Streamlit** | Python-native, easy DuckDB read-only connection. Free tier hosting on Streamlit Community Cloud. |
-| CI | **GitHub Actions** | Two workflows: `docs.yml` publishes dbt docs to Pages on every push to main; `ci.yml` runs `dbt build` + 88 data tests + `sqlfluff lint` on every PR. Branch protection on `main` requires the CI check before merging. |
+| CI | **GitHub Actions** | Two workflows: `docs.yml` publishes dbt docs to Pages on every push to main; `ci.yml` runs Python unit tests, Streamlit render/browser smoke tests, source freshness, `dbt build`, 154 data tests, dashboard extract smoke tests, and `sqlfluff lint` on every PR. Branch protection on `main` requires the CI check before merging. |
 | Lint | **sqlfluff 4.1** + dbt templater | Wired via `pre-commit` (local) and as a hard CI gate. A style violation in `models/` fails the PR check, same as a failing dbt test. |
 
 The full `requirements.txt` pins are verified May 2026 against PyPI metadata to
@@ -108,15 +108,25 @@ dbt deps
 mkdir -p ~/.dbt
 cp profiles.yml.example ~/.dbt/profiles.yml
 
-# 3. Pull data + load + build (5-year default ~3-5 min, --sample for fast 1-year)
-python scripts/download_raw.py     # use --sample for ~30s 1-year run
+# 3. Pull data + load + build (5-year default ~3-5 min, --sample for fast 2-year YoY run)
+python scripts/download_raw.py     # use --sample for a faster 2-year run
 python scripts/load_to_duckdb.py
 dbt seed
 dbt build
 ```
 
-A fresh clone reproduces the full warehouse + 88 data tests in under 5 minutes
+A fresh clone reproduces the full warehouse + 154 data tests in under 5 minutes
 on a laptop. To re-publish docs locally: `dbt docs generate && dbt docs serve`.
+
+To prepare a local official postcode lookup for the housing decision-support
+prototype, keep the full upstream file out of git and normalize it into the
+same contract as the committed fixture:
+
+```bash
+python scripts/prepare_onspd_seed.py path/to/onspd.zip --member "Data/*.csv" --snapshot-date 2026-05-01
+```
+
+The default output is `data/raw/ref_onspd_normalized.csv`, which is ignored by git.
 
 ## Test coverage
 
@@ -126,8 +136,8 @@ on a laptop. To re-publish docs locally: `dbt docs generate && dbt docs serve`.
 | Built-in row-shape (`not_null`, `unique`, `accepted_values`, `relationships`) | 65 | Schema bugs, FK orphans, enum drift |
 | `dbt-utils` (`expression_is_true`, `unique_combination_of_columns`) | 8 | Sign / range invariants, multi-column uniqueness on the reporting marts |
 | `dbt-expectations` (range, regex, length, distinct, quantile, row count) | 7 | Type-cast bugs, statistical drift, format regressions |
-| Singular (`tests/assert_*.sql`) | 8 | Domain-specific anomalies — one named risk hypothesis per mart |
-| **Total** | **88** | All passing on every `dbt build` (source freshness runs separately) |
+| Singular (`tests/assert_*.sql`) | 12 | Domain-specific anomalies, including guards for non-vacuous YoY, date-spine coverage, and area-profile caveats |
+| **Total** | **154** | All passing on every `dbt build`; source freshness is a separate CI gate |
 
 ## Lessons learned
 
@@ -158,8 +168,8 @@ because they're the kind of thing that catches everyone the first time:
 
 - **Phase 8:** Portfolio site write-up + LinkedIn announcement
 - **GH Actions Node 24 migration:** Action runners deprecate Node.js 20 by September 2026; bump `actions/*` pins as v5+ versions ship
-- **Postcode coverage:** the seed currently maps ~104 postcode areas to 10 regions; ~2K rows fall to `'Unknown'`. A more granular ONS Postcode Directory join would shrink that
-- **Multi-year refresh:** `download_raw.py` is idempotent (skips parquet that already exists); rerun with `--years 2026` once the year is complete
+- **Decision-grade geography:** the legacy postcode-area seed is enough for regional market analysis, but not for renter decisions. A fixture-backed MSOA/postcode geography slice now exists, plus `scripts/prepare_onspd_seed.py` for normalizing a local official lookup snapshot. The next step is to pin the first official snapshot and measure full Land Registry postcode coverage against it.
+- **Multi-year refresh:** `download_raw.py` is idempotent by default and reads its default years from `dbt_project.yml`; use `--force-refresh` when you intentionally want to replace cached yearly Parquets after upstream Land Registry corrections. Once 2026 is complete, update `landreg_end_year`; the date spine derives its buffer range automatically.
 - **`fct_transactions` → `incremental` when it scales:** at 4.2M rows a full table rebuild is ~5s — fine. Past ~50M rows the natural migration is `materialized='incremental'`, `unique_key='transaction_key'`, with an `is_incremental()` filter on `_loaded_at` (the loader is already idempotent on that column). See the inline comment in `models/marts/core/fct_transactions.sql`
 
 ## Source attribution
@@ -174,7 +184,7 @@ Contains HM Land Registry data © Crown copyright and database right.
 ```
 .
 ├── .github/workflows/
-│   ├── ci.yml                    # GH Actions: dbt build + 88 tests + sqlfluff on every PR
+│   ├── ci.yml                    # GH Actions: unit tests + Streamlit browser smoke + freshness + dbt build + 154 tests + dashboard smoke + sqlfluff
 │   └── docs.yml                  # GH Actions: build dbt + publish docs to GH Pages
 ├── .pre-commit-config.yaml       # sqlfluff + ruff hooks (local style gate)
 ├── .sqlfluff                     # sqlfluff rules + dbt templater config
@@ -225,17 +235,21 @@ Contains HM Land Registry data © Crown copyright and database right.
 │   ├── build_dashboard_db.py     # builds slim data/dashboard.duckdb from full warehouse
 │   ├── check_marts.py            # spot-check helper for the rpt_ marts
 │   ├── download_raw.py           # idempotent yearly Land Registry download
-│   └── load_to_duckdb.py         # Parquet → raw_landreg.transactions
+│   ├── load_to_duckdb.py         # Parquet → raw_landreg.transactions
+│   └── prepare_onspd_seed.py     # local ONSPD-style CSV/ZIP → geography seed contract
 ├── seeds/
+│   ├── ref_onspd_sample.csv           # tiny MSOA/postcode fixture for decision geography
 │   └── ref_postcode_area_region.csv   # 104-row postcode-area → ONS-region lookup
-└── tests/                         # 8 singular SQL tests, one named-risk hypothesis per mart
+└── tests/                         # 12 singular SQL tests, named-risk hypotheses plus spine/YoY/geography guards
     ├── assert_dim_date_continuous.sql
+    ├── assert_dim_date_covers_configured_window.sql
     ├── assert_dim_postcode_outward_derived_when_postcode_set.sql
     ├── assert_dim_property_type_codes_complete.sql
     ├── assert_dim_tenure_codes_complete.sql
     ├── assert_fct_no_future_transactions.sql
     ├── assert_rpt_new_build_premium_within_bounds.sql
     ├── assert_rpt_top_postcodes_one_per_year.sql
+    ├── assert_rpt_yoy_has_expected_rows.sql
     └── assert_rpt_yoy_pct_within_bounds.sql
 ```
 

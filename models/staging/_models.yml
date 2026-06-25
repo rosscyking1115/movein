@@ -1,6 +1,50 @@
 version: 2
 
 models:
+  - name: stg_geo__postcodes
+    description: |
+      ONS Postcode Directory-shaped staging fixture for the housing
+      decision-support geography layer. Grain: one row per postcode in the
+      lookup snapshot.
+    columns:
+      - name: postcode
+        description: Normalised full postcode.
+        tests:
+          - not_null
+          - unique
+      - name: postcode_outward
+        description: Outward postcode.
+        tests:
+          - not_null
+      - name: postcode_area
+        description: Leading postcode area.
+        tests:
+          - not_null
+      - name: area_id
+        description: Canonical MSOA area key for the MVP recommendation grain.
+        tests:
+          - not_null
+      - name: latitude
+        description: Postcode centroid latitude.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -90
+                max_value: 90
+      - name: longitude
+        description: Postcode centroid longitude.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -180
+                max_value: 180
+      - name: source_snapshot_date
+        description: Date of the lookup snapshot used by this fixture.
+        tests:
+          - not_null
+
   - name: stg_landreg__transactions
     description: |
       One row per HM Land Registry Price Paid transaction. Types are cast,

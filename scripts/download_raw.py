@@ -1,14 +1,17 @@
 """Download HM Land Registry Price Paid yearly CSVs and convert to Parquet.
 
 Idempotent: if `data/raw/pp-{year}.parquet` already exists, the year is skipped.
+Use `--force-refresh` to replace existing Parquet files after a successful
+fresh download and conversion.
 Per kit lesson L5, we read the headerless CSV with pandas once, attach a UTC
 `_loaded_at` column, and write Snappy Parquet — subsequent dbt runs read the
 Parquet (~2s) instead of re-parsing the CSV (~90s for the full file).
 
 Usage:
-    python scripts/download_raw.py                # default: 2021-2025 (5 years)
-    python scripts/download_raw.py --sample        # latest year only (for CI)
+    python scripts/download_raw.py                # default: configured years
+    python scripts/download_raw.py --sample        # latest 2 configured years
     python scripts/download_raw.py --years 2024 2025
+    python scripts/download_raw.py --years 2025 --force-refresh
 
 Source: https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads
 Data dictionary: https://www.gov.uk/guidance/about-the-price-paid-data
@@ -31,6 +34,7 @@ LANDREG_BASE = (
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW_DIR = ROOT / "data" / "raw"
+DBT_PROJECT_PATH = ROOT / "dbt_project.yml"
 
 # Land Registry Price Paid CSVs are HEADERLESS — column order from the data
 # dictionary. Names below are deliberately raw (untransformed) — the staging
@@ -54,26 +58,91 @@ LANDREG_COLUMNS = [
     "record_status",
 ]
 
-# Default: five complete calendar years. 2026 is excluded because at time of
-# writing it's a partial year — including it would mess with YoY marts in Phase 3.
-DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025]
+def _parse_simple_dbt_vars(config_path: Path) -> dict[str, int | str]:
+    """Parse the simple top-level vars block in dbt_project.yml.
+
+    This intentionally supports only the scalar shape used by this project,
+    which avoids adding a YAML dependency just to read four config values.
+    """
+    vars_block: dict[str, int | str] = {}
+    in_vars = False
+
+    for line in config_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if not in_vars:
+            if stripped == "vars:":
+                in_vars = True
+            continue
+
+        if not line.startswith("  "):
+            break
+
+        key, sep, value = stripped.partition(":")
+        if sep != ":":
+            continue
+
+        value = value.strip().strip('"').strip("'")
+        vars_block[key] = int(value) if value.isdigit() else value
+
+    return vars_block
 
 
-def download_year(year: int) -> Path:
+def load_default_years(config_path: Path = DBT_PROJECT_PATH) -> list[int]:
+    """Read the configured Land Registry year window from dbt_project.yml."""
+    vars_block = _parse_simple_dbt_vars(config_path)
+    try:
+        start_year = vars_block["landreg_start_year"]
+        end_year = vars_block["landreg_end_year"]
+    except KeyError as exc:
+        raise ValueError(
+            f"{config_path} must define landreg_start_year and landreg_end_year in vars"
+        ) from exc
+
+    if not isinstance(start_year, int) or not isinstance(end_year, int):
+        raise ValueError("landreg_start_year and landreg_end_year must be integers")
+    if start_year > end_year:
+        raise ValueError("landreg_start_year must be less than or equal to landreg_end_year")
+
+    return list(range(start_year, end_year + 1))
+
+
+def select_years(args: argparse.Namespace, config_path: Path = DBT_PROJECT_PATH) -> list[int]:
+    """Resolve CLI flags into the final list of years to fetch."""
+    if args.years:
+        return sorted(set(args.years))
+
+    default_years = load_default_years(config_path)
+
+    if args.sample:
+        return default_years[-2:]
+    return default_years
+
+
+def download_year(year: int, *, force_refresh: bool = False) -> Path:
     """Download a single year's CSV and convert to Parquet.
 
     Returns the Parquet path. Skips both the download and the conversion if
-    the Parquet file already exists.
+    the Parquet file already exists, unless force_refresh is set.
     """
     parquet_path = RAW_DIR / f"pp-{year}.parquet"
+    tmp_parquet_path = RAW_DIR / f"pp-{year}.parquet.tmp"
     csv_path = RAW_DIR / f"pp-{year}.csv"
 
-    if parquet_path.exists():
+    if parquet_path.exists() and not force_refresh:
         size_mb = parquet_path.stat().st_size / 1024 / 1024
         print(f"  [skip]     {parquet_path.name} already present ({size_mb:.1f} MB)")
         return parquet_path
 
     RAW_DIR.mkdir(parents=True, exist_ok=True)
+    tmp_parquet_path.unlink(missing_ok=True)
+
+    if parquet_path.exists() and force_refresh:
+        size_mb = parquet_path.stat().st_size / 1024 / 1024
+        print(f"  [refresh]  replacing {parquet_path.name} ({size_mb:.1f} MB)")
+
     url = f"{LANDREG_BASE}/pp-{year}.csv"
     print(f"  [download] {url}")
 
@@ -93,6 +162,7 @@ def download_year(year: int) -> Path:
         if total:
             print()  # newline after progress
 
+    output_path = tmp_parquet_path if force_refresh else parquet_path
     print(f"  [convert]  {csv_path.name} → {parquet_path.name}")
     df = pd.read_csv(
         csv_path,
@@ -106,7 +176,15 @@ def download_year(year: int) -> Path:
     )
     df["_loaded_at"] = datetime.now(timezone.utc).isoformat()
 
-    df.to_parquet(parquet_path, engine="pyarrow", compression="snappy", index=False)
+    try:
+        df.to_parquet(output_path, engine="pyarrow", compression="snappy", index=False)
+
+        if output_path != parquet_path:
+            output_path.replace(parquet_path)
+    except Exception:
+        if output_path != parquet_path:
+            output_path.unlink(missing_ok=True)
+        raise
 
     # Drop the CSV after successful conversion (kit lesson L5 — disk hygiene).
     csv_path.unlink(missing_ok=True)
@@ -126,7 +204,7 @@ def parse_args() -> argparse.Namespace:
     group.add_argument(
         "--sample",
         action="store_true",
-        help="Download only the most recent year — used by CI for fast runs.",
+        help="Download the two most recent years — used by CI for fast YoY runs.",
     )
     group.add_argument(
         "--years",
@@ -135,26 +213,35 @@ def parse_args() -> argparse.Namespace:
         metavar="YEAR",
         help="Specific years to fetch, e.g. --years 2024 2025.",
     )
+    parser.add_argument(
+        "--force-refresh",
+        action="store_true",
+        help=(
+            "Redownload and replace existing Parquet files. Existing files are "
+            "kept if the fresh download or conversion fails."
+        ),
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
 
-    if args.sample:
-        years = [max(DEFAULT_YEARS)]
-    elif args.years:
-        years = sorted(set(args.years))
-    else:
-        years = DEFAULT_YEARS
+    try:
+        years = select_years(args)
+    except ValueError as e:
+        print(f"\n  [error]    Invalid analysis-window config: {e}", file=sys.stderr)
+        return 1
 
     print(f"Land Registry Price Paid — fetching years: {years}")
     print(f"Output dir: {RAW_DIR}")
+    if args.force_refresh:
+        print("Mode: force refresh existing Parquet files")
     print()
 
     for year in years:
         try:
-            download_year(year)
+            download_year(year, force_refresh=args.force_refresh)
         except requests.HTTPError as e:
             print(f"\n  [error]    Failed to fetch {year}: {e}", file=sys.stderr)
             return 1

@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import plotly.express as px
 import streamlit as st
 
-from _utils import REGION_ORDER, fmt_gbp, fmt_pct, load_new_build_premium
+from _utils import REGION_ORDER, fmt_gbp, fmt_pct, get_year_window, load_new_build_premium
 
 st.set_page_config(page_title="New-build premium", page_icon="🏗️", layout="wide")
 
@@ -21,20 +21,21 @@ st.markdown(
 )
 
 nbp = load_new_build_premium()
+latest_year, _ = get_year_window(nbp)
 
-tab1, tab2, tab3 = st.tabs(["2025 snapshot", "Premium over time", "Raw data"])
+tab1, tab2, tab3 = st.tabs([f"{latest_year} snapshot", "Premium over time", "Raw data"])
 
 with tab1:
     st.markdown(
-        "**2025 by region.** Inversely correlated with regional price level — "
+        f"**{latest_year} by region.** Inversely correlated with regional price level — "
         "the cheapest regions have the largest new-build premiums (scarcity), "
         "while saturated London has the smallest."
     )
-    nbp_2025 = nbp[nbp["transferred_year"] == 2025].sort_values(
+    nbp_latest = nbp[nbp["transferred_year"] == latest_year].sort_values(
         "premium_pct", ascending=True
     )
     fig = px.bar(
-        nbp_2025,
+        nbp_latest,
         x="premium_pct",
         y="region",
         orientation="h",
@@ -46,7 +47,7 @@ with tab1:
     fig.update_traces(texttemplate="%{text:+.1f}%", textposition="outside")
     fig.update_layout(height=480, margin=dict(l=0, r=0, t=10, b=0))
     fig.update_xaxes(ticksuffix="%")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab2:
     st.markdown(
@@ -68,7 +69,7 @@ with tab2:
     )
     fig.update_layout(height=520, margin=dict(l=0, r=0, t=10, b=0))
     fig.update_yaxes(ticksuffix="%")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab3:
     display = nbp.copy()
@@ -86,7 +87,7 @@ with tab3:
             "premium_pct",
         ]
     ]
-    st.dataframe(show, use_container_width=True, hide_index=True)
+    st.dataframe(show, width="stretch", hide_index=True)
 
 st.caption(
     "Source: `models/marts/analytics/rpt_new_build_premium.sql` · "

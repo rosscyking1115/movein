@@ -15,9 +15,8 @@ st.markdown(
 The dashboard you're looking at is the *consumption layer* over a six-stage
 pipeline: source → staging → intermediate → marts/core (dimensions + fact)
 → marts/analytics (reporting) → Streamlit. Every layer is tested
-(91 tests across three layers), every column is documented (95 columns,
-zero missing description), and the lineage graph is published to GitHub
-Pages.
+(154 data tests across three layers), every model and column is documented,
+and the lineage graph is published to GitHub Pages.
 
 ### Live links
 
@@ -47,11 +46,11 @@ Pages.
    — usually rare historic records with no postcode at all. The
    distinct-values-to-contain-set test guarantees the 10 ONS regions are
    present without rejecting Unknown as an extra value.
-3. **Every reporting mart has a singular test** asserting a named risk
+3. **Every reporting/decision mart has a singular test** asserting a named risk
    hypothesis (e.g. *yoy %% within ±50%*, *premium %% within −50% to
    +250%*, *no future-dated transactions*). When asked "how do you think
-   about data quality?" the answer is the eight `tests/assert_*.sql`
-   files plus 73 generic tests plus 10 distribution tests across three
+   about data quality?" the answer is the twelve `tests/assert_*.sql`
+   files plus built-in, dbt-utils, and dbt-expectations tests across three
    layers.
 
 ### Source attribution

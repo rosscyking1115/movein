@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: rpt_area_profile_mvp
+    description: |
+      First housing decision-support mart at MSOA grain. This prototype
+      exposes Land Registry sale context and explicit null/caveated
+      placeholders for rent, EPC, crime, flood, planning, and commute signals.
+      Grain: one row per area_id.
+    columns:
+      - name: area_id
+        description: MSOA area key from dim_area.
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_id
+      - name: area_name
+        description: Human-readable area name.
+        tests:
+          - not_null
+      - name: local_authority_name
+        description: Local authority context.
+        tests:
+          - not_null
+      - name: region
+        description: Region context.
+        tests:
+          - not_null
+      - name: sales_count_latest_year
+        description: Matched Land Registry sales in the configured latest year.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: flood_risk_flag
+        description: Placeholder until flood data is loaded.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high', 'unknown']
+      - name: planning_constraint_count
+        description: Placeholder until planning constraints are loaded.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: confidence_level
+        description: Overall source coverage confidence for the profile.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['high', 'medium', 'low']
+      - name: confidence_notes
+        description: Caveat text explaining missing or coarse source coverage.
+        tests:
+          - not_null
+      - name: why_this_area
+        description: Short explainability text for the current prototype area profile.
+        tests:
+          - not_null

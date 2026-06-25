@@ -29,7 +29,7 @@ models:
                   - South West
                   - Wales
       - name: transferred_year
-        description: Calendar year of transfer (2021-2025 in current load).
+        description: Calendar year of transfer in the configured analysis window.
         tests:
           - not_null
       - name: sales_count
@@ -52,7 +52,7 @@ models:
       - name: p90_price_gbp
         description: 90th percentile sale price in GBP. Upper-end.
       - name: prior_year_median_price_gbp
-        description: Median price for the same region in the prior year. NULL for the earliest year (2021 here).
+        description: Median price for the same region in the prior year. NULL for the earliest configured year.
       - name: prior_year_mean_price_gbp
         description: Mean price for the same region in the prior year. NULL for the earliest year.
       - name: median_yoy_pct

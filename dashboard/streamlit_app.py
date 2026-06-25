@@ -7,13 +7,19 @@ and the GitHub repo.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import plotly.express as px
 import streamlit as st
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _utils import (
     REGION_ORDER,
     fmt_gbp,
     fmt_pct,
+    get_year_window,
     load_new_build_premium,
     load_price_yoy,
     load_top_postcodes,
@@ -28,10 +34,17 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+yoy = load_price_yoy()
+top_pc = load_top_postcodes()
+nbp = load_new_build_premium()
+latest_year, prior_year = get_year_window(yoy)
+first_year = int(yoy["transferred_year"].min())
+
 st.title("🏠 UK Property Analytics")
 st.markdown(
-    "5-year UK housing market study built on **HM Land Registry Price Paid** "
-    "data — every recorded property transaction in England & Wales 2021–2025 "
+    "UK housing market study built on **HM Land Registry Price Paid** "
+    f"data — every recorded property transaction in England & Wales "
+    f"{first_year}–{latest_year} "
     "(≈4.99M rows, ≈157 MB Parquet). Sources → staging → intermediate → marts, "
     "tested at every layer, lineage published to GitHub Pages."
 )
@@ -41,40 +54,40 @@ st.markdown(
     "💻 **[GitHub repo](https://github.com/rosscyking1115/uk-property-analytics)**"
 )
 
-# -------------------------------------------------------------------- load data
-
-yoy = load_price_yoy()
-top_pc = load_top_postcodes()
-nbp = load_new_build_premium()
-
 # -------------------------------------------------------------------- KPI row
 
-st.markdown("### Headline metrics — 2025")
+st.markdown(f"### Headline metrics — {latest_year}")
 
-london_2025 = yoy[(yoy["region"] == "London") & (yoy["transferred_year"] == 2025)].iloc[0]
+latest_yoy = yoy[yoy["transferred_year"] == latest_year]
+london_latest = latest_yoy[latest_yoy["region"] == "London"].iloc[0]
 
-national_volume_yoy = (
-    yoy[yoy["transferred_year"] == 2025]["sales_count"].sum()
-    / yoy[yoy["transferred_year"] == 2024]["sales_count"].sum()
-    - 1
-) * 100
+latest_sales = latest_yoy["sales_count"].sum()
+if prior_year is not None:
+    prior_sales = yoy[yoy["transferred_year"] == prior_year]["sales_count"].sum()
+    national_volume_yoy = (latest_sales / prior_sales - 1) * 100
+else:
+    national_volume_yoy = None
 
-biggest_premium = nbp[nbp["transferred_year"] == 2025].sort_values(
+biggest_premium = nbp[nbp["transferred_year"] == latest_year].sort_values(
     "premium_pct", ascending=False
 ).iloc[0]
 
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric(
-        label="London median price (2025)",
-        value=fmt_gbp(london_2025["median_price_gbp"]),
-        delta=fmt_pct(london_2025["median_yoy_pct"]),
-        help="London is the only region with a negative YoY in 2025.",
+        label=f"London median price ({latest_year})",
+        value=fmt_gbp(london_latest["median_price_gbp"]),
+        delta=fmt_pct(london_latest["median_yoy_pct"]),
+        help=f"Latest London median sale price and YoY movement for {latest_year}.",
     )
 with col2:
     st.metric(
-        label="National sales volume (2025 vs 2024)",
-        value=f"{int(yoy[yoy['transferred_year'] == 2025]['sales_count'].sum()):,}",
+        label=(
+            f"National sales volume ({latest_year} vs {prior_year})"
+            if prior_year is not None
+            else f"National sales volume ({latest_year})"
+        ),
+        value=f"{int(latest_sales):,}",
         delta=fmt_pct(national_volume_yoy),
         help="Total arm's-length transactions across all 10 ONS regions.",
     )
@@ -112,7 +125,7 @@ fig1.update_layout(
     legend=dict(orientation="v", yanchor="middle", y=0.5, xanchor="left", x=1.02),
 )
 fig1.update_yaxes(tickprefix="£", tickformat=",")
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, width="stretch")
 st.caption(
     "Source: `rpt_price_yoy_by_region` — see "
     "[lineage](https://rosscyking1115.github.io/uk-property-analytics/#!/model/model.uk_property_analytics.rpt_price_yoy_by_region). "
@@ -121,13 +134,13 @@ st.caption(
 
 st.markdown("---")
 
-# --- Chart 2: Top postcode areas in 2025
-st.markdown("#### 🏘️ Which postcode areas are the hottest markets in 2025?")
-top_2025 = top_pc[top_pc["transferred_year"] == 2025].head(15).sort_values(
+# --- Chart 2: Top postcode areas in latest year
+st.markdown(f"#### 🏘️ Which postcode areas are the hottest markets in {latest_year}?")
+top_latest = top_pc[top_pc["transferred_year"] == latest_year].head(15).sort_values(
     "sales_count", ascending=True
 )
 fig2 = px.bar(
-    top_2025,
+    top_latest,
     x="sales_count",
     y="postcode_area",
     color="region",
@@ -140,22 +153,24 @@ fig2 = px.bar(
     },
 )
 fig2.update_layout(height=460, margin=dict(l=0, r=0, t=10, b=0))
-st.plotly_chart(fig2, use_container_width=True)
+st.plotly_chart(fig2, width="stretch")
 st.caption(
     "Source: `rpt_top_postcodes_by_volume`. Notable: zero London postcode codes "
-    "in the 2025 top-15 — Birmingham (B), Sheffield (S), Nottingham (NG) lead. "
+    f"in the {latest_year} top-15 — "
+    f"{', '.join(top_latest.sort_values('sales_count', ascending=False)['postcode_area'].head(3))} "
+    "lead. "
     "Deep dive on the [Top postcode areas page](./Top_postcode_areas)."
 )
 
 st.markdown("---")
 
-# --- Chart 3: New build premium 2025
+# --- Chart 3: New build premium in latest year
 st.markdown("#### 🏗️ How much premium do new builds command, regionally?")
-nbp_2025 = nbp[nbp["transferred_year"] == 2025].sort_values(
+nbp_latest = nbp[nbp["transferred_year"] == latest_year].sort_values(
     "premium_pct", ascending=True
 )
 fig3 = px.bar(
-    nbp_2025,
+    nbp_latest,
     x="premium_pct",
     y="region",
     orientation="h",
@@ -166,10 +181,10 @@ fig3 = px.bar(
 fig3.update_traces(texttemplate="%{text:+.1f}%", textposition="outside")
 fig3.update_layout(height=420, margin=dict(l=0, r=0, t=10, b=0), showlegend=False)
 fig3.update_xaxes(ticksuffix="%")
-st.plotly_chart(fig3, use_container_width=True)
+st.plotly_chart(fig3, width="stretch")
 st.caption(
     "Source: `rpt_new_build_premium`. Inversely correlated with regional price "
-    "level — North East +61.8% vs London +8.8%. Deep dive on the "
+    "level in the current data. Deep dive on the "
     "[New-build premium page](./New_build_premium)."
 )
 

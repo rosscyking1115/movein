@@ -20,6 +20,11 @@ clean-targets:
   - "dbt_packages"
   - "logs"
 
+# Analysis window. Update these when adding a complete new Land Registry year.
+vars:
+  landreg_start_year: 2021
+  landreg_end_year: 2025
+
 # Default model materialisations by folder.
 # - staging: views (cheap, recompute on every run)
 # - intermediate: ephemeral by default (compose into marts)
@@ -42,6 +47,8 @@ models:
         +schema: core
       analytics:
         +schema: analytics
+      decision:
+        +schema: decision
 
 seeds:
   uk_property_analytics:
