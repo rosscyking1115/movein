@@ -34,7 +34,7 @@ over fragmented official UK datasets.
 | Geography (MSOA `dim_area`, postcode bridge) | ✅ Built | Real ONSPD May 2026 lookup (2.73M postcodes → 7,264 England & Wales MSOAs), readable area/LA/region names, 99.999% Land Registry coverage; committed fixture is the CI default |
 | `rpt_area_profile_mvp` (first decision mart) | ✅ Prototype | Land Registry sale context + ONS rent + affordability; caveated null placeholders for the rest |
 | ONS rent + affordability | ✅ Built | PIPR local-authority rent (May 2026) on **7,262/7,264 (100%)** of E&W MSOAs; affordability ratio vs a default income scenario |
-| EPC energy profile | 🟡 Scaffolded | Pipeline + fixture-tested per-area median EPC band & certificate count; real England & Wales bulk pending a free GOV.UK One Login download, then `--vars 'epc_source: bulk'` |
+| EPC energy profile | ✅ Built | 23.5M England & Wales certificates → per-area median EPC band + certificate count on **100%** of MSOAs (median band D); committed fixture is the CI default, real bulk via `--vars 'epc_source: bulk'` |
 | Crime, flood, planning, commute layers | ⬜ Planned | Designed in the build plan; not loaded |
 | Explainable weighted neighbourhood score | ⬜ Planned | Phase 4 — component scores, confidence, "why this area" |
 | Renter-facing decision app (replacing the chart dashboard) | ⬜ Planned | Phase 5 — search, ranking, compare, source/caveat views |
@@ -187,7 +187,7 @@ The phased plan lives in [`HOUSING_DECISION_SUPPORT_BUILD_PLAN.md`](HOUSING_DECI
 
 1. **Spine hardening** — ✅ done (this pivot).
 2. **Geography foundation** — ✅ done: real ONSPD snapshot, 99.999% Land Registry coverage, decision marts keyed on `area_id`, readable names.
-3. **MVP data sources** — ONS rent ✅ done (PIPR local-authority rent + affordability); EPC energy 🟡 scaffolded (per-area median band, fixture-tested, real bulk pending One Login); crime, flood/planning, commute next, one tested ingestion + staging model per source.
+3. **MVP data sources** — ONS rent ✅ done (PIPR local-authority rent + affordability); EPC energy ✅ done (23.5M certificates → per-area median band); crime, flood/planning, commute next, one tested ingestion + staging model per source.
 4. **Decision marts** — explainable component scores, confidence/coverage fields, "why this area" fragments; user weights re-rank without changing raw facts.
 5. **Renter-facing app** — search/preferences, ranked areas, compare, per-area "trade-off receipt", source/caveat views.
 6. **Quality gates** — score-bound, coverage, and explanation-completeness tests; UI accessibility review.
@@ -209,10 +209,7 @@ Loaded:
 - [HM Land Registry Price Paid Data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads) — sale-market context. Contains HM Land Registry data © Crown copyright and database right.
 - [ONS Postcode Directory](https://geoportal.statistics.gov.uk/) — postcode → MSOA/LSOA/LA/region geography (and the MSOA/LA/region name lookups). Contains OS, ONS, Royal Mail and NRS data © Crown copyright and database right.
 - [ONS Price Index of Private Rents](https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics) — local-authority average monthly rent. Values may be provisional and revised.
-
-Scaffolded (pipeline + fixture in place, real data pending):
-
-- [Energy Performance Certificates](https://get-energy-performance-data.communities.gov.uk/) — per-area median EPC band. Bulk download needs a free GOV.UK One Login; then `python scripts/prepare_epc_seed.py <download>`, `python scripts/load_epc.py`, `dbt build --vars 'epc_source: bulk'`. Certificates may be expired or superseded.
+- [Energy Performance Certificates](https://get-energy-performance-data.communities.gov.uk/) — per-area median EPC band from 23.5M domestic certificates. Bulk download needs a free GOV.UK One Login; then `python scripts/prepare_epc_seed.py <download>`, `python scripts/load_epc.py`, `dbt build --vars 'epc_source: bulk'`. Certificates may be expired or superseded.
 
 Planned (Police API, Planning Data API, Environment Agency flood data, TfL,
 OpenStreetMap) and their licences/caveats are catalogued in

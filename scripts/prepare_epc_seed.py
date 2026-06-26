@@ -1,10 +1,11 @@
 """Normalize an EPC bulk download into the energy contract.
 
-The full England & Wales EPC bulk export is large and gated behind a free
-GOV.UK One Login, so it is never committed. This helper streams a local bulk
-download (a single certificates CSV, or the bulk ZIP whose members are per-local
--authority `certificates.csv` files) into the slim contract used by
-`stg_epc__certificates`:
+The full England & Wales EPC bulk export is large (~6 GB zipped, ~21 GB of
+certificates uncompressed across per-year `certificates-YYYY.csv` members) and
+gated behind a free GOV.UK One Login, so it is never committed. This helper
+streams a local bulk download (a single certificates CSV, or the bulk ZIP whose
+members are per-year `certificates-YYYY.csv` files — recommendations are
+skipped) into the slim contract used by `stg_epc__certificates`:
 
   postcode, current_energy_rating, current_energy_efficiency, property_type, lodgement_date
 
@@ -48,7 +49,7 @@ ALIASES = {
     "lodgement_date": ("lodgement_date", "lodgement-date", "inspection_date"),
 }
 
-CHUNK_SIZE = 200_000
+CHUNK_SIZE = 500_000
 
 
 def _resolve(columns: list[str]) -> dict[str, str]:
@@ -65,48 +66,70 @@ def _resolve(columns: list[str]) -> dict[str, str]:
     return resolved
 
 
-def _slim(frame: pd.DataFrame) -> pd.DataFrame:
-    resolved = _resolve(list(frame.columns))
-    out = pd.DataFrame()
-    for logical in CONTRACT_COLUMNS:
-        source = resolved.get(logical)
-        out[logical] = frame[source] if source else ""
-    out = out[out["postcode"].astype(str).str.strip() != ""]
-    return out
+def _is_certificates_member(name: str) -> bool:
+    """The bulk ZIP holds per-year certificates-YYYY.csv (plus recommendations we skip)."""
+    base = name.rsplit("/", 1)[-1].lower()
+    return base.startswith("certificates") and base.endswith(".csv")
 
 
-def _iter_frames(input_path: Path):
-    if input_path.suffix.lower() == ".zip":
-        with zipfile.ZipFile(input_path) as archive:
-            members = [
-                info
-                for info in archive.infolist()
-                if not info.is_dir() and info.filename.lower().endswith("certificates.csv")
-            ]
-            if not members:
-                raise ValueError("No '*certificates.csv' members found in the EPC ZIP")
-            for info in members:
-                with archive.open(info) as handle:
-                    yield pd.read_csv(handle, dtype=str, keep_default_na=False, low_memory=False)
-    else:
+def _read_slim_chunks(open_handle):
+    """Stream a CSV (via a callable returning a fresh handle) as slim contract chunks.
+
+    Only the contract columns are parsed (usecols) so the 1-2 GB per-year EPC
+    files stream in bounded memory instead of materialising all 90+ columns.
+    """
+    with open_handle() as handle:
+        header = pd.read_csv(handle, nrows=0, dtype=str)
+    resolved = _resolve(list(header.columns))
+    rename = {source: logical for logical, source in resolved.items()}
+
+    with open_handle() as handle:
         for chunk in pd.read_csv(
-            input_path, dtype=str, keep_default_na=False, low_memory=False, chunksize=CHUNK_SIZE
+            handle,
+            dtype=str,
+            keep_default_na=False,
+            low_memory=False,
+            usecols=list(resolved.values()),
+            chunksize=CHUNK_SIZE,
         ):
-            yield chunk
+            chunk = chunk.rename(columns=rename)
+            for column in CONTRACT_COLUMNS:
+                if column not in chunk.columns:
+                    chunk[column] = ""
+            chunk = chunk[CONTRACT_COLUMNS]
+            yield chunk[chunk["postcode"].astype(str).str.strip() != ""]
 
 
 def prepare(input_path: Path, output_path: Path) -> int:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rows = 0
     wrote_header = False
-    with output_path.open("w", encoding="utf-8", newline="") as out_file:
-        for frame in _iter_frames(input_path):
-            slim = _slim(frame)
-            if slim.empty:
+
+    def write(chunks, out_file):
+        nonlocal rows, wrote_header
+        for chunk in chunks:
+            if chunk.empty:
                 continue
-            slim.to_csv(out_file, index=False, header=not wrote_header)
+            chunk.to_csv(out_file, index=False, header=not wrote_header)
             wrote_header = True
-            rows += len(slim)
+            rows += len(chunk)
+
+    with output_path.open("w", encoding="utf-8", newline="") as out_file:
+        if input_path.suffix.lower() == ".zip":
+            with zipfile.ZipFile(input_path) as archive:
+                members = [
+                    info.filename
+                    for info in archive.infolist()
+                    if not info.is_dir() and _is_certificates_member(info.filename)
+                ]
+                if not members:
+                    raise ValueError("No 'certificates*.csv' members found in the EPC ZIP")
+                for name in members:
+                    print(f"  reading {name}", file=sys.stderr)
+                    write(_read_slim_chunks(lambda n=name: archive.open(n)), out_file)
+        else:
+            write(_read_slim_chunks(lambda: input_path.open("rb")), out_file)
+
     if not wrote_header:
         raise ValueError("No EPC certificate rows were written")
     return rows
