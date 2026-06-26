@@ -9,9 +9,10 @@
 --
 -- This profile exposes Land Registry sale context, ONS local-authority rent
 -- (with an affordability ratio), an EPC energy-efficiency profile, a police
--- street-crime indicator, and planning-constraint / flood-risk flags, plus a
--- null placeholder for the commute layer still to come. That keeps the product
--- honest: no commute claims are made before that source exists.
+-- street-crime indicator, planning-constraint / flood-risk flags, and
+-- OpenStreetMap amenity/convenience access, plus a null placeholder for
+-- door-to-door commute time. That keeps the product honest: no journey-time
+-- commute claims are made before that source exists.
 
 with latest_market as (
 
@@ -112,6 +113,12 @@ select
     cons.flood_postcode_pct,
     coalesce(cons.planning_constraint_count, 0)
         as planning_constraint_count,
+    amenity.nearest_station_km,
+    amenity.nearest_supermarket_km,
+    amenity.nearest_gp_km,
+    amenity.nearest_school_km,
+    amenity.nearest_greenspace_km,
+    amenity.walkable_amenity_count,
     cast(null as numeric) as commute_minutes_sample,
     'low' as confidence_level,
     concat(
@@ -132,7 +139,12 @@ select
                 then ', planning/flood constraints'
             else ''
         end,
-        '. Not yet loaded: commute.'
+        case
+            when amenity.area_id is not null
+                then ', amenity access'
+            else ''
+        end,
+        '. Not yet loaded: door-to-door commute time.'
     ) as confidence_notes,
     case
         when coalesce(latest_market.sales_count_latest_year, 0) = 0
@@ -174,4 +186,6 @@ left join area_crime
     on area.area_id = area_crime.area_id
 left join {{ ref('stg_constraints__area') }} as cons
     on area.area_id = cons.area_id
+left join {{ ref('stg_amenities__area') }} as amenity
+    on area.area_id = amenity.area_id
 order by area.region, area.local_authority_name, area.area_name

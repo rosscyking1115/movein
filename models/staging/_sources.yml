@@ -154,3 +154,22 @@ sources:
         description: |
           One row per MSOA (same columns as ref_area_constraints_sample):
           area_id, planning_constraint_count, flood_risk_flag, flood_postcode_pct.
+
+  - name: amenities
+    description: |
+      Per-MSOA amenity/convenience access (nearest-amenity distances and a
+      walkable-essentials count), pre-computed from an OpenStreetMap extract by
+      spatial nearest-neighbour in scripts/prepare_amenity_access.py and loaded
+      by scripts/load_amenities.py. Only present (and only read) when building
+      with `--vars 'amenities_source: computed'`; the committed
+      ref_amenity_access_sample seed is the CI fixture.
+
+      Source: OpenStreetMap via a Geofabrik extract (Open Database Licence).
+    schema: raw_amenities
+    loader: scripts/load_amenities.py
+    tables:
+      - name: area_access
+        description: |
+          One row per MSOA (same columns as ref_amenity_access_sample):
+          area_id, nearest_station_km, nearest_supermarket_km, nearest_gp_km,
+          nearest_school_km, nearest_greenspace_km, walkable_amenity_count.

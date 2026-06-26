@@ -119,6 +119,26 @@ models:
               arguments:
                 values: ['low', 'medium', 'high', 'unknown']
 
+  - name: stg_amenities__area
+    description: |
+      Per-MSOA amenity/convenience access (nearest-amenity distances + walkable
+      essentials count). Reads the committed ref_amenity_access_sample fixture by
+      default, or the OpenStreetMap-derived raw_amenities.area_access source with
+      `--vars 'amenities_source: computed'`. Grain: one row per area_id.
+    columns:
+      - name: area_id
+        description: MSOA key.
+        tests:
+          - not_null
+          - unique
+      - name: walkable_amenity_count
+        description: Count of essential amenity types within the walking radius (0-5).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "between 0 and 5"
+
   - name: stg_landreg__transactions
     description: |
       One row per HM Land Registry Price Paid transaction. Types are cast,

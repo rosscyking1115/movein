@@ -60,6 +60,13 @@ vars:
   # table loaded by scripts/load_constraints.py from the spatial roll-up in
   # scripts/prepare_area_constraints.py. Override: --vars 'constraints_source: computed'
   constraints_source: 'fixture'
+  # Amenity/convenience source. 'fixture' uses the committed
+  # ref_amenity_access_sample seed (CI-safe); 'computed' uses the per-MSOA
+  # access table loaded by scripts/load_amenities.py from the OpenStreetMap
+  # roll-up in scripts/prepare_amenity_access.py. Override: --vars 'amenities_source: computed'
+  amenities_source: 'fixture'
+  # Walking radius (km) for the walkable_amenity_count convenience measure.
+  walkable_radius_km: 1.0
 
 # Default model materialisations by folder.
 # - staging: views (cheap, recompute on every run)
