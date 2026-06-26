@@ -8,10 +8,10 @@
 -- Grain: one row per MSOA area_id.
 --
 -- This profile exposes Land Registry sale context, ONS local-authority rent
--- (with an affordability ratio), an EPC energy-efficiency profile, and a police
--- street-crime indicator, plus null/caveated placeholders for the layers still
--- to come. That keeps the product honest: no flood, planning, or commute claims
--- are made before those sources exist.
+-- (with an affordability ratio), an EPC energy-efficiency profile, a police
+-- street-crime indicator, and planning-constraint / flood-risk flags, plus a
+-- null placeholder for the commute layer still to come. That keeps the product
+-- honest: no commute claims are made before that source exists.
 
 with latest_market as (
 
@@ -108,8 +108,10 @@ select
         2
     ) as crime_rate_per_1000,
     area_crime.crime_record_count,
-    'unknown' as flood_risk_flag,
-    0 as planning_constraint_count,
+    coalesce(cons.flood_risk_flag, 'unknown') as flood_risk_flag,
+    cons.flood_postcode_pct,
+    coalesce(cons.planning_constraint_count, 0)
+        as planning_constraint_count,
     cast(null as numeric) as commute_minutes_sample,
     'low' as confidence_level,
     concat(
@@ -125,7 +127,12 @@ select
                 then ', police crime'
             else ''
         end,
-        '. Not yet loaded: flood, planning, commute.'
+        case
+            when cons.area_id is not null
+                then ', planning/flood constraints'
+            else ''
+        end,
+        '. Not yet loaded: commute.'
     ) as confidence_notes,
     case
         when coalesce(latest_market.sales_count_latest_year, 0) = 0
@@ -165,4 +172,6 @@ left join area_energy
     on area.area_id = area_energy.area_id
 left join area_crime
     on area.area_id = area_crime.area_id
+left join {{ ref('stg_constraints__area') }} as cons
+    on area.area_id = cons.area_id
 order by area.region, area.local_authority_name, area.area_name

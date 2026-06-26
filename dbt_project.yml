@@ -55,6 +55,11 @@ vars:
   # to be population-consistent (~7,500-8,000), so a fixed denominator gives a
   # roughly comparable, clearly-approximate monthly crime rate per 1,000.
   nominal_msoa_population: 7800
+  # Planning/flood constraints source. 'fixture' uses the committed
+  # ref_area_constraints_sample seed (CI-safe); 'computed' uses the per-MSOA
+  # table loaded by scripts/load_constraints.py from the spatial roll-up in
+  # scripts/prepare_area_constraints.py. Override: --vars 'constraints_source: computed'
+  constraints_source: 'fixture'
 
 # Default model materialisations by folder.
 # - staging: views (cheap, recompute on every run)

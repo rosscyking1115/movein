@@ -1,4 +1,4 @@
-# PR gate — proves every change still builds + passes 163 data tests + lints clean.
+# PR gate — proves every change still builds + passes 169 data tests + lints clean.
 #
 # Triggers:
 #   - pull_request to main: every PR is gated
@@ -14,7 +14,7 @@
 #   7. Download two years of Land Registry data (--sample, enough for YoY)
 #   8. Load it into DuckDB
 #   9. dbt source freshness — proves the loaded source is current enough
-#   10. dbt build — runs all marts + 163 data tests against the sample
+#   10. dbt build — runs all marts + 169 data tests against the sample
 #   11. Build + smoke-test a sample dashboard DuckDB extract
 #   12. sqlfluff lint — model SQL must satisfy .sqlfluff rules
 #
@@ -24,7 +24,7 @@
 # Why a sample, not the full 5-year Parquet:
 #   - Full pull is ~157MB Parquet across 5 years and would burn 3-5min of CI
 #     time per PR. The 2-year sample exercises the same SQL paths, hits all
-#     163 data tests, and proves YoY logic is non-vacuous. Row-count test bounds
+#     169 data tests, and proves YoY logic is non-vacuous. Row-count test bounds
 #     were calibrated to pass on either full or sample data.
 
 name: CI
@@ -97,7 +97,7 @@ jobs:
       - name: dbt seed
         run: dbt seed --target dev
 
-      - name: dbt build (runs all marts + 163 data tests)
+      - name: dbt build (runs all marts + 169 data tests)
         run: dbt build --target dev
 
       - name: Build sample dashboard DuckDB extract

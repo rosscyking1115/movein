@@ -23,7 +23,7 @@ over fragmented official UK datasets.
 
 - 📊 **dbt docs site (lineage + column catalogue):** https://rosscyking1115.github.io/uk-housing-decision-support/
 - 📈 **Streamlit dashboard (legacy market-study UI):** https://ross-uk-property-analytics.streamlit.app/
-- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml) — every PR runs Python unit tests, Streamlit render/browser smoke tests, source freshness, `dbt build`, 163 data tests, dashboard extract smoke tests, and sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
+- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml) — every PR runs Python unit tests, Streamlit render/browser smoke tests, source freshness, `dbt build`, 169 data tests, dashboard extract smoke tests, and sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
 
 ## Project status
 
@@ -36,7 +36,7 @@ over fragmented official UK datasets.
 | ONS rent + affordability | ✅ Built | PIPR local-authority rent (May 2026) on **7,262/7,264 (100%)** of E&W MSOAs; affordability ratio vs a default income scenario |
 | EPC energy profile | ✅ Built | 23.5M England & Wales certificates → per-area median EPC band + certificate count on **100%** of MSOAs (median band D); committed fixture is the CI default, real bulk via `--vars 'epc_source: bulk'` |
 | Crime safety indicator | ✅ Built | 17.1M police street-crimes (LSOA→MSOA) → approx. monthly rate per 1,000 on **99.6%** of MSOAs (median ~6.6, indicator only — never a safe/unsafe label); committed fixture is the CI default, real bulk via `--vars 'crime_source: bulk'` |
-| Flood + planning constraints | ⬜ Planned | Spatial (MSOA boundaries × planning.data.gov.uk constraint/flood-zone geometries); next |
+| Flood + planning constraints | ✅ Built | Spatial point-in-polygon (2.7M postcode centroids × planning.data.gov.uk geometries) → per-MSOA planning_constraint_count (0–119) + flood band on **100%** of MSOAs (~23% medium/high flood); committed fixture is the CI default, real roll-up via `--vars 'constraints_source: computed'` |
 | Commute layer | ⬜ Planned | Designed in the build plan; not loaded |
 | Explainable weighted neighbourhood score | ⬜ Planned | Phase 4 — component scores, confidence, "why this area" |
 | Renter-facing decision app (replacing the chart dashboard) | ⬜ Planned | Phase 5 — search, ranking, compare, source/caveat views |
@@ -96,10 +96,10 @@ flowchart LR
 |---|---|---|
 | Warehouse | **DuckDB** | Free, zero-ops, single-file, runs in CI. The whole 5-year warehouse fits in ~200 MB; queries return in milliseconds. |
 | Transform | **dbt-core 1.11** + **dbt-duckdb 1.10** | Industry-standard analytics-engineering tooling, declared grains, tested marts, lineage. |
-| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Row-shape, value-shape, and named-hypothesis tests. 163 data tests + 1 source-freshness check. |
+| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Row-shape, value-shape, and named-hypothesis tests. 169 data tests + 1 source-freshness check. |
 | Docs | `dbt docs` → **GitHub Pages** | Free hosting, lineage graph, column-level catalogue (`.github/workflows/docs.yml`). |
 | App | **Streamlit** | Python-native, read-only DuckDB connection, free Community Cloud hosting. The renter-facing decision workflow (Phase 5) will replace the current chart dashboard. |
-| CI | **GitHub Actions** | `ci.yml` runs unit tests, Streamlit smoke tests, source freshness, `dbt build`, 163 data tests, dashboard extract smoke, and sqlfluff lint on every PR. `docs.yml` publishes dbt docs to Pages. Branch protection on `main` gates merges. |
+| CI | **GitHub Actions** | `ci.yml` runs unit tests, Streamlit smoke tests, source freshness, `dbt build`, 169 data tests, dashboard extract smoke, and sqlfluff lint on every PR. `docs.yml` publishes dbt docs to Pages. Branch protection on `main` gates merges. |
 | Lint | **sqlfluff 4.1** + dbt templater | Wired via `pre-commit` (local) and as a hard CI gate. |
 
 `requirements.txt` pins are verified against PyPI for Python 3.13 (`cp313`) wheels
@@ -110,11 +110,11 @@ so a fresh clone needs no source builds — which matters on Windows.
 | Layer | Count | What it catches |
 |---|---|---|
 | Source freshness | 1 | Stale upstream data (warn if no rows newer than 35 days) |
-| Built-in row-shape (`not_null`, `unique`, `accepted_values`, `relationships`) | 65 | Schema bugs, FK orphans, enum drift |
-| `dbt-utils` (`expression_is_true`, `unique_combination_of_columns`) | 9 | Sign / range invariants, multi-column uniqueness |
+| Built-in row-shape (`not_null`, `unique`, `accepted_values`, `relationships`) | 70 | Schema bugs, FK orphans, enum drift |
+| `dbt-utils` (`expression_is_true`, `unique_combination_of_columns`) | 10 | Sign / range invariants, multi-column uniqueness |
 | `dbt-expectations` (range, regex, length, distinct, quantile, row count) | 8 | Type-cast bugs, statistical drift, format regressions |
 | Singular (`tests/assert_*.sql`) | 17 | Domain anomalies — non-vacuous YoY, date-spine coverage, area-profile market-match/source-caveat/small-sample/rent/EPC/crime-coherence guards, and Land Registry → MSOA coverage |
-| **Total** | **163** | All passing on every `dbt build`; source freshness is a separate CI gate |
+| **Total** | **169** | All passing on every `dbt build`; source freshness is a separate CI gate |
 
 ## Geography
 
@@ -180,7 +180,7 @@ dbt seed
 dbt build
 ```
 
-A fresh clone reproduces the full warehouse + 163 data tests in under 5 minutes
+A fresh clone reproduces the full warehouse + 169 data tests in under 5 minutes
 on a laptop. To re-publish docs locally: `dbt docs generate && dbt docs serve`.
 
 ## Roadmap
@@ -189,7 +189,7 @@ The phased plan lives in [`HOUSING_DECISION_SUPPORT_BUILD_PLAN.md`](HOUSING_DECI
 
 1. **Spine hardening** — ✅ done (this pivot).
 2. **Geography foundation** — ✅ done: real ONSPD snapshot, 99.999% Land Registry coverage, decision marts keyed on `area_id`, readable names.
-3. **MVP data sources** — ONS rent ✅ done (PIPR local-authority rent + affordability); EPC energy ✅ done (23.5M certificates → per-area median band); crime ✅ done (17.1M police crimes → LSOA→MSOA indicator); flood/planning (spatial), commute next, one tested ingestion + staging model per source.
+3. **MVP data sources** — ONS rent ✅ done; EPC energy ✅ done (23.5M certificates); crime ✅ done (17.1M police crimes); flood + planning ✅ done (spatial point-in-polygon roll-up); commute next.
 4. **Decision marts** — explainable component scores, confidence/coverage fields, "why this area" fragments; user weights re-rank without changing raw facts.
 5. **Renter-facing app** — search/preferences, ranked areas, compare, per-area "trade-off receipt", source/caveat views.
 6. **Quality gates** — score-bound, coverage, and explanation-completeness tests; UI accessibility review.
@@ -214,8 +214,9 @@ Loaded:
 - [Energy Performance Certificates](https://get-energy-performance-data.communities.gov.uk/) — per-area median EPC band from 23.5M domestic certificates. Bulk download needs a free GOV.UK One Login; then `python scripts/prepare_epc_seed.py <download>`, `python scripts/load_epc.py`, `dbt build --vars 'epc_source: bulk'`. Certificates may be expired or superseded.
 
 - [Police street-level crime](https://data.police.uk/data/) — per-area approximate monthly crime rate per 1,000 (LSOA→MSOA) from 17.1M crimes, as a measured indicator only, never a safe/unsafe label. Generate a bulk archive (no login), then `python scripts/prepare_crime_seed.py <download>`, `python scripts/load_crime.py`, `dbt build --vars 'crime_source: bulk'`.
+- [Planning Data Platform](https://www.planning.data.gov.uk/) — per-MSOA planning-constraint count (conservation areas, green belt, Article 4, tree preservation zones) and flood-risk band, via spatial point-in-polygon. Datasets download directly (no login); `python scripts/prepare_area_constraints.py <csv_dir>` (DuckDB spatial roll-up; the 1.9 GB flood-risk-zone join is the slow part, ~10 min), `python scripts/load_constraints.py`, `dbt build --vars 'constraints_source: computed'`.
 
-Planned (planning.data.gov.uk constraints + flood-risk-zone, TfL,
+Planned (TfL / transport,
 OpenStreetMap) and their licences/caveats are catalogued in
 [`HOUSING_DECISION_SUPPORT_DATA_SOURCES.md`](HOUSING_DECISION_SUPPORT_DATA_SOURCES.md).
 

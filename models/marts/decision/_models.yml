@@ -90,14 +90,24 @@ models:
           Total police street-level crimes matched to the area over the loaded
           period — confidence indicator for crime_rate_per_1000. Null when none.
       - name: flood_risk_flag
-        description: Placeholder until flood data is loaded.
+        description: >
+          Flood-risk band (low/medium/high) from the share of the area's
+          postcodes inside an Environment Agency flood-risk zone; 'unknown' if
+          constraints are not loaded for the area.
         tests:
           - not_null
           - accepted_values:
               arguments:
                 values: ['low', 'medium', 'high', 'unknown']
+      - name: flood_postcode_pct
+        description: >
+          Percentage of the area's postcodes whose centroid falls inside a
+          flood-risk zone. Null when constraints are not loaded for the area.
       - name: planning_constraint_count
-        description: Placeholder until planning constraints are loaded.
+        description: >
+          Distinct planning constraint entities (conservation areas, green belt,
+          Article 4 areas, tree preservation zones) touching the area's
+          postcodes. 0 when none / not loaded.
         tests:
           - not_null
           - dbt_utils.expression_is_true:

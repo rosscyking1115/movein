@@ -92,6 +92,33 @@ models:
         tests:
           - not_null
 
+  - name: stg_constraints__area
+    description: |
+      Per-MSOA planning-constraint count and flood-risk flag. Reads the
+      committed ref_area_constraints_sample fixture by default, or the
+      spatially-computed raw_constraints.area_constraints source with
+      `--vars 'constraints_source: computed'`. Grain: one row per area_id.
+    columns:
+      - name: area_id
+        description: MSOA key.
+        tests:
+          - not_null
+          - unique
+      - name: planning_constraint_count
+        description: Distinct planning constraint entities touching the MSOA.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: flood_risk_flag
+        description: Flood-risk band from the share of postcodes in a flood zone.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high', 'unknown']
+
   - name: stg_landreg__transactions
     description: |
       One row per HM Land Registry Price Paid transaction. Types are cast,
