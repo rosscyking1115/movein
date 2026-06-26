@@ -45,6 +45,23 @@ models:
           - accepted_values:
               arguments:
                 values: ['none', 'indicative', 'reliable']
+      - name: official_rent_monthly_gbp
+        description: >
+          ONS PIPR average monthly private rent (GBP) for the area's local
+          authority. Null when no ONS rent matched the local authority.
+      - name: rent_source_grain
+        description: >
+          Grain the rent figure came from (local_authority for the MVP).
+          Non-null whenever official_rent_monthly_gbp is non-null.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['local_authority', 'region', 'country']
+      - name: affordability_ratio
+        description: >
+          official_rent_monthly_gbp / default_monthly_net_income_gbp. Above
+          ~0.30 means rent exceeds the common 30% affordability guideline for
+          the default income scenario.
       - name: flood_risk_flag
         description: Placeholder until flood data is loaded.
         tests:

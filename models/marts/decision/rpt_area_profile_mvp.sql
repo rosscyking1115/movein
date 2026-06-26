@@ -7,10 +7,10 @@
 -- First decision-support mart.
 -- Grain: one row per MSOA area_id.
 --
--- This prototype profile intentionally exposes only Land Registry market
--- context plus null/caveated placeholders for the public-data layers that
--- will be added next. That keeps the product honest: no rent, crime, EPC,
--- flood, planning, or commute claims are made before those sources exist.
+-- This profile exposes Land Registry sale context and ONS local-authority
+-- rent (with an affordability ratio), plus null/caveated placeholders for the
+-- public-data layers still to come. That keeps the product honest: no crime,
+-- EPC, flood, planning, or commute claims are made before those sources exist.
 
 with latest_market as (
 
@@ -49,19 +49,29 @@ select
             < {{ var('min_reliable_sale_sample') }} then 'indicative'
         else 'reliable'
     end as median_sale_price_confidence,
-    cast(null as numeric) as official_rent_monthly_gbp,
-    cast(null as varchar) as rent_source_grain,
-    cast(null as numeric) as affordability_ratio,
+    rent.rent_monthly_gbp as official_rent_monthly_gbp,
+    rent.rent_grain as rent_source_grain,
+    round(
+        rent.rent_monthly_gbp / {{ var('default_monthly_net_income_gbp') }}, 3
+    ) as affordability_ratio,
     cast(null as varchar) as epc_median_rating,
     cast(null as numeric) as crime_rate_per_1000,
     'unknown' as flood_risk_flag,
     0 as planning_constraint_count,
     cast(null as numeric) as commute_minutes_sample,
     'low' as confidence_level,
-    concat(
-        'Prototype profile: Land Registry sale context only; ',
-        'rent, EPC, crime, flood, planning, and commute sources not loaded yet.'
-    ) as confidence_notes,
+    case
+        when rent.rent_monthly_gbp is not null
+            then concat(
+                'Land Registry sale context and ONS ',
+                rent.rent_grain,
+                ' rent loaded; EPC, crime, flood, planning, and commute not loaded yet.'
+            )
+        else concat(
+            'Land Registry sale context loaded; no ONS rent matched for this ',
+            'area; EPC, crime, flood, planning, and commute not loaded yet.'
+        )
+    end as confidence_notes,
     case
         when coalesce(latest_market.sales_count_latest_year, 0) = 0
             then concat(
@@ -94,4 +104,6 @@ select
 from {{ ref('dim_area') }} as area
 left join latest_market
     on area.area_id = latest_market.area_id
+left join {{ ref('ref_ons_rent') }} as rent
+    on area.local_authority_code = rent.area_code
 order by area.region, area.local_authority_name, area.area_name

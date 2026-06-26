@@ -37,6 +37,11 @@ vars:
   # MSOA when building against the real ONSPD lookup. Enforced by
   # tests/assert_landreg_postcode_coverage.sql (no-op on fixture builds).
   min_postcode_coverage_pct: 95
+  # Default net monthly household income (GBP) for the area profile's
+  # affordability_ratio (= official rent / this income) until the app supplies a
+  # real user budget. A ratio above ~0.30 means rent exceeds the common 30%
+  # affordability guideline for this scenario.
+  default_monthly_net_income_gbp: 2500
 
 # Default model materialisations by folder.
 # - staging: views (cheap, recompute on every run)

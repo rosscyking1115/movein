@@ -15,7 +15,7 @@ st.markdown(
 The dashboard you're looking at is the *consumption layer* over a six-stage
 pipeline: source → staging → intermediate → marts/core (dimensions + fact)
 → marts/analytics (reporting) → Streamlit. Every layer is tested
-(150 data tests across three layers), every model and column is documented,
+(152 data tests across three layers), every model and column is documented,
 and the lineage graph is published to GitHub Pages.
 
 ### Live links

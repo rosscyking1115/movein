@@ -23,7 +23,7 @@ over fragmented official UK datasets.
 
 - 📊 **dbt docs site (lineage + column catalogue):** https://rosscyking1115.github.io/uk-housing-decision-support/
 - 📈 **Streamlit dashboard (legacy market-study UI):** https://ross-uk-property-analytics.streamlit.app/
-- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml) — every PR runs Python unit tests, Streamlit render/browser smoke tests, source freshness, `dbt build`, 150 data tests, dashboard extract smoke tests, and sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
+- ✅ **CI status:** [![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml) — every PR runs Python unit tests, Streamlit render/browser smoke tests, source freshness, `dbt build`, 152 data tests, dashboard extract smoke tests, and sqlfluff lint. Branch protection on `main` requires the check to pass before merging.
 
 ## Project status
 
@@ -32,8 +32,8 @@ over fragmented official UK datasets.
 | Analytics-engineering spine (dbt + DuckDB + CI + docs) | ✅ Built | Inherited from the market-study project; hardened in this pivot |
 | Land Registry sale-market context | ✅ Built | 4.99M transactions, 2021–2025, tested marts |
 | Geography (MSOA `dim_area`, postcode bridge) | ✅ Built | Real ONSPD May 2026 lookup (2.73M postcodes → 7,264 England & Wales MSOAs), readable area/LA/region names, 99.999% Land Registry coverage; committed fixture is the CI default |
-| `rpt_area_profile_mvp` (first decision mart) | ✅ Prototype | Land Registry context + caveated null placeholders for other sources |
-| ONS rent / affordability | ⬜ Planned | Next source after geography is real — see `HOUSING_DECISION_SUPPORT_DATA_SOURCES.md` |
+| `rpt_area_profile_mvp` (first decision mart) | ✅ Prototype | Land Registry sale context + ONS rent + affordability; caveated null placeholders for the rest |
+| ONS rent + affordability | ✅ Built | PIPR local-authority rent (May 2026) on **7,262/7,264 (100%)** of E&W MSOAs; affordability ratio vs a default income scenario |
 | EPC, crime, flood, planning, commute layers | ⬜ Planned | Designed in the build plan; not loaded |
 | Explainable weighted neighbourhood score | ⬜ Planned | Phase 4 — component scores, confidence, "why this area" |
 | Renter-facing decision app (replacing the chart dashboard) | ⬜ Planned | Phase 5 — search, ranking, compare, source/caveat views |
@@ -93,10 +93,10 @@ flowchart LR
 |---|---|---|
 | Warehouse | **DuckDB** | Free, zero-ops, single-file, runs in CI. The whole 5-year warehouse fits in ~200 MB; queries return in milliseconds. |
 | Transform | **dbt-core 1.11** + **dbt-duckdb 1.10** | Industry-standard analytics-engineering tooling, declared grains, tested marts, lineage. |
-| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Row-shape, value-shape, and named-hypothesis tests. 150 data tests + 1 source-freshness check. |
+| Tests | **Built-in** + **dbt-utils** + **dbt-expectations** + **singular** | Row-shape, value-shape, and named-hypothesis tests. 152 data tests + 1 source-freshness check. |
 | Docs | `dbt docs` → **GitHub Pages** | Free hosting, lineage graph, column-level catalogue (`.github/workflows/docs.yml`). |
 | App | **Streamlit** | Python-native, read-only DuckDB connection, free Community Cloud hosting. The renter-facing decision workflow (Phase 5) will replace the current chart dashboard. |
-| CI | **GitHub Actions** | `ci.yml` runs unit tests, Streamlit smoke tests, source freshness, `dbt build`, 150 data tests, dashboard extract smoke, and sqlfluff lint on every PR. `docs.yml` publishes dbt docs to Pages. Branch protection on `main` gates merges. |
+| CI | **GitHub Actions** | `ci.yml` runs unit tests, Streamlit smoke tests, source freshness, `dbt build`, 152 data tests, dashboard extract smoke, and sqlfluff lint on every PR. `docs.yml` publishes dbt docs to Pages. Branch protection on `main` gates merges. |
 | Lint | **sqlfluff 4.1** + dbt templater | Wired via `pre-commit` (local) and as a hard CI gate. |
 
 `requirements.txt` pins are verified against PyPI for Python 3.13 (`cp313`) wheels
@@ -107,11 +107,11 @@ so a fresh clone needs no source builds — which matters on Windows.
 | Layer | Count | What it catches |
 |---|---|---|
 | Source freshness | 1 | Stale upstream data (warn if no rows newer than 35 days) |
-| Built-in row-shape (`not_null`, `unique`, `accepted_values`, `relationships`) | 57 | Schema bugs, FK orphans, enum drift |
+| Built-in row-shape (`not_null`, `unique`, `accepted_values`, `relationships`) | 58 | Schema bugs, FK orphans, enum drift |
 | `dbt-utils` (`expression_is_true`, `unique_combination_of_columns`) | 8 | Sign / range invariants, multi-column uniqueness |
 | `dbt-expectations` (range, regex, length, distinct, quantile, row count) | 7 | Type-cast bugs, statistical drift, format regressions |
-| Singular (`tests/assert_*.sql`) | 14 | Domain anomalies — non-vacuous YoY, date-spine coverage, area-profile market-match/source-caveat/small-sample guards, and Land Registry → MSOA coverage |
-| **Total** | **150** | All passing on every `dbt build`; source freshness is a separate CI gate |
+| Singular (`tests/assert_*.sql`) | 15 | Domain anomalies — non-vacuous YoY, date-spine coverage, area-profile market-match/source-caveat/small-sample/rent-coherence guards, and Land Registry → MSOA coverage |
+| **Total** | **152** | All passing on every `dbt build`; source freshness is a separate CI gate |
 
 ## Geography
 
@@ -177,16 +177,16 @@ dbt seed
 dbt build
 ```
 
-A fresh clone reproduces the full warehouse + 150 data tests in under 5 minutes
+A fresh clone reproduces the full warehouse + 152 data tests in under 5 minutes
 on a laptop. To re-publish docs locally: `dbt docs generate && dbt docs serve`.
 
 ## Roadmap
 
 The phased plan lives in [`HOUSING_DECISION_SUPPORT_BUILD_PLAN.md`](HOUSING_DECISION_SUPPORT_BUILD_PLAN.md). In short:
 
-1. **Spine hardening** — done (this pivot).
-2. **Geography foundation** — pin a real ONSPD snapshot; ≥95% Land Registry coverage; decision marts keyed on `area_id`.
-3. **MVP data sources** — ONS rent first, then EPC, crime, flood/planning, commute; one tested ingestion + staging model per source.
+1. **Spine hardening** — ✅ done (this pivot).
+2. **Geography foundation** — ✅ done: real ONSPD snapshot, 99.999% Land Registry coverage, decision marts keyed on `area_id`, readable names.
+3. **MVP data sources** — ONS rent ✅ done (PIPR local-authority rent + affordability); EPC, crime, flood/planning, commute next, one tested ingestion + staging model per source.
 4. **Decision marts** — explainable component scores, confidence/coverage fields, "why this area" fragments; user weights re-rank without changing raw facts.
 5. **Renter-facing app** — search/preferences, ranked areas, compare, per-area "trade-off receipt", source/caveat views.
 6. **Quality gates** — score-bound, coverage, and explanation-completeness tests; UI accessibility review.
@@ -194,20 +194,24 @@ The phased plan lives in [`HOUSING_DECISION_SUPPORT_BUILD_PLAN.md`](HOUSING_DECI
 
 Known prototype caveats to address before anything is user-facing:
 
-- Geography is fixture-only; no real national coverage yet.
-- Small-sample area medians are unguarded (a Westminster fixture area shows a £13M median from 2 matched sales); `confidence_level` is currently a hardcoded global `'low'` and needs to reflect sample depth per area.
+- `confidence_level` is still a hardcoded global `'low'`; it should rise as more source layers (EPC, crime, flood, planning, commute) are loaded per area. The per-area `median_sale_price_confidence` already reflects sale-sample depth.
+- `affordability_ratio` uses a single default income scenario until the app collects a real user budget.
 - No live rental-listing coverage is claimed or scraped — listing comparison will be user-entered.
 
 ## Source attribution
 
-[HM Land Registry Price Paid Data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads),
-public dataset, monthly updates. Used under the
+All sources are public and used under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
-Contains HM Land Registry data © Crown copyright and database right.
 
-Planned sources (ONS rents, ONS/geography postcode lookup, EPC, Police API,
-Planning Data API, Environment Agency flood data, TfL, OpenStreetMap) and their
-licences/caveats are catalogued in [`HOUSING_DECISION_SUPPORT_DATA_SOURCES.md`](HOUSING_DECISION_SUPPORT_DATA_SOURCES.md).
+Loaded:
+
+- [HM Land Registry Price Paid Data](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads) — sale-market context. Contains HM Land Registry data © Crown copyright and database right.
+- [ONS Postcode Directory](https://geoportal.statistics.gov.uk/) — postcode → MSOA/LSOA/LA/region geography (and the MSOA/LA/region name lookups). Contains OS, ONS, Royal Mail and NRS data © Crown copyright and database right.
+- [ONS Price Index of Private Rents](https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics) — local-authority average monthly rent. Values may be provisional and revised.
+
+Planned (EPC, Police API, Planning Data API, Environment Agency flood data, TfL,
+OpenStreetMap) and their licences/caveats are catalogued in
+[`HOUSING_DECISION_SUPPORT_DATA_SOURCES.md`](HOUSING_DECISION_SUPPORT_DATA_SOURCES.md).
 
 ## License
 
