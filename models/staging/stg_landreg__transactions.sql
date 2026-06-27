@@ -64,10 +64,13 @@ renamed as (
 
     from source
 
-    -- Data hygiene guard: Land Registry has a handful of price=0 historic
-    -- transfers (e.g. compulsory purchase orders, charity transfers) that
-    -- are technically valid but break price-based analytics.
-    where cast(price as bigint) > 0
+    -- Data hygiene guard. Drop price=0 historic transfers (compulsory purchase
+    -- orders, charity transfers) that are technically valid but break
+    -- price-based analytics. Also drop implausibly huge prices: Land Registry
+    -- occasionally records recording errors (e.g. a £540M "terraced house" in
+    -- Waltham Forest). Real prime sales top out around £150-200M, so £250M is a
+    -- garbage cap, not a market cap.
+    where cast(price as bigint) between 1 and 250000000
 
 )
 
