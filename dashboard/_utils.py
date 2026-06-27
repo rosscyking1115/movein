@@ -75,6 +75,18 @@ def load_new_build_premium() -> pd.DataFrame:
     ).df()
 
 
+def get_year_window(
+    df: pd.DataFrame,
+    year_col: str = "transferred_year",
+) -> tuple[int, int | None]:
+    """Return the latest year and the previous available year in a mart."""
+    years = sorted(int(year) for year in df[year_col].dropna().unique())
+    if not years:
+        raise ValueError(f"No years found in column {year_col!r}")
+    prior_year = years[-2] if len(years) > 1 else None
+    return years[-1], prior_year
+
+
 def fmt_gbp(val: float | None) -> str:
     """Format a price as GBP with thousands separators, e.g. £515,000."""
     if val is None or pd.isna(val):

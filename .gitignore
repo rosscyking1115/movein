@@ -23,6 +23,8 @@ data/*.parquet
 # total across the three rpt_* tables, well under GitHub's 100MB hard limit.
 # The leading `*.duckdb` rule (above) ignores it; this rule re-includes it.
 !data/dashboard.duckdb
+# Slim decision extract (scores + per-area facts) read by the renter app (app/).
+!data/decision.duckdb
 
 # Built dbt docs site (published to Pages from CI).
 docs/

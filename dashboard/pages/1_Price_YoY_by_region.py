@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import plotly.express as px
 import streamlit as st
 
-from _utils import REGION_ORDER, fmt_gbp, fmt_pct, load_price_yoy
+from _utils import REGION_ORDER, fmt_gbp, fmt_pct, get_year_window, load_price_yoy
 
 st.set_page_config(page_title="Price YoY by region", page_icon="📈", layout="wide")
 
@@ -21,8 +21,11 @@ st.markdown(
 )
 
 yoy = load_price_yoy()
+latest_year, _ = get_year_window(yoy)
 
-tab1, tab2, tab3 = st.tabs(["Median trajectory", "2025 YoY change", "Raw data"])
+tab1, tab2, tab3 = st.tabs(
+    ["Median trajectory", f"{latest_year} YoY change", "Raw data"]
+)
 
 with tab1:
     st.markdown(
@@ -44,18 +47,22 @@ with tab1:
     )
     fig.update_layout(height=560, margin=dict(l=0, r=0, t=10, b=0))
     fig.update_yaxes(tickprefix="£", tickformat=",")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab2:
+    latest_yoy = yoy[yoy["transferred_year"] == latest_year]
+    weakest = latest_yoy.sort_values("median_yoy_pct").iloc[0]
+    strongest = latest_yoy.sort_values("median_yoy_pct", ascending=False).iloc[0]
     st.markdown(
-        "**2025 YoY median price change.** London is the only region that fell. "
-        "Wales and the North West lead at +2.4%."
+        f"**{latest_year} YoY median price change.** "
+        f"{weakest['region']} is weakest at {fmt_pct(weakest['median_yoy_pct'])}; "
+        f"{strongest['region']} is strongest at {fmt_pct(strongest['median_yoy_pct'])}."
     )
-    yoy_2025 = yoy[yoy["transferred_year"] == 2025].sort_values(
+    yoy_latest = latest_yoy.sort_values(
         "median_yoy_pct", ascending=True
     )
     fig = px.bar(
-        yoy_2025,
+        yoy_latest,
         x="median_yoy_pct",
         y="region",
         orientation="h",
@@ -63,12 +70,12 @@ with tab2:
         color="median_yoy_pct",
         color_continuous_scale="RdYlGn",
         color_continuous_midpoint=0,
-        labels={"median_yoy_pct": "2025 YoY %", "region": "Region"},
+        labels={"median_yoy_pct": f"{latest_year} YoY %", "region": "Region"},
     )
     fig.update_traces(texttemplate="%{text:+.1f}%", textposition="outside")
     fig.update_layout(height=480, margin=dict(l=0, r=0, t=10, b=0))
     fig.update_xaxes(ticksuffix="%")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab3:
     display = yoy.copy()
@@ -76,9 +83,9 @@ with tab3:
     display["mean_price_gbp"] = display["mean_price_gbp"].map(fmt_gbp)
     display["median_yoy_pct"] = display["median_yoy_pct"].map(fmt_pct)
     display["mean_yoy_pct"] = display["mean_yoy_pct"].map(fmt_pct)
-    st.dataframe(display, use_container_width=True, hide_index=True)
+    st.dataframe(display, width="stretch", hide_index=True)
 
 st.caption(
     "Source: `models/marts/analytics/rpt_price_yoy_by_region.sql` · "
-    "[Lineage on dbt docs](https://rosscyking1115.github.io/uk-property-analytics/)"
+    "[Lineage on dbt docs](https://rosscyking1115.github.io/uk-housing-decision-support/)"
 )

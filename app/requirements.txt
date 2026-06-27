@@ -1,0 +1,6 @@
+# Slim deps for the renter decision app on Streamlit Community Cloud.
+# The app only reads the committed data/decision.duckdb extract.
+streamlit==1.57.0
+duckdb==1.4.3
+pandas==2.2.3
+numpy==2.1.3

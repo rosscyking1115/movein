@@ -1,0 +1,9 @@
+lsoa_code,crime_type,month
+E01000001,anti-social-behaviour,2026-03
+E01000001,violent-crime,2026-03
+E01000001,burglary,2026-04
+E01000001,theft-from-the-person,2026-04
+E01004295,anti-social-behaviour,2026-03
+E01004295,vehicle-crime,2026-04
+W01001731,violent-crime,2026-03
+W01001731,anti-social-behaviour,2026-04

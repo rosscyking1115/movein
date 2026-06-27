@@ -2,9 +2,145 @@ version: 2
 
 models:
 
+  - name: dim_area
+    description: |
+      Canonical housing decision-support area dimension. MVP grain is MSOA,
+      built from the postcode lookup (the committed fixture by default, or the
+      full national ONSPD snapshot with `--vars 'geo_source: onspd'`).
+      Restricted to England & Wales MSOAs (Scottish Intermediate Zones and ONS
+      pseudo-codes excluded); raw ONS codes are resolved to readable area /
+      local-authority / region names via the committed name seeds.
+      Grain: one row per area_id.
+    config:
+      materialized: table
+    columns:
+      - name: area_id
+        description: Stable MSOA key.
+        tests:
+          - not_null
+          - unique
+      - name: area_name
+        description: Human-readable area name.
+        tests:
+          - not_null
+      - name: area_type
+        description: Area grain for the decision-support mart.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['MSOA']
+      - name: local_authority_code
+        description: Local authority code from the postcode lookup.
+        tests:
+          - not_null
+      - name: local_authority_name
+        description: Local authority name from the postcode lookup.
+        tests:
+          - not_null
+      - name: region
+        description: Region context, or Unknown for fixture fallback rows.
+        tests:
+          - not_null
+      - name: centroid_latitude
+        description: Average latitude of matched postcodes in the area.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -90
+                max_value: 90
+      - name: centroid_longitude
+        description: Average longitude of matched postcodes in the area.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -180
+                max_value: 180
+      - name: source_snapshot_date
+        description: Date of the postcode lookup snapshot.
+        tests:
+          - not_null
+      - name: source_name
+        description: Source name for the lookup.
+        tests:
+          - not_null
+      - name: source_url
+        description: Source URL for the lookup.
+        tests:
+          - not_null
+
+  - name: dim_postcode_geography
+    description: |
+      Postcode-to-area geography bridge for the housing decision-support
+      product direction. Grain: one row per postcode in the lookup snapshot.
+    config:
+      materialized: table
+    columns:
+      - name: postcode
+        description: Normalised full postcode.
+        tests:
+          - not_null
+          - unique
+      - name: postcode_outward
+        description: Outward postcode.
+        tests:
+          - not_null
+      - name: postcode_area
+        description: Leading postcode area.
+        tests:
+          - not_null
+      - name: area_id
+        description: >
+          MSOA area key. Null for postcodes outside England & Wales (no MSOA)
+          or retired postcodes; the relationship test ignores null keys.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_id
+      - name: lsoa_code
+        description: LSOA code where supplied by the lookup. Null outside England & Wales.
+      - name: local_authority_code
+        description: Local authority code. Null for postcodes with no allocated area.
+      - name: region
+        description: Region context. Coalesced to 'Unknown' when the lookup is blank.
+        tests:
+          - not_null
+      - name: latitude
+        description: Postcode centroid latitude. Null when the lookup has no grid reference.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -90
+                max_value: 90
+      - name: longitude
+        description: Postcode centroid longitude. Null when the lookup has no grid reference.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -180
+                max_value: 180
+      - name: is_current_postcode
+        description: True when the lookup marks the postcode as current.
+        tests:
+          - not_null
+      - name: is_in_source_lookup
+        description: True when the postcode is present in the source lookup.
+        tests:
+          - not_null
+      - name: source_snapshot_date
+        description: Date of the postcode lookup snapshot.
+        tests:
+          - not_null
+
   - name: dim_date
     description: |
-      Generated 7-year calendar (2020-01-01 → 2026-12-31) via dbt_date.get_date_dimension.
+      Generated calendar for the configured analysis window plus one buffer
+      year on either side
+      ({{ var('landreg_start_year') - 1 }}-01-01 → {{ var('landreg_end_year') + 1 }}-12-31)
+      via dbt_date.get_date_dimension.
       One row per calendar day, with ~30 derived columns (day-of-week, month, quarter, ISO week, fiscal year, etc).
       Grain: one row per calendar day.
     config:
@@ -92,7 +228,8 @@ models:
   - name: fct_transactions
     description: |
       Headline fact: one row per arm's-length residential property sale
-      recorded by HM Land Registry in England + Wales (2021–2025).
+      recorded by HM Land Registry in England + Wales for the configured
+      analysis window ({{ var('landreg_start_year') }}–{{ var('landreg_end_year') }}).
       Excludes ppd_category='additional' (corrections, repossessions, etc).
       Grain: one row per Land Registry transaction.
     config:
@@ -151,8 +288,11 @@ models:
                 expression: "> 0"
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
+                # Guards that the staging garbage cap held: stg_landreg filters
+                # price to 1..250M (drops recording errors like a £540M terraced
+                # house). Keep this max in sync with that cap.
                 min_value: 1
-                max_value: 100000000
+                max_value: 250000000
           - dbt_expectations.expect_column_quantile_values_to_be_between:
               arguments:
                 quantile: 0.5
@@ -171,8 +311,8 @@ models:
         tests:
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
-                min_value: 2021
-                max_value: 2025
+                min_value: "{{ var('landreg_start_year') }}"
+                max_value: "{{ var('landreg_end_year') }}"
       - name: transferred_month
         description: Month of transfer (1-12), integer.
       - name: region
@@ -217,6 +357,31 @@ models:
           - not_null
 
 seeds:
+  - name: ref_onspd_sample
+    description: |
+      Tiny ONS Postcode Directory-shaped fixture used to prove the
+      decision-support geography contract without committing a large official
+      lookup snapshot. Replace or supplement with full official ONSPD ingestion
+      when implementing the production geography layer.
+    columns:
+      - name: postcode
+        description: Normalised full postcode.
+        tests:
+          - not_null
+          - unique
+      - name: area_id
+        description: MSOA-like area key.
+        tests:
+          - not_null
+      - name: latitude
+        description: Postcode centroid latitude.
+        tests:
+          - not_null
+      - name: longitude
+        description: Postcode centroid longitude.
+        tests:
+          - not_null
+
   - name: ref_postcode_area_region
     description: |
       Hand-curated mapping from postcode area (1-2 leading letters) to one

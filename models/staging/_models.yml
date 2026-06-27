@@ -1,6 +1,144 @@
 version: 2
 
 models:
+  - name: stg_geo__postcodes
+    description: |
+      ONS Postcode Directory-shaped staging interface for the housing
+      decision-support geography layer. Reads the committed ref_onspd_sample
+      fixture by default, or the full national raw_geo.onspd_postcodes source
+      when built with `--vars 'geo_source: onspd'`. Grain: one row per postcode
+      in the lookup snapshot.
+    columns:
+      - name: postcode
+        description: Normalised full postcode.
+        tests:
+          - not_null
+          - unique
+      - name: postcode_outward
+        description: Outward postcode.
+        tests:
+          - not_null
+      - name: postcode_area
+        description: Leading postcode area.
+        tests:
+          - not_null
+      - name: area_id
+        description: >
+          Canonical MSOA area key for the MVP recommendation grain. Null for
+          postcodes outside England & Wales (no MSOA) or retired postcodes.
+      - name: latitude
+        description: >
+          Postcode centroid latitude. Null when the lookup has no grid
+          reference (ONSPD sentinel).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -90
+                max_value: 90
+      - name: longitude
+        description: >
+          Postcode centroid longitude. Null when the lookup has no grid
+          reference (ONSPD sentinel).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -180
+                max_value: 180
+      - name: source_snapshot_date
+        description: Date of the lookup snapshot used by this fixture.
+        tests:
+          - not_null
+
+  - name: stg_epc__certificates
+    description: |
+      Domestic EPC certificate staging interface for the energy profile layer.
+      Reads the committed ref_epc_sample fixture by default, or the full
+      raw_epc.certificates source with `--vars 'epc_source: bulk'`.
+      Grain: one row per certificate.
+    columns:
+      - name: postcode
+        description: Normalised full postcode (joins to dim_postcode_geography).
+        tests:
+          - not_null
+      - name: current_energy_rating
+        description: Energy efficiency band A (best) to G (worst).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      - name: current_energy_efficiency
+        description: SAP energy efficiency score, 1-100.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 1
+                max_value: 100
+
+  - name: stg_crime__street
+    description: |
+      Street-level crime staging interface for the safety-indicator layer.
+      Reads the committed ref_crime_sample fixture by default, or the full
+      raw_police.street_crime source with `--vars 'crime_source: bulk'`.
+      Grain: one row per recorded crime, keyed by 2021 LSOA.
+    columns:
+      - name: lsoa_code
+        description: 2021 LSOA code (rolls up to MSOA via dim_postcode_geography).
+        tests:
+          - not_null
+      - name: crime_type
+        description: data.police.uk crime category (indicator only, not a label).
+        tests:
+          - not_null
+
+  - name: stg_constraints__area
+    description: |
+      Per-MSOA planning-constraint count and flood-risk flag. Reads the
+      committed ref_area_constraints_sample fixture by default, or the
+      spatially-computed raw_constraints.area_constraints source with
+      `--vars 'constraints_source: computed'`. Grain: one row per area_id.
+    columns:
+      - name: area_id
+        description: MSOA key.
+        tests:
+          - not_null
+          - unique
+      - name: planning_constraint_count
+        description: Distinct planning constraint entities touching the MSOA.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: flood_risk_flag
+        description: Flood-risk band from the share of postcodes in a flood zone.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high', 'unknown']
+
+  - name: stg_amenities__area
+    description: |
+      Per-MSOA amenity/convenience access (nearest-amenity distances + walkable
+      essentials count). Reads the committed ref_amenity_access_sample fixture by
+      default, or the OpenStreetMap-derived raw_amenities.area_access source with
+      `--vars 'amenities_source: computed'`. Grain: one row per area_id.
+    columns:
+      - name: area_id
+        description: MSOA key.
+        tests:
+          - not_null
+          - unique
+      - name: walkable_amenity_count
+        description: Count of essential amenity types within the walking radius (0-5).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "between 0 and 5"
+
   - name: stg_landreg__transactions
     description: |
       One row per HM Land Registry Price Paid transaction. Types are cast,

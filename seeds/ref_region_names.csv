@@ -1,0 +1,22 @@
+region_code,region_name
+E12000001,North East
+E12000002,North West
+E12000003,Yorkshire and The Humber
+E12000004,East Midlands
+E12000005,West Midlands
+E12000006,East of England
+E12000007,London
+E12000008,South East
+E12000009,South West
+E92000001,England
+K02000001,United Kingdom
+K03000001,Great Britain
+K04000001,England and Wales
+L99999999,Channel Islands
+M99999999,Isle of Man
+N92000002,Northern Ireland
+N99999999,Northern Ireland
+S92000003,Scotland
+S99999999,Scotland
+W92000004,Wales
+W99999999,Wales

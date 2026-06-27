@@ -51,7 +51,7 @@ fig = px.bar(
 )
 fig.update_traces(texttemplate="%{text:,}", textposition="outside")
 fig.update_layout(height=560, margin=dict(l=0, r=0, t=10, b=0))
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 st.markdown("### Same data with median sale price")
 display = top_n_data.sort_values("rank_within_year").copy()
@@ -60,7 +60,7 @@ display = display[
     ["rank_within_year", "postcode_area", "region", "sales_count", "median_price_gbp"]
 ]
 display.columns = ["Rank", "Area", "Region", "Sales count", "Median price"]
-st.dataframe(display, use_container_width=True, hide_index=True)
+st.dataframe(display, width="stretch", hide_index=True)
 
 st.caption(
     "Source: `models/marts/analytics/rpt_top_postcodes_by_volume.sql` · "

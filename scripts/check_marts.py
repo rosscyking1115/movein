@@ -34,6 +34,16 @@ def main() -> int:
         return 1
 
     con = duckdb.connect(str(WAREHOUSE), read_only=True)
+    latest_year = con.execute(
+        """
+        select max(transferred_year)
+        from main_analytics.rpt_price_yoy_by_region
+        """
+    ).fetchone()[0]
+    if latest_year is None:
+        con.close()
+        print("No reporting years found in rpt_price_yoy_by_region.", file=sys.stderr)
+        return 1
 
     print("=" * 72)
     print("rpt_price_yoy_by_region — London trajectory")
@@ -54,15 +64,19 @@ def main() -> int:
 
     print()
     print("=" * 72)
-    print("rpt_price_yoy_by_region — 2025 ranked (highest median first)")
+    print(
+        f"rpt_price_yoy_by_region — {latest_year} ranked "
+        "(highest median first)"
+    )
     print("=" * 72)
     rows = con.execute(
         """
         select region, sales_count, median_price_gbp, median_yoy_pct
         from main_analytics.rpt_price_yoy_by_region
-        where transferred_year = 2025
+        where transferred_year = ?
         order by median_price_gbp desc
-        """
+        """,
+        [latest_year],
     ).fetchall()
     for region, n, median, yoy in rows:
         print(
@@ -71,15 +85,16 @@ def main() -> int:
 
     print()
     print("=" * 72)
-    print("rpt_top_postcodes_by_volume — top 10 in 2025")
+    print(f"rpt_top_postcodes_by_volume — top 10 in {latest_year}")
     print("=" * 72)
     rows = con.execute(
         """
         select postcode_area, region, sales_count, median_price_gbp
         from main_analytics.rpt_top_postcodes_by_volume
-        where transferred_year = 2025 and rank_within_year <= 10
+        where transferred_year = ? and rank_within_year <= 10
         order by rank_within_year
-        """
+        """,
+        [latest_year],
     ).fetchall()
     for area, region, n, median in rows:
         print(
@@ -88,7 +103,10 @@ def main() -> int:
 
     print()
     print("=" * 72)
-    print("rpt_new_build_premium — 2025 by region (highest premium first)")
+    print(
+        f"rpt_new_build_premium — {latest_year} by region "
+        "(highest premium first)"
+    )
     print("=" * 72)
     rows = con.execute(
         """
@@ -96,9 +114,10 @@ def main() -> int:
                new_build_median_price_gbp, existing_median_price_gbp,
                premium_pct
         from main_analytics.rpt_new_build_premium
-        where transferred_year = 2025
+        where transferred_year = ?
         order by premium_pct desc nulls last
-        """
+        """,
+        [latest_year],
     ).fetchall()
     for region, nb_n, ex_n, nb_p, ex_p, prem in rows:
         prem_s = f"{prem:+.1f}%" if prem is not None else " (n/a)"
