@@ -1,0 +1,8 @@
+# Runtime deps for the API service (Docker image). Loose pins so the resolver
+# finds wheels for whatever Python the base image / host uses.
+fastapi>=0.110
+uvicorn[standard]>=0.30
+duckdb>=1.4
+pandas>=2.3
+numpy>=2.1
+requests>=2.32

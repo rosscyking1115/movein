@@ -41,6 +41,7 @@ over fragmented official UK datasets.
 | Convenience / amenities (OSM) | ✅ Built | Spatial roll-up of 437k OpenStreetMap amenities (nodes + way centroids) → per-MSOA nearest supermarket/school/GP/park/station + walkable-essentials count on 100% of MSOAs; committed fixture is the CI default, real via `--vars 'amenities_source: computed'` |
 | Door-to-door commute time | ⬜ Planned | Station proximity is already in the amenities layer; journey-time routing (TfL London-first) is the remaining refinement |
 | Renter-facing decision app (`app/`) | ✅ Built | Streamlit workflow: set income/budget/priorities → live-reranked shortlist, per-area trade-off receipt, compare, **a listing checker** (postcode + asking price → area + price-vs-local), and sources & caveats. Reads the committed `data/decision.duckdb` extract |
+| Backend API (`api/`, FastAPI) | ✅ Built | resolve / search / listing-check / meta over the decision marts; OpenAPI docs at `/docs`, Dockerfile + `fly.toml`, 7 API tests. Deploy-ready (Fly.io) — the keystone for a future website + mobile app |
 
 The full reasoning lives in four planning docs at the repo root:
 

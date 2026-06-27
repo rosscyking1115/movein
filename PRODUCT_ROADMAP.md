@@ -37,7 +37,13 @@ clients of it, and the listing checker is one of its endpoints surfaced in both.
 
 ---
 
-## Workstream 1 — API (the foundation)
+## Workstream 1 — API (the foundation) ✅ built (`api/`)
+
+> **Built:** a FastAPI service in `api/` — `/healthz`, `/v1/meta`,
+> `/v1/areas/{msoa}`, `/v1/areas/resolve?postcode=`, `POST /v1/search` (weighted
+> re-rank + budget/region filters), `POST /v1/listing-check`. Ships the
+> read-only `decision.duckdb` in-memory; OpenAPI docs at `/docs`; Dockerfile +
+> `fly.toml` (scale-to-zero). 7 API tests in CI. Deploy is one `fly deploy`.
 
 **Stack: FastAPI (Python), standalone service.** Reuses the existing Python +
 DuckDB engine with zero re-implementation, free OpenAPI docs (a typed contract for
@@ -186,7 +192,7 @@ Ordered by value-per-effort and dependency. Each phase ships something usable.
 | Phase | What | Depends on | Why first/next |
 |---|---|---|---|
 | **0 — Quick wins (no new infra)** ✅ **done** | (a) **Listing checker, manual entry** (`app/pages/3_Listing_checker.py`) — postcode → MSOA via postcodes.io, area scores + price-vs-local; (b) **ONS PIPR per-bedroom rent** ingested (`rent_1bed_gbp`…`rent_4plus_gbp`) so the price check matches the listing's bed count | nothing | Shipped the most-requested feature with zero legal surface; per-bed rent is the biggest accuracy win. |
-| **1 — API** | FastAPI on Fly.io: resolve / search / listing-check / meta, OpenAPI, caching, rate limits | Phase 0 data | The keystone every other client needs. |
+| **1 — API** ✅ **built** | FastAPI (`api/`): resolve / search / listing-check / meta, OpenAPI, Dockerfile + fly.toml. Deploy = `fly deploy` | Phase 0 data | The keystone every other client needs. |
 | **2 — Website** | Next.js/Vercel: search + compare + **the 7,264 programmatic area pages** (SEO growth engine) + listing checker | API | Where organic growth comes from; the area pages are the moat. |
 | **3 — Mobile** | Expo app: MVP screens + on-device re-rank; then **Rightmove share-in** (deep links → iOS share extension) | API | The native share-in is the standout differentiator. |
 | **Cross-cutting** | Retire the legacy Streamlit dashboard once the website is live; data-refresh automation; analytics | — | — |

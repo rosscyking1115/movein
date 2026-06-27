@@ -1,0 +1,25 @@
+# Fly.io config for the API. Run `fly launch --no-deploy` once to claim an app
+# name (Fly names are global), then `fly deploy`. Scales to zero when idle.
+app = "uk-housing-decision-support-api"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/healthz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

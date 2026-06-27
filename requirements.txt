@@ -28,3 +28,5 @@ requests==2.32.3
 chardet==5.2.0       # keep requests import compatibility check quiet when chardet is present
 openpyxl==3.1.5      # read the ONS PIPR .xlsx in scripts/prepare_ons_rent_seed.py
 playwright==1.60.0   # browser-level dashboard smoke tests in CI
+fastapi==0.138.1     # api/ service (deployed via api/requirements.txt; here for tests)
+httpx==0.28.1        # FastAPI TestClient in tests/test_api.py
