@@ -288,8 +288,12 @@ models:
                 expression: "> 0"
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
+                # Upper bound is a garbage guard (catches pennies-as-pounds /
+                # typo prices), not a market cap. Real Land Registry standard
+                # sales reach ~£100-200M for prime central London, so 100M was
+                # too tight; 300M keeps the guard while allowing genuine highs.
                 min_value: 1
-                max_value: 100000000
+                max_value: 300000000
           - dbt_expectations.expect_column_quantile_values_to_be_between:
               arguments:
                 quantile: 0.5
