@@ -1,4 +1,4 @@
-# PR gate — proves every change still builds + passes 88 data tests + lints clean.
+# PR gate — proves every change still builds + passes 189 data tests + lints clean.
 #
 # Triggers:
 #   - pull_request to main: every PR is gated
@@ -8,19 +8,24 @@
 #   1. Set up Python 3.13 + the pinned dbt stack
 #   2. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
 #   3. Stage profiles.yml from the committed example
-#   4. Download a single year of Land Registry data (--sample, ~30s)
-#   5. Load it into DuckDB
-#   6. dbt build — runs all marts + 88 data tests against the sample
-#   7. sqlfluff lint — model SQL must satisfy .sqlfluff rules
+#   4. Install Playwright browser runtime
+#   5. Python unit tests — downloader, dependency imports, Streamlit render/browser smoke
+#   6. Smoke-test the committed slim dashboard DuckDB extract
+#   7. Download two years of Land Registry data (--sample, enough for YoY)
+#   8. Load it into DuckDB
+#   9. dbt source freshness — proves the loaded source is current enough
+#   10. dbt build — runs all marts + 189 data tests against the sample
+#   11. Build + smoke-test a sample dashboard DuckDB extract
+#   12. sqlfluff lint — model SQL must satisfy .sqlfluff rules
 #
 # Branch protection on main requires the "build-and-test" check to pass before
 # merging. See repo Settings → Branches.
 #
 # Why a sample, not the full 5-year Parquet:
 #   - Full pull is ~157MB Parquet across 5 years and would burn 3-5min of CI
-#     time per PR. The 1-year sample exercises the same SQL paths, hits all
-#     88 data tests, and finishes in ~90s. Row-count test bounds were calibrated
-#     to pass on either full or sample data.
+#     time per PR. The 2-year sample exercises the same SQL paths, hits all
+#     189 data tests, and proves YoY logic is non-vacuous. Row-count test bounds
+#     were calibrated to pass on either full or sample data.
 
 name: CI
 
@@ -63,6 +68,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Python unit tests + Streamlit render/browser smoke
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Smoke-test committed dashboard DuckDB extract
+        run: python scripts/smoke_dashboard_db.py
+
       - name: Install dbt packages
         run: dbt deps
 
@@ -71,17 +85,26 @@ jobs:
           mkdir -p ~/.dbt
           cp profiles.yml.example ~/.dbt/profiles.yml
 
-      - name: Download Land Registry sample (1 year)
+      - name: Download Land Registry sample (2 years)
         run: python scripts/download_raw.py --sample
 
       - name: Load sample into DuckDB
         run: python scripts/load_to_duckdb.py
 
+      - name: dbt source freshness
+        run: dbt source freshness --target dev
+
       - name: dbt seed
         run: dbt seed --target dev
 
-      - name: dbt build (runs all marts + 88 data tests)
+      - name: dbt build (runs all marts + 189 data tests)
         run: dbt build --target dev
+
+      - name: Build sample dashboard DuckDB extract
+        run: python scripts/build_dashboard_db.py
+
+      - name: Smoke-test sample dashboard DuckDB extract
+        run: python scripts/smoke_dashboard_db.py
 
       - name: sqlfluff lint (model SQL only)
         # Hard gate: a style violation in models/ fails the PR check, same as

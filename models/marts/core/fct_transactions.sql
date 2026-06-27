@@ -7,7 +7,7 @@
 -- fct_transactions — the project's headline fact table.
 --
 -- GRAIN: one row per arm's-length residential property sale recorded by
--- HM Land Registry in England + Wales for years 2021–2025.
+-- HM Land Registry in England + Wales for the configured analysis window.
 -- (When asked in an interview to "walk through a model you're proud of",
 --  this is the one — the explicit grain declaration is what sets a fact
 --  table apart from a flat dump.)
@@ -25,7 +25,7 @@
 --
 -- Filters:
 --   - ppd_category = 'standard' (applied upstream in int_)  →
---     excludes ~3-5% of rows that are corrections, repossessions, charity
+--     excludes non-standard rows that are corrections, repossessions, charity
 --     transfers, transfers under power of sale, etc. Those are real but
 --     not 'market' transactions, and including them drags average price
 --     down toward £1.

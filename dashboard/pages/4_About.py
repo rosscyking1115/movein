@@ -8,21 +8,20 @@ st.title("📊 About this project")
 
 st.markdown(
     """
-**uk-property-analytics** is an analytics-engineering portfolio piece — a
+**uk-housing-decision-support** is an analytics-engineering portfolio piece — a
 5-year UK housing market study built on HM Land Registry Price Paid data
 (every recorded property transaction in England & Wales, 2021–2025).
 
 The dashboard you're looking at is the *consumption layer* over a six-stage
 pipeline: source → staging → intermediate → marts/core (dimensions + fact)
 → marts/analytics (reporting) → Streamlit. Every layer is tested
-(91 tests across three layers), every column is documented (95 columns,
-zero missing description), and the lineage graph is published to GitHub
-Pages.
+(189 data tests across three layers), every model and column is documented,
+and the lineage graph is published to GitHub Pages.
 
 ### Live links
 
-- 📊 [**Live dbt docs (lineage + column catalogue)**](https://rosscyking1115.github.io/uk-property-analytics/)
-- 💻 [**GitHub repo**](https://github.com/rosscyking1115/uk-property-analytics)
+- 📊 [**Live dbt docs (lineage + column catalogue)**](https://rosscyking1115.github.io/uk-housing-decision-support/)
+- 💻 [**GitHub repo**](https://github.com/rosscyking1115/uk-housing-decision-support)
 
 ### Tech stack
 
@@ -47,11 +46,11 @@ Pages.
    — usually rare historic records with no postcode at all. The
    distinct-values-to-contain-set test guarantees the 10 ONS regions are
    present without rejecting Unknown as an extra value.
-3. **Every reporting mart has a singular test** asserting a named risk
+3. **Every reporting/decision mart has a singular test** asserting a named risk
    hypothesis (e.g. *yoy %% within ±50%*, *premium %% within −50% to
    +250%*, *no future-dated transactions*). When asked "how do you think
-   about data quality?" the answer is the eight `tests/assert_*.sql`
-   files plus 73 generic tests plus 10 distribution tests across three
+   about data quality?" the answer is the twelve `tests/assert_*.sql`
+   files plus built-in, dbt-utils, and dbt-expectations tests across three
    layers.
 
 ### Source attribution

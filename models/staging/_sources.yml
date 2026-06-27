@@ -77,3 +77,99 @@ sources:
             description: UTC ISO-8601 timestamp injected by load_to_duckdb.py.
             tests:
               - not_null
+
+  - name: geo
+    description: |
+      Normalized national ONS Postcode Directory (ONSPD) snapshot —
+      postcode → MSOA / LSOA / local-authority / region plus centroid
+      coordinates. Loaded by scripts/load_geography.py from a local snapshot
+      prepared with scripts/prepare_onspd_seed.py. Only present (and only read)
+      when building with `--vars 'geo_source: onspd'`; the committed
+      ref_onspd_sample seed is the CI fixture for the default fixture build.
+
+      Source page: https://geoportal.statistics.gov.uk/
+      Licence: Open Government Licence v3.0 (contains OS, ONS, Royal Mail and
+      NRS data © Crown copyright and database right).
+    schema: raw_geo
+    loader: scripts/load_geography.py
+    tables:
+      - name: onspd_postcodes
+        description: |
+          One row per postcode in the prepared ONSPD snapshot, already shaped
+          to the geography contract (same columns as ref_onspd_sample).
+
+  - name: epc
+    description: |
+      Domestic Energy Performance Certificates for England & Wales. Loaded by
+      scripts/load_epc.py from a local bulk snapshot prepared with
+      scripts/prepare_epc_seed.py. Only present (and only read) when building
+      with `--vars 'epc_source: bulk'`; the committed ref_epc_sample seed is the
+      CI fixture for the default build.
+
+      Source: https://get-energy-performance-data.communities.gov.uk/
+      Licence: Open Government Licence v3.0. Certificates may be expired or
+      superseded; bulk download requires a free GOV.UK One Login.
+    schema: raw_epc
+    loader: scripts/load_epc.py
+    tables:
+      - name: certificates
+        description: |
+          One row per certificate, shaped to the energy contract (same columns
+          as ref_epc_sample): postcode, current_energy_rating,
+          current_energy_efficiency, property_type, lodgement_date.
+
+  - name: police
+    description: |
+      Street-level crime for England & Wales (data.police.uk), keyed by 2021
+      LSOA. Loaded by scripts/load_crime.py from a local bulk archive prepared
+      with scripts/prepare_crime_seed.py. Only present (and only read) when
+      building with `--vars 'crime_source: bulk'`; the committed ref_crime_sample
+      seed is the CI fixture for the default build.
+
+      Source: https://data.police.uk/data/  (Open Government Licence v3.0)
+      Indicators only — never labelled "safe"/"unsafe".
+    schema: raw_police
+    loader: scripts/load_crime.py
+    tables:
+      - name: street_crime
+        description: |
+          One row per recorded crime, shaped to the crime contract (same columns
+          as ref_crime_sample): lsoa_code, crime_type, month.
+
+  - name: constraints
+    description: |
+      Per-MSOA planning-constraint counts and a flood-risk flag, pre-computed by
+      spatial point-in-polygon (postcode centroids inside planning.data.gov.uk
+      constraint and flood-risk-zone geometries) in
+      scripts/prepare_area_constraints.py and loaded by scripts/load_constraints.py.
+      Only present (and only read) when building with
+      `--vars 'constraints_source: computed'`; the committed
+      ref_area_constraints_sample seed is the CI fixture.
+
+      Source: https://www.planning.data.gov.uk/ (Open Government Licence v3.0)
+    schema: raw_constraints
+    loader: scripts/load_constraints.py
+    tables:
+      - name: area_constraints
+        description: |
+          One row per MSOA (same columns as ref_area_constraints_sample):
+          area_id, planning_constraint_count, flood_risk_flag, flood_postcode_pct.
+
+  - name: amenities
+    description: |
+      Per-MSOA amenity/convenience access (nearest-amenity distances and a
+      walkable-essentials count), pre-computed from an OpenStreetMap extract by
+      spatial nearest-neighbour in scripts/prepare_amenity_access.py and loaded
+      by scripts/load_amenities.py. Only present (and only read) when building
+      with `--vars 'amenities_source: computed'`; the committed
+      ref_amenity_access_sample seed is the CI fixture.
+
+      Source: OpenStreetMap via a Geofabrik extract (Open Database Licence).
+    schema: raw_amenities
+    loader: scripts/load_amenities.py
+    tables:
+      - name: area_access
+        description: |
+          One row per MSOA (same columns as ref_amenity_access_sample):
+          area_id, nearest_station_km, nearest_supermarket_km, nearest_gp_km,
+          nearest_school_km, nearest_greenspace_km, walkable_amenity_count.

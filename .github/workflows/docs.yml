@@ -8,12 +8,13 @@
 #   1. Set up Python 3.13 + the pinned dbt stack from requirements.txt
 #   2. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
 #   3. Stage a profiles.yml from the committed example file
-#   4. Download a single year of Land Registry data (--sample, ~30s, ~140MB CSV → 27MB Parquet)
+#   4. Download two years of Land Registry data (--sample, enough for YoY docs)
 #   5. Load it into DuckDB
-#   6. dbt build (5 marts + 88 data tests against sample data — ~10s)
-#   7. dbt docs generate (manifest + catalog from the live warehouse)
-#   8. Upload target/ as a Pages artifact
-#   9. Deploy to GitHub Pages
+#   6. dbt source freshness
+#   7. dbt build (marts + 189 data tests against sample data — ~10s)
+#   8. dbt docs generate (manifest + catalog from the live warehouse)
+#   9. Upload target/ as a Pages artifact
+#   10. Deploy to GitHub Pages
 #
 # After first deploy, docs site lives at:
 #   https://<owner>.github.io/<repo>/
@@ -70,16 +71,19 @@ jobs:
           mkdir -p ~/.dbt
           cp profiles.yml.example ~/.dbt/profiles.yml
 
-      - name: Download Land Registry sample (1 year)
+      - name: Download Land Registry sample (2 years)
         run: python scripts/download_raw.py --sample
 
       - name: Load sample into DuckDB
         run: python scripts/load_to_duckdb.py
 
+      - name: dbt source freshness
+        run: dbt source freshness --target dev
+
       - name: dbt seed
         run: dbt seed --target dev
 
-      - name: dbt build (warehouse + 88 data tests)
+      - name: dbt build (warehouse + 189 data tests)
         run: dbt build --target dev
 
       - name: dbt docs generate (produces manifest + catalog)

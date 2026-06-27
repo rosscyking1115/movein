@@ -20,6 +20,63 @@ clean-targets:
   - "dbt_packages"
   - "logs"
 
+# Analysis window. Update these when adding a complete new Land Registry year.
+vars:
+  landreg_start_year: 2021
+  landreg_end_year: 2025
+  # Decision-support: minimum latest-year sales for an area's median sale price
+  # to be treated as reliable rather than indicative. Guards small-sample
+  # medians (e.g. a £13M area median derived from 2 prime-central sales).
+  min_reliable_sale_sample: 5
+  # Geography source. 'fixture' uses the tiny committed ref_onspd_sample seed
+  # (CI-safe, reproducible). 'onspd' uses the full national lookup loaded by
+  # scripts/load_geography.py into raw_geo.onspd_postcodes. Override locally:
+  #   dbt build --vars 'geo_source: onspd'
+  geo_source: 'fixture'
+  # Minimum % of Land Registry rows (that have a postcode) which must map to an
+  # MSOA when building against the real ONSPD lookup. Enforced by
+  # tests/assert_landreg_postcode_coverage.sql (no-op on fixture builds).
+  min_postcode_coverage_pct: 95
+  # Default net monthly household income (GBP) for the area profile's
+  # affordability_ratio (= official rent / this income) until the app supplies a
+  # real user budget. A ratio above ~0.30 means rent exceeds the common 30%
+  # affordability guideline for this scenario.
+  default_monthly_net_income_gbp: 2500
+  # EPC source. 'fixture' uses the tiny committed ref_epc_sample seed (CI-safe);
+  # 'bulk' uses the full England & Wales certificates loaded by
+  # scripts/load_epc.py into raw_epc.certificates. Override locally:
+  #   dbt build --vars 'epc_source: bulk'
+  epc_source: 'fixture'
+  # Crime source. 'fixture' uses the committed ref_crime_sample seed (CI-safe);
+  # 'bulk' uses police street-level crime loaded by scripts/load_crime.py into
+  # police.street_crime. Override locally: dbt build --vars 'crime_source: bulk'
+  crime_source: 'fixture'
+  # Nominal MSOA resident population for the crime indicator. MSOAs are designed
+  # to be population-consistent (~7,500-8,000), so a fixed denominator gives a
+  # roughly comparable, clearly-approximate monthly crime rate per 1,000.
+  nominal_msoa_population: 7800
+  # Planning/flood constraints source. 'fixture' uses the committed
+  # ref_area_constraints_sample seed (CI-safe); 'computed' uses the per-MSOA
+  # table loaded by scripts/load_constraints.py from the spatial roll-up in
+  # scripts/prepare_area_constraints.py. Override: --vars 'constraints_source: computed'
+  constraints_source: 'fixture'
+  # Amenity/convenience source. 'fixture' uses the committed
+  # ref_amenity_access_sample seed (CI-safe); 'computed' uses the per-MSOA
+  # access table loaded by scripts/load_amenities.py from the OpenStreetMap
+  # roll-up in scripts/prepare_amenity_access.py. Override: --vars 'amenities_source: computed'
+  amenities_source: 'fixture'
+  # Walking radius (km) for the walkable_amenity_count convenience measure.
+  walkable_radius_km: 1.0
+  # Default component weights for rpt_neighbourhood_score's overall_score. These
+  # are the neutral defaults baked into the mart; the app re-weights per user
+  # from the stored component scores without changing them. Any non-negative
+  # numbers work (they are normalised over the components an area actually has).
+  score_weight_affordability: 1.0
+  score_weight_safety: 1.0
+  score_weight_energy: 1.0
+  score_weight_flood: 1.0
+  score_weight_convenience: 1.0
+
 # Default model materialisations by folder.
 # - staging: views (cheap, recompute on every run)
 # - intermediate: ephemeral by default (compose into marts)
@@ -42,6 +99,8 @@ models:
         +schema: core
       analytics:
         +schema: analytics
+      decision:
+        +schema: decision
 
 seeds:
   uk_property_analytics:
