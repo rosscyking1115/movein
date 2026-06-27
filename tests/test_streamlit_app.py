@@ -31,6 +31,7 @@ class RenterAppTests(unittest.TestCase):
         for path, title in [
             ("app/pages/1_Compare_areas.py", "Compare areas"),
             ("app/pages/2_Sources_and_caveats.py", "Sources & caveats"),
+            ("app/pages/3_Listing_checker.py", "Check a listing"),
         ]:
             with self.subTest(path=path):
                 app = self.run_app(path)

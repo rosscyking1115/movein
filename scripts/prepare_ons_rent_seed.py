@@ -4,7 +4,9 @@ The PIPR release is a large monthly time series (one row per area per month).
 This helper pulls the latest month's average monthly rent (GBP) for every
 England & Wales geography and writes the small committed seed:
 
-  seeds/ref_ons_rent.csv  (area_code, area_name, rent_grain, rent_monthly_gbp, rent_period)
+  seeds/ref_ons_rent.csv  (area_code, area_name, rent_grain, rent_monthly_gbp,
+                           rent_1bed_gbp, rent_2bed_gbp, rent_3bed_gbp,
+                           rent_4plus_gbp, rent_period)
 
 rent_grain is local_authority (E06-E09 / W06), region (E12) or country (E92/W92),
 so the area profile can fall back from finest to coarsest available rent.
@@ -60,12 +62,23 @@ def prepare(xlsx_path: Path) -> int:
     latest = latest[latest["rent_grain"].notna()]
     latest = latest[pd.to_numeric(latest["Rental price"], errors="coerce").notna()]
 
+    def _rent(column: str) -> pd.Series:
+        # Per-bedroom prices can be suppressed (blank) for small samples; keep
+        # them nullable rather than dropping the row.
+        if column not in latest.columns:
+            return pd.Series([pd.NA] * len(latest), index=latest.index)
+        return pd.to_numeric(latest[column], errors="coerce").round()
+
     out = pd.DataFrame(
         {
             "area_code": latest["Area code"].astype(str).str.strip(),
             "area_name": latest["Area name"].astype(str).str.strip(),
             "rent_grain": latest["rent_grain"],
             "rent_monthly_gbp": pd.to_numeric(latest["Rental price"]).round().astype(int),
+            "rent_1bed_gbp": _rent("Rental price one bed"),
+            "rent_2bed_gbp": _rent("Rental price two bed"),
+            "rent_3bed_gbp": _rent("Rental price three bed"),
+            "rent_4plus_gbp": _rent("Rental price four or more bed"),
             "rent_period": pd.to_datetime(latest_period).date().isoformat(),
         }
     )

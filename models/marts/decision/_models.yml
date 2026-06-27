@@ -62,6 +62,14 @@ models:
           official_rent_monthly_gbp / default_monthly_net_income_gbp. Above
           ~0.30 means rent exceeds the common 30% affordability guideline for
           the default income scenario.
+      - name: rent_1bed_gbp
+        description: ONS PIPR average monthly rent for a 1-bed in the local authority. Null if suppressed.
+      - name: rent_2bed_gbp
+        description: ONS PIPR average monthly rent for a 2-bed in the local authority. Null if suppressed.
+      - name: rent_3bed_gbp
+        description: ONS PIPR average monthly rent for a 3-bed in the local authority. Null if suppressed.
+      - name: rent_4plus_gbp
+        description: ONS PIPR average monthly rent for a 4+-bed in the local authority. Null if suppressed.
       - name: epc_median_rating
         description: >
           Median EPC band (A best - G worst) of certificates in the area,

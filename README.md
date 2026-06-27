@@ -40,7 +40,7 @@ over fragmented official UK datasets.
 | Flood + planning constraints | ✅ Built | Spatial point-in-polygon (2.7M postcode centroids × planning.data.gov.uk geometries) → per-MSOA planning_constraint_count (0–119) + flood band on **100%** of MSOAs (~23% medium/high flood); committed fixture is the CI default, real roll-up via `--vars 'constraints_source: computed'` |
 | Convenience / amenities (OSM) | ✅ Built | Spatial roll-up of 437k OpenStreetMap amenities (nodes + way centroids) → per-MSOA nearest supermarket/school/GP/park/station + walkable-essentials count on 100% of MSOAs; committed fixture is the CI default, real via `--vars 'amenities_source: computed'` |
 | Door-to-door commute time | ⬜ Planned | Station proximity is already in the amenities layer; journey-time routing (TfL London-first) is the remaining refinement |
-| Renter-facing decision app (`app/`) | ✅ Built | Streamlit workflow: set income/budget/priorities → live-reranked shortlist, per-area trade-off receipt, side-by-side compare, sources & caveats. Reads the committed `data/decision.duckdb` extract |
+| Renter-facing decision app (`app/`) | ✅ Built | Streamlit workflow: set income/budget/priorities → live-reranked shortlist, per-area trade-off receipt, compare, **a listing checker** (postcode + asking price → area + price-vs-local), and sources & caveats. Reads the committed `data/decision.duckdb` extract |
 
 The full reasoning lives in four planning docs at the repo root:
 

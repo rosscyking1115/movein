@@ -50,6 +50,7 @@ def load_areas() -> pd.DataFrame:
             s.overall_score, s.confidence_level, s.components_available,
             s.why_this_area,
             p.official_rent_monthly_gbp, p.median_sale_price_gbp,
+            p.rent_1bed_gbp, p.rent_2bed_gbp, p.rent_3bed_gbp, p.rent_4plus_gbp,
             p.epc_median_rating, p.crime_rate_per_1000, p.flood_risk_flag,
             p.planning_constraint_count, p.walkable_amenity_count,
             p.nearest_station_km, p.nearest_supermarket_km, p.nearest_gp_km,
@@ -58,6 +59,60 @@ def load_areas() -> pd.DataFrame:
         left join app.rpt_area_profile_mvp as p using (area_id)
         """
     ).df()
+
+
+# Rent column per bedroom count, for the listing checker's price comparison.
+RENT_BY_BEDS = {
+    "1 bed": "rent_1bed_gbp",
+    "2 beds": "rent_2bed_gbp",
+    "3 beds": "rent_3bed_gbp",
+    "4+ beds": "rent_4plus_gbp",
+    "Any / not sure": "official_rent_monthly_gbp",
+}
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def resolve_postcode(postcode: str) -> dict | None:
+    """Look up postcode → MSOA via the free postcodes.io API (no key).
+
+    Returns {msoa_code, msoa_name, country} or None on any failure. We never
+    store the result beyond the in-session cache.
+    """
+    import requests
+
+    compact = "".join(postcode.split()).upper()
+    if not compact:
+        return None
+    try:
+        resp = requests.get(f"https://api.postcodes.io/postcodes/{compact}", timeout=8)
+        if resp.status_code != 200:
+            return None
+        result = resp.json().get("result") or {}
+        return {
+            "msoa_code": (result.get("codes") or {}).get("msoa"),
+            "msoa_name": result.get("msoa"),
+            "country": result.get("country"),
+        }
+    except Exception:
+        return None
+
+
+def price_verdict(asking: float, local_typical: float | None) -> tuple[float | None, str]:
+    """Return (pct difference, banded verdict) of an asking figure vs local typical."""
+    if local_typical is None or pd.isna(local_typical) or not local_typical:
+        return None, "no local benchmark"
+    pct = (asking - local_typical) / local_typical * 100
+    if pct < -15:
+        band = "well below the local typical"
+    elif pct < -5:
+        band = "below the local typical"
+    elif pct <= 5:
+        band = "about the local typical"
+    elif pct <= 15:
+        band = "above the local typical"
+    else:
+        band = "well above the local typical"
+    return round(pct, 1), band
 
 
 def reweight(df: pd.DataFrame, weights: dict[str, float]) -> pd.DataFrame:
