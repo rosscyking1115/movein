@@ -10,14 +10,14 @@ context — with confidence levels and source caveats on every recommendation.
 Not a price predictor, and not a glossy listings site: an honest decision layer
 over fragmented official UK datasets.
 
-> ⚠️ **Status: prototype / work in progress.** This repo is mid-pivot from a
-> finished Land Registry market-study (see *What's already built* below) into the
-> decision-support tool described here. Today the engineering spine, the geography
-> *contract*, and a Land-Registry-only area profile are live. The rent, EPC,
-> crime, flood, planning, and commute source layers are designed but not yet
-> loaded. The geography layer currently runs on a **6-postcode fixture**, not a
-> real national lookup. Treat every "area profile" as a contract demo, not
-> production guidance.
+> **Status: MVP feature-complete.** Nine real, national open-data signals —
+> sales, geography, rent/affordability, EPC energy, crime, planning, flood, and
+> convenience — feed an explainable per-MSOA scoring engine
+> (`rpt_neighbourhood_score`) and a renter-facing Streamlit app (`app/`). Each
+> external source is **fixture-default for fast, reproducible CI**, with a
+> real-data toggle for production builds. Door-to-door commute *time* is the one
+> remaining MVP source (station proximity is already covered). Indicators only —
+> never a "safe/unsafe" verdict.
 
 ## Live links
 
@@ -40,7 +40,6 @@ over fragmented official UK datasets.
 | Flood + planning constraints | ✅ Built | Spatial point-in-polygon (2.7M postcode centroids × planning.data.gov.uk geometries) → per-MSOA planning_constraint_count (0–119) + flood band on **100%** of MSOAs (~23% medium/high flood); committed fixture is the CI default, real roll-up via `--vars 'constraints_source: computed'` |
 | Convenience / amenities (OSM) | ✅ Built | Spatial roll-up of 437k OpenStreetMap amenities (nodes + way centroids) → per-MSOA nearest supermarket/school/GP/park/station + walkable-essentials count on 100% of MSOAs; committed fixture is the CI default, real via `--vars 'amenities_source: computed'` |
 | Door-to-door commute time | ⬜ Planned | Station proximity is already in the amenities layer; journey-time routing (TfL London-first) is the remaining refinement |
-| Explainable weighted neighbourhood score | ⬜ Planned | Phase 4 — component scores, confidence, "why this area" |
 | Renter-facing decision app (`app/`) | ✅ Built | Streamlit workflow: set income/budget/priorities → live-reranked shortlist, per-area trade-off receipt, side-by-side compare, sources & caveats. Reads the committed `data/decision.duckdb` extract |
 
 The full reasoning lives in four planning docs at the repo root:
