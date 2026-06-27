@@ -1,328 +1,328 @@
-area_code,area_name,rent_grain,rent_monthly_gbp,rent_period
-E06000001,Hartlepool,local_authority,561,2026-05-01
-E06000002,Middlesbrough,local_authority,707,2026-05-01
-E06000003,Redcar and Cleveland,local_authority,645,2026-05-01
-E06000004,Stockton-on-Tees,local_authority,738,2026-05-01
-E06000005,Darlington,local_authority,676,2026-05-01
-E06000006,Halton,local_authority,738,2026-05-01
-E06000007,Warrington,local_authority,885,2026-05-01
-E06000008,Blackburn with Darwen,local_authority,711,2026-05-01
-E06000009,Blackpool,local_authority,704,2026-05-01
-E06000010,"Kingston upon Hull, City of",local_authority,690,2026-05-01
-E06000011,East Riding of Yorkshire,local_authority,721,2026-05-01
-E06000012,North East Lincolnshire,local_authority,618,2026-05-01
-E06000013,North Lincolnshire,local_authority,645,2026-05-01
-E06000014,York,local_authority,1182,2026-05-01
-E06000015,Derby,local_authority,852,2026-05-01
-E06000016,Leicester,local_authority,1024,2026-05-01
-E06000017,Rutland,local_authority,964,2026-05-01
-E06000018,Nottingham,local_authority,1006,2026-05-01
-E06000019,"Herefordshire, County of",local_authority,809,2026-05-01
-E06000020,Telford and Wrekin,local_authority,856,2026-05-01
-E06000021,Stoke-on-Trent,local_authority,709,2026-05-01
-E06000022,Bath and North East Somerset,local_authority,1881,2026-05-01
-E06000023,"Bristol, City of",local_authority,1883,2026-05-01
-E06000024,North Somerset,local_authority,1197,2026-05-01
-E06000025,South Gloucestershire,local_authority,1450,2026-05-01
-E06000026,Plymouth,local_authority,994,2026-05-01
-E06000027,Torbay,local_authority,908,2026-05-01
-E06000030,Swindon,local_authority,1089,2026-05-01
-E06000031,Peterborough,local_authority,981,2026-05-01
-E06000032,Luton,local_authority,1217,2026-05-01
-E06000033,Southend-on-Sea,local_authority,1287,2026-05-01
-E06000034,Thurrock,local_authority,1366,2026-05-01
-E06000035,Medway,local_authority,1238,2026-05-01
-E06000036,Bracknell Forest,local_authority,1490,2026-05-01
-E06000037,West Berkshire,local_authority,1290,2026-05-01
-E06000038,Reading,local_authority,1577,2026-05-01
-E06000039,Slough,local_authority,1575,2026-05-01
-E06000040,Windsor and Maidenhead,local_authority,1818,2026-05-01
-E06000041,Wokingham,local_authority,1482,2026-05-01
-E06000042,Milton Keynes,local_authority,1336,2026-05-01
-E06000043,Brighton and Hove,local_authority,1816,2026-05-01
-E06000044,Portsmouth,local_authority,1366,2026-05-01
-E06000045,Southampton,local_authority,1250,2026-05-01
-E06000046,Isle of Wight,local_authority,946,2026-05-01
-E06000047,County Durham,local_authority,638,2026-05-01
-E06000049,Cheshire East,local_authority,979,2026-05-01
-E06000050,Cheshire West and Chester,local_authority,974,2026-05-01
-E06000051,Shropshire,local_authority,813,2026-05-01
-E06000052,Cornwall,local_authority,1003,2026-05-01
-E06000054,Wiltshire,local_authority,1064,2026-05-01
-E06000055,Bedford,local_authority,1168,2026-05-01
-E06000056,Central Bedfordshire,local_authority,1247,2026-05-01
-E06000057,Northumberland,local_authority,679,2026-05-01
-E06000058,"Bournemouth, Christchurch and Poole",local_authority,1404,2026-05-01
-E06000059,Dorset,local_authority,1041,2026-05-01
-E06000060,Buckinghamshire,local_authority,1477,2026-05-01
-E06000061,North Northamptonshire,local_authority,984,2026-05-01
-E06000062,West Northamptonshire,local_authority,1072,2026-05-01
-E06000063,Cumberland,local_authority,666,2026-05-01
-E06000064,Westmorland and Furness,local_authority,805,2026-05-01
-E06000065,North Yorkshire,local_authority,833,2026-05-01
-E06000066,Somerset,local_authority,990,2026-05-01
-E07000008,Cambridge,local_authority,1805,2026-05-01
-E07000009,East Cambridgeshire,local_authority,1024,2026-05-01
-E07000010,Fenland,local_authority,835,2026-05-01
-E07000011,Huntingdonshire,local_authority,1047,2026-05-01
-E07000012,South Cambridgeshire,local_authority,1407,2026-05-01
-E07000032,Amber Valley,local_authority,789,2026-05-01
-E07000033,Bolsover,local_authority,704,2026-05-01
-E07000034,Chesterfield,local_authority,738,2026-05-01
-E07000035,Derbyshire Dales,local_authority,805,2026-05-01
-E07000036,Erewash,local_authority,834,2026-05-01
-E07000037,High Peak,local_authority,907,2026-05-01
-E07000038,North East Derbyshire,local_authority,774,2026-05-01
-E07000039,South Derbyshire,local_authority,874,2026-05-01
-E07000040,East Devon,local_authority,973,2026-05-01
-E07000041,Exeter,local_authority,1314,2026-05-01
-E07000042,Mid Devon,local_authority,873,2026-05-01
-E07000043,North Devon,local_authority,845,2026-05-01
-E07000044,South Hams,local_authority,1000,2026-05-01
-E07000045,Teignbridge,local_authority,951,2026-05-01
-E07000046,Torridge,local_authority,787,2026-05-01
-E07000047,West Devon,local_authority,839,2026-05-01
-E07000061,Eastbourne,local_authority,1162,2026-05-01
-E07000062,Hastings,local_authority,1006,2026-05-01
-E07000063,Lewes,local_authority,1323,2026-05-01
-E07000064,Rother,local_authority,1165,2026-05-01
-E07000065,Wealden,local_authority,1266,2026-05-01
-E07000066,Basildon,local_authority,1410,2026-05-01
-E07000067,Braintree,local_authority,1232,2026-05-01
-E07000068,Brentwood,local_authority,1613,2026-05-01
-E07000069,Castle Point,local_authority,1249,2026-05-01
-E07000070,Chelmsford,local_authority,1445,2026-05-01
-E07000071,Colchester,local_authority,1211,2026-05-01
-E07000072,Epping Forest,local_authority,1842,2026-05-01
-E07000073,Harlow,local_authority,1517,2026-05-01
-E07000074,Maldon,local_authority,1151,2026-05-01
-E07000075,Rochford,local_authority,1296,2026-05-01
-E07000076,Tendring,local_authority,1051,2026-05-01
-E07000077,Uttlesford,local_authority,1283,2026-05-01
-E07000078,Cheltenham,local_authority,1249,2026-05-01
-E07000079,Cotswold,local_authority,1255,2026-05-01
-E07000080,Forest of Dean,local_authority,823,2026-05-01
-E07000081,Gloucester,local_authority,1105,2026-05-01
-E07000082,Stroud,local_authority,1039,2026-05-01
-E07000083,Tewkesbury,local_authority,1020,2026-05-01
-E07000084,Basingstoke and Deane,local_authority,1317,2026-05-01
-E07000085,East Hampshire,local_authority,1260,2026-05-01
-E07000086,Eastleigh,local_authority,1210,2026-05-01
-E07000087,Fareham,local_authority,1213,2026-05-01
-E07000088,Gosport,local_authority,1158,2026-05-01
-E07000089,Hart,local_authority,1418,2026-05-01
-E07000090,Havant,local_authority,1135,2026-05-01
-E07000091,New Forest,local_authority,1240,2026-05-01
-E07000092,Rushmoor,local_authority,1380,2026-05-01
-E07000093,Test Valley,local_authority,1215,2026-05-01
-E07000094,Winchester,local_authority,1505,2026-05-01
-E07000095,Broxbourne,local_authority,1665,2026-05-01
-E07000096,Dacorum,local_authority,1579,2026-05-01
-E07000098,Hertsmere,local_authority,1802,2026-05-01
-E07000099,North Hertfordshire,local_authority,1421,2026-05-01
-E07000102,Three Rivers,local_authority,1809,2026-05-01
-E07000103,Watford,local_authority,1814,2026-05-01
-E07000105,Ashford,local_authority,1243,2026-05-01
-E07000106,Canterbury,local_authority,1276,2026-05-01
-E07000107,Dartford,local_authority,1562,2026-05-01
-E07000108,Dover,local_authority,1012,2026-05-01
-E07000109,Gravesham,local_authority,1328,2026-05-01
-E07000110,Maidstone,local_authority,1290,2026-05-01
-E07000111,Sevenoaks,local_authority,1790,2026-05-01
-E07000112,Folkestone and Hythe,local_authority,1161,2026-05-01
-E07000113,Swale,local_authority,1091,2026-05-01
-E07000114,Thanet,local_authority,1109,2026-05-01
-E07000115,Tonbridge and Malling,local_authority,1479,2026-05-01
-E07000116,Tunbridge Wells,local_authority,1517,2026-05-01
-E07000117,Burnley,local_authority,622,2026-05-01
-E07000118,Chorley,local_authority,779,2026-05-01
-E07000119,Fylde,local_authority,858,2026-05-01
-E07000120,Hyndburn,local_authority,640,2026-05-01
-E07000121,Lancaster,local_authority,807,2026-05-01
-E07000122,Pendle,local_authority,652,2026-05-01
-E07000123,Preston,local_authority,782,2026-05-01
-E07000124,Ribble Valley,local_authority,810,2026-05-01
-E07000125,Rossendale,local_authority,808,2026-05-01
-E07000126,South Ribble,local_authority,793,2026-05-01
-E07000127,West Lancashire,local_authority,799,2026-05-01
-E07000128,Wyre,local_authority,726,2026-05-01
-E07000129,Blaby,local_authority,982,2026-05-01
-E07000130,Charnwood,local_authority,955,2026-05-01
-E07000131,Harborough,local_authority,962,2026-05-01
-E07000132,Hinckley and Bosworth,local_authority,926,2026-05-01
-E07000133,Melton,local_authority,791,2026-05-01
-E07000134,North West Leicestershire,local_authority,905,2026-05-01
-E07000135,Oadby and Wigston,local_authority,1024,2026-05-01
-E07000136,Boston,local_authority,796,2026-05-01
-E07000137,East Lindsey,local_authority,694,2026-05-01
-E07000138,Lincoln,local_authority,951,2026-05-01
-E07000139,North Kesteven,local_authority,828,2026-05-01
-E07000140,South Holland,local_authority,762,2026-05-01
-E07000141,South Kesteven,local_authority,838,2026-05-01
-E07000142,West Lindsey,local_authority,728,2026-05-01
-E07000143,Breckland,local_authority,920,2026-05-01
-E07000144,Broadland,local_authority,939,2026-05-01
-E07000145,Great Yarmouth,local_authority,833,2026-05-01
-E07000146,King's Lynn and West Norfolk,local_authority,935,2026-05-01
-E07000147,North Norfolk,local_authority,860,2026-05-01
-E07000148,Norwich,local_authority,1152,2026-05-01
-E07000149,South Norfolk,local_authority,981,2026-05-01
-E07000170,Ashfield,local_authority,785,2026-05-01
-E07000171,Bassetlaw,local_authority,718,2026-05-01
-E07000172,Broxtowe,local_authority,955,2026-05-01
-E07000173,Gedling,local_authority,892,2026-05-01
-E07000174,Mansfield,local_authority,779,2026-05-01
-E07000175,Newark and Sherwood,local_authority,794,2026-05-01
-E07000176,Rushcliffe,local_authority,1033,2026-05-01
-E07000177,Cherwell,local_authority,1289,2026-05-01
-E07000178,Oxford,local_authority,1958,2026-05-01
-E07000179,South Oxfordshire,local_authority,1381,2026-05-01
-E07000180,Vale of White Horse,local_authority,1333,2026-05-01
-E07000181,West Oxfordshire,local_authority,1277,2026-05-01
-E07000192,Cannock Chase,local_authority,848,2026-05-01
-E07000193,East Staffordshire,local_authority,838,2026-05-01
-E07000194,Lichfield,local_authority,1096,2026-05-01
-E07000195,Newcastle-under-Lyme,local_authority,826,2026-05-01
-E07000196,South Staffordshire,local_authority,945,2026-05-01
-E07000197,Stafford,local_authority,891,2026-05-01
-E07000198,Staffordshire Moorlands,local_authority,716,2026-05-01
-E07000199,Tamworth,local_authority,938,2026-05-01
-E07000200,Babergh,local_authority,972,2026-05-01
-E07000202,Ipswich,local_authority,989,2026-05-01
-E07000203,Mid Suffolk,local_authority,994,2026-05-01
-E07000207,Elmbridge,local_authority,1831,2026-05-01
-E07000208,Epsom and Ewell,local_authority,1690,2026-05-01
-E07000209,Guildford,local_authority,1728,2026-05-01
-E07000210,Mole Valley,local_authority,1548,2026-05-01
-E07000211,Reigate and Banstead,local_authority,1636,2026-05-01
-E07000212,Runnymede,local_authority,1575,2026-05-01
-E07000213,Spelthorne,local_authority,1631,2026-05-01
-E07000214,Surrey Heath,local_authority,1508,2026-05-01
-E07000215,Tandridge,local_authority,1622,2026-05-01
-E07000216,Waverley,local_authority,1445,2026-05-01
-E07000217,Woking,local_authority,1618,2026-05-01
-E07000218,North Warwickshire,local_authority,975,2026-05-01
-E07000219,Nuneaton and Bedworth,local_authority,916,2026-05-01
-E07000220,Rugby,local_authority,1038,2026-05-01
-E07000221,Stratford-on-Avon,local_authority,1135,2026-05-01
-E07000222,Warwick,local_authority,1238,2026-05-01
-E07000223,Adur,local_authority,1383,2026-05-01
-E07000224,Arun,local_authority,1224,2026-05-01
-E07000225,Chichester,local_authority,1325,2026-05-01
-E07000226,Crawley,local_authority,1482,2026-05-01
-E07000227,Horsham,local_authority,1455,2026-05-01
-E07000228,Mid Sussex,local_authority,1415,2026-05-01
-E07000229,Worthing,local_authority,1311,2026-05-01
-E07000234,Bromsgrove,local_authority,979,2026-05-01
-E07000235,Malvern Hills,local_authority,940,2026-05-01
-E07000236,Redditch,local_authority,904,2026-05-01
-E07000237,Worcester,local_authority,965,2026-05-01
-E07000238,Wychavon,local_authority,938,2026-05-01
-E07000239,Wyre Forest,local_authority,821,2026-05-01
-E07000240,St Albans,local_authority,1925,2026-05-01
-E07000241,Welwyn Hatfield,local_authority,1482,2026-05-01
-E07000242,East Hertfordshire,local_authority,1503,2026-05-01
-E07000243,Stevenage,local_authority,1426,2026-05-01
-E07000244,East Suffolk,local_authority,834,2026-05-01
-E07000245,West Suffolk,local_authority,1177,2026-05-01
-E08000001,Bolton,local_authority,883,2026-05-01
-E08000002,Bury,local_authority,967,2026-05-01
-E08000003,Manchester,local_authority,1352,2026-05-01
-E08000004,Oldham,local_authority,917,2026-05-01
-E08000005,Rochdale,local_authority,829,2026-05-01
-E08000006,Salford,local_authority,1162,2026-05-01
-E08000007,Stockport,local_authority,1100,2026-05-01
-E08000008,Tameside,local_authority,920,2026-05-01
-E08000009,Trafford,local_authority,1362,2026-05-01
-E08000010,Wigan,local_authority,741,2026-05-01
-E08000011,Knowsley,local_authority,814,2026-05-01
-E08000012,Liverpool,local_authority,901,2026-05-01
-E08000013,St. Helens,local_authority,790,2026-05-01
-E08000014,Sefton,local_authority,928,2026-05-01
-E08000015,Wirral,local_authority,838,2026-05-01
-E08000017,Doncaster,local_authority,689,2026-05-01
-E08000018,Rotherham,local_authority,679,2026-05-01
-E08000021,Newcastle upon Tyne,local_authority,1204,2026-05-01
-E08000022,North Tyneside,local_authority,838,2026-05-01
-E08000023,South Tyneside,local_authority,726,2026-05-01
-E08000024,Sunderland,local_authority,701,2026-05-01
-E08000025,Birmingham,local_authority,1088,2026-05-01
-E08000026,Coventry,local_authority,1017,2026-05-01
-E08000027,Dudley,local_authority,849,2026-05-01
-E08000028,Sandwell,local_authority,940,2026-05-01
-E08000029,Solihull,local_authority,1260,2026-05-01
-E08000030,Walsall,local_authority,908,2026-05-01
-E08000031,Wolverhampton,local_authority,934,2026-05-01
-E08000032,Bradford,local_authority,746,2026-05-01
-E08000033,Calderdale,local_authority,750,2026-05-01
-E08000034,Kirklees,local_authority,775,2026-05-01
-E08000035,Leeds,local_authority,1134,2026-05-01
-E08000036,Wakefield,local_authority,794,2026-05-01
-E08000037,Gateshead,local_authority,790,2026-05-01
-E08000038,Barnsley,local_authority,678,2026-05-01
-E08000039,Sheffield,local_authority,922,2026-05-01
-E09000002,Barking and Dagenham,local_authority,1690,2026-05-01
-E09000003,Barnet,local_authority,1934,2026-05-01
-E09000004,Bexley,local_authority,1528,2026-05-01
-E09000005,Brent,local_authority,2005,2026-05-01
-E09000006,Bromley,local_authority,1675,2026-05-01
-E09000007,Camden,local_authority,2759,2026-05-01
-E09000008,Croydon,local_authority,1572,2026-05-01
-E09000009,Ealing,local_authority,2060,2026-05-01
-E09000010,Enfield,local_authority,1788,2026-05-01
-E09000011,Greenwich,local_authority,1952,2026-05-01
-E09000012,Hackney,local_authority,2622,2026-05-01
-E09000013,Hammersmith and Fulham,local_authority,2770,2026-05-01
-E09000014,Haringey,local_authority,2212,2026-05-01
-E09000015,Harrow,local_authority,1759,2026-05-01
-E09000016,Havering,local_authority,1564,2026-05-01
-E09000017,Hillingdon,local_authority,1557,2026-05-01
-E09000018,Hounslow,local_authority,1933,2026-05-01
-E09000019,Islington,local_authority,2828,2026-05-01
-E09000020,Kensington and Chelsea,local_authority,3591,2026-05-01
-E09000021,Kingston upon Thames,local_authority,1803,2026-05-01
-E09000022,Lambeth,local_authority,2527,2026-05-01
-E09000023,Lewisham,local_authority,1821,2026-05-01
-E09000024,Merton,local_authority,2114,2026-05-01
-E09000025,Newham,local_authority,1923,2026-05-01
-E09000026,Redbridge,local_authority,1725,2026-05-01
-E09000027,Richmond upon Thames,local_authority,2305,2026-05-01
-E09000028,Southwark,local_authority,2394,2026-05-01
-E09000029,Sutton,local_authority,1550,2026-05-01
-E09000030,Tower Hamlets,local_authority,2419,2026-05-01
-E09000031,Waltham Forest,local_authority,1763,2026-05-01
-E09000032,Wandsworth,local_authority,2599,2026-05-01
-E09000033,Westminster,local_authority,3163,2026-05-01
-E12000001,North East,region,776,2026-05-01
-E12000002,North West,region,954,2026-05-01
-E12000003,Yorkshire and The Humber,region,856,2026-05-01
-E12000004,East Midlands,region,914,2026-05-01
-E12000005,West Midlands,region,966,2026-05-01
-E12000006,East of England,region,1280,2026-05-01
-E12000007,London,region,2294,2026-05-01
-E12000008,South East,region,1418,2026-05-01
-E12000009,South West,region,1234,2026-05-01
-E92000001,England,country,1442,2026-05-01
-W06000001,Isle of Anglesey,local_authority,706,2026-05-01
-W06000002,Gwynedd,local_authority,708,2026-05-01
-W06000003,Conwy,local_authority,781,2026-05-01
-W06000004,Denbighshire,local_authority,706,2026-05-01
-W06000005,Flintshire,local_authority,790,2026-05-01
-W06000006,Wrexham,local_authority,757,2026-05-01
-W06000008,Ceredigion,local_authority,714,2026-05-01
-W06000009,Pembrokeshire,local_authority,690,2026-05-01
-W06000010,Carmarthenshire,local_authority,680,2026-05-01
-W06000011,Swansea,local_authority,838,2026-05-01
-W06000012,Neath Port Talbot,local_authority,681,2026-05-01
-W06000013,Bridgend,local_authority,749,2026-05-01
-W06000014,Vale of Glamorgan,local_authority,984,2026-05-01
-W06000015,Cardiff,local_authority,1157,2026-05-01
-W06000016,Rhondda Cynon Taf,local_authority,748,2026-05-01
-W06000018,Caerphilly,local_authority,742,2026-05-01
-W06000019,Blaenau Gwent,local_authority,674,2026-05-01
-W06000020,Torfaen,local_authority,856,2026-05-01
-W06000021,Monmouthshire,local_authority,992,2026-05-01
-W06000022,Newport,local_authority,952,2026-05-01
-W06000023,Powys,local_authority,620,2026-05-01
-W06000024,Merthyr Tydfil,local_authority,754,2026-05-01
-W92000004,Wales,country,836,2026-05-01
+area_code,area_name,rent_grain,rent_monthly_gbp,rent_1bed_gbp,rent_2bed_gbp,rent_3bed_gbp,rent_4plus_gbp,rent_period
+E06000001,Hartlepool,local_authority,561,403,512,611,812,2026-05-01
+E06000002,Middlesbrough,local_authority,707,505,641,761,1004,2026-05-01
+E06000003,Redcar and Cleveland,local_authority,645,457,610,724,1060,2026-05-01
+E06000004,Stockton-on-Tees,local_authority,738,538,671,799,1174,2026-05-01
+E06000005,Darlington,local_authority,676,487,617,751,1074,2026-05-01
+E06000006,Halton,local_authority,738,539,676,814,1149,2026-05-01
+E06000007,Warrington,local_authority,885,663,823,1000,1436,2026-05-01
+E06000008,Blackburn with Darwen,local_authority,711,532,659,778,1111,2026-05-01
+E06000009,Blackpool,local_authority,704,491,639,776,1028,2026-05-01
+E06000010,"Kingston upon Hull, City of",local_authority,690,497,618,739,980,2026-05-01
+E06000011,East Riding of Yorkshire,local_authority,721,500,647,795,1160,2026-05-01
+E06000012,North East Lincolnshire,local_authority,618,435,558,652,915,2026-05-01
+E06000013,North Lincolnshire,local_authority,645,465,609,741,1047,2026-05-01
+E06000014,York,local_authority,1182,863,1066,1260,1725,2026-05-01
+E06000015,Derby,local_authority,852,602,770,927,1291,2026-05-01
+E06000016,Leicester,local_authority,1024,717,894,1045,1459,2026-05-01
+E06000017,Rutland,local_authority,964,677,842,996,1523,2026-05-01
+E06000018,Nottingham,local_authority,1006,730,908,1043,1452,2026-05-01
+E06000019,"Herefordshire, County of",local_authority,809,587,762,940,1326,2026-05-01
+E06000020,Telford and Wrekin,local_authority,856,596,766,947,1351,2026-05-01
+E06000021,Stoke-on-Trent,local_authority,709,514,656,789,1073,2026-05-01
+E06000022,Bath and North East Somerset,local_authority,1881,1203,1518,1803,2535,2026-05-01
+E06000023,"Bristol, City of",local_authority,1883,1224,1543,1757,2552,2026-05-01
+E06000024,North Somerset,local_authority,1197,812,1069,1331,1830,2026-05-01
+E06000025,South Gloucestershire,local_authority,1450,989,1261,1539,2208,2026-05-01
+E06000026,Plymouth,local_authority,994,698,876,1052,1479,2026-05-01
+E06000027,Torbay,local_authority,908,611,806,983,1279,2026-05-01
+E06000030,Swindon,local_authority,1089,814,981,1209,1648,2026-05-01
+E06000031,Peterborough,local_authority,981,687,867,1044,1509,2026-05-01
+E06000032,Luton,local_authority,1217,904,1110,1331,1811,2026-05-01
+E06000033,Southend-on-Sea,local_authority,1287,865,1100,1339,1839,2026-05-01
+E06000034,Thurrock,local_authority,1366,930,1202,1457,2174,2026-05-01
+E06000035,Medway,local_authority,1238,900,1143,1342,1835,2026-05-01
+E06000036,Bracknell Forest,local_authority,1490,1087,1372,1674,2421,2026-05-01
+E06000037,West Berkshire,local_authority,1290,902,1173,1456,2121,2026-05-01
+E06000038,Reading,local_authority,1577,1118,1396,1673,2362,2026-05-01
+E06000039,Slough,local_authority,1575,1148,1434,1721,2457,2026-05-01
+E06000040,Windsor and Maidenhead,local_authority,1818,1257,1583,1934,2725,2026-05-01
+E06000041,Wokingham,local_authority,1482,1065,1360,1663,2329,2026-05-01
+E06000042,Milton Keynes,local_authority,1336,972,1210,1442,2080,2026-05-01
+E06000043,Brighton and Hove,local_authority,1816,1193,1523,1802,2495,2026-05-01
+E06000044,Portsmouth,local_authority,1366,899,1132,1356,1961,2026-05-01
+E06000045,Southampton,local_authority,1250,875,1108,1348,1882,2026-05-01
+E06000046,Isle of Wight,local_authority,946,659,867,1082,1508,2026-05-01
+E06000047,County Durham,local_authority,638,447,568,679,982,2026-05-01
+E06000049,Cheshire East,local_authority,979,692,893,1099,1603,2026-05-01
+E06000050,Cheshire West and Chester,local_authority,974,712,897,1100,1586,2026-05-01
+E06000051,Shropshire,local_authority,813,600,759,942,1384,2026-05-01
+E06000052,Cornwall,local_authority,1003,691,883,1080,1510,2026-05-01
+E06000054,Wiltshire,local_authority,1064,736,956,1198,1711,2026-05-01
+E06000055,Bedford,local_authority,1168,796,1024,1253,1800,2026-05-01
+E06000056,Central Bedfordshire,local_authority,1247,862,1094,1371,2039,2026-05-01
+E06000057,Northumberland,local_authority,679,483,614,748,1107,2026-05-01
+E06000058,"Bournemouth, Christchurch and Poole",local_authority,1404,922,1174,1461,2092,2026-05-01
+E06000059,Dorset,local_authority,1041,721,953,1172,1661,2026-05-01
+E06000060,Buckinghamshire,local_authority,1477,1036,1312,1604,2364,2026-05-01
+E06000061,North Northamptonshire,local_authority,984,677,874,1058,1518,2026-05-01
+E06000062,West Northamptonshire,local_authority,1072,744,944,1153,1665,2026-05-01
+E06000063,Cumberland,local_authority,666,496,628,767,1071,2026-05-01
+E06000064,Westmorland and Furness,local_authority,805,595,762,929,1305,2026-05-01
+E06000065,North Yorkshire,local_authority,833,582,754,923,1333,2026-05-01
+E06000066,Somerset,local_authority,990,674,890,1106,1580,2026-05-01
+E07000008,Cambridge,local_authority,1805,1255,1613,1906,2661,2026-05-01
+E07000009,East Cambridgeshire,local_authority,1024,721,945,1151,1643,2026-05-01
+E07000010,Fenland,local_authority,835,621,799,970,1378,2026-05-01
+E07000011,Huntingdonshire,local_authority,1047,737,958,1158,1684,2026-05-01
+E07000012,South Cambridgeshire,local_authority,1407,1009,1279,1528,2149,2026-05-01
+E07000032,Amber Valley,local_authority,789,576,732,902,1266,2026-05-01
+E07000033,Bolsover,local_authority,704,496,643,745,1124,2026-05-01
+E07000034,Chesterfield,local_authority,738,527,677,809,1141,2026-05-01
+E07000035,Derbyshire Dales,local_authority,805,583,747,894,1331,2026-05-01
+E07000036,Erewash,local_authority,834,601,788,948,1314,2026-05-01
+E07000037,High Peak,local_authority,907,605,785,959,1388,2026-05-01
+E07000038,North East Derbyshire,local_authority,774,556,707,859,1184,2026-05-01
+E07000039,South Derbyshire,local_authority,874,605,793,996,1428,2026-05-01
+E07000040,East Devon,local_authority,973,688,900,1126,1624,2026-05-01
+E07000041,Exeter,local_authority,1314,912,1127,1357,1917,2026-05-01
+E07000042,Mid Devon,local_authority,873,637,805,989,1446,2026-05-01
+E07000043,North Devon,local_authority,845,588,777,963,1330,2026-05-01
+E07000044,South Hams,local_authority,1000,728,910,1124,1613,2026-05-01
+E07000045,Teignbridge,local_authority,951,648,860,1074,1542,2026-05-01
+E07000046,Torridge,local_authority,787,564,737,905,1267,2026-05-01
+E07000047,West Devon,local_authority,839,598,765,943,1342,2026-05-01
+E07000061,Eastbourne,local_authority,1162,814,1072,1297,1787,2026-05-01
+E07000062,Hastings,local_authority,1006,696,896,1099,1514,2026-05-01
+E07000063,Lewes,local_authority,1323,917,1208,1495,2158,2026-05-01
+E07000064,Rother,local_authority,1165,803,1031,1294,1915,2026-05-01
+E07000065,Wealden,local_authority,1266,899,1147,1432,2096,2026-05-01
+E07000066,Basildon,local_authority,1410,972,1256,1491,2104,2026-05-01
+E07000067,Braintree,local_authority,1232,863,1116,1374,2003,2026-05-01
+E07000068,Brentwood,local_authority,1613,1102,1393,1709,2402,2026-05-01
+E07000069,Castle Point,local_authority,1249,932,1157,1410,2020,2026-05-01
+E07000070,Chelmsford,local_authority,1445,1063,1297,1548,2233,2026-05-01
+E07000071,Colchester,local_authority,1211,829,1075,1315,1819,2026-05-01
+E07000072,Epping Forest,local_authority,1842,1228,1582,1938,2879,2026-05-01
+E07000073,Harlow,local_authority,1517,1019,1323,1568,2196,2026-05-01
+E07000074,Maldon,local_authority,1151,805,1044,1258,1929,2026-05-01
+E07000075,Rochford,local_authority,1296,887,1166,1424,1867,2026-05-01
+E07000076,Tendring,local_authority,1051,757,973,1183,1585,2026-05-01
+E07000077,Uttlesford,local_authority,1283,900,1137,1434,2028,2026-05-01
+E07000078,Cheltenham,local_authority,1249,861,1086,1341,1892,2026-05-01
+E07000079,Cotswold,local_authority,1255,871,1108,1346,2044,2026-05-01
+E07000080,Forest of Dean,local_authority,823,590,795,953,1442,2026-05-01
+E07000081,Gloucester,local_authority,1105,738,962,1200,1642,2026-05-01
+E07000082,Stroud,local_authority,1039,742,959,1175,1660,2026-05-01
+E07000083,Tewkesbury,local_authority,1020,696,914,1160,1663,2026-05-01
+E07000084,Basingstoke and Deane,local_authority,1317,936,1218,1474,2080,2026-05-01
+E07000085,East Hampshire,local_authority,1260,899,1178,1480,1976,2026-05-01
+E07000086,Eastleigh,local_authority,1210,859,1108,1357,1866,2026-05-01
+E07000087,Fareham,local_authority,1213,857,1106,1371,1997,2026-05-01
+E07000088,Gosport,local_authority,1158,815,1035,1261,1713,2026-05-01
+E07000089,Hart,local_authority,1418,1025,1307,1586,2312,2026-05-01
+E07000090,Havant,local_authority,1135,840,1071,1335,1872,2026-05-01
+E07000091,New Forest,local_authority,1240,861,1129,1385,1984,2026-05-01
+E07000092,Rushmoor,local_authority,1380,975,1265,1526,2168,2026-05-01
+E07000093,Test Valley,local_authority,1215,872,1125,1383,1971,2026-05-01
+E07000094,Winchester,local_authority,1505,1014,1316,1619,2247,2026-05-01
+E07000095,Broxbourne,local_authority,1665,1118,1433,1758,2470,2026-05-01
+E07000096,Dacorum,local_authority,1579,1087,1365,1639,2270,2026-05-01
+E07000098,Hertsmere,local_authority,1802,1238,1580,1911,2761,2026-05-01
+E07000099,North Hertfordshire,local_authority,1421,1013,1272,1560,2218,2026-05-01
+E07000102,Three Rivers,local_authority,1809,1263,1574,1952,2756,2026-05-01
+E07000103,Watford,local_authority,1814,1256,1587,1808,2634,2026-05-01
+E07000105,Ashford,local_authority,1243,890,1138,1400,2033,2026-05-01
+E07000106,Canterbury,local_authority,1276,872,1127,1362,1900,2026-05-01
+E07000107,Dartford,local_authority,1562,1082,1407,1694,2352,2026-05-01
+E07000108,Dover,local_authority,1012,722,944,1156,1649,2026-05-01
+E07000109,Gravesham,local_authority,1328,904,1193,1454,2069,2026-05-01
+E07000110,Maidstone,local_authority,1290,914,1187,1452,1962,2026-05-01
+E07000111,Sevenoaks,local_authority,1790,1252,1563,1905,2926,2026-05-01
+E07000112,Folkestone and Hythe,local_authority,1161,793,1016,1265,1699,2026-05-01
+E07000113,Swale,local_authority,1091,763,1008,1218,1820,2026-05-01
+E07000114,Thanet,local_authority,1109,766,995,1217,1669,2026-05-01
+E07000115,Tonbridge and Malling,local_authority,1479,1025,1324,1614,2466,2026-05-01
+E07000116,Tunbridge Wells,local_authority,1517,1045,1391,1682,2440,2026-05-01
+E07000117,Burnley,local_authority,622,458,579,685,940,2026-05-01
+E07000118,Chorley,local_authority,779,584,745,882,1301,2026-05-01
+E07000119,Fylde,local_authority,858,601,776,931,1385,2026-05-01
+E07000120,Hyndburn,local_authority,640,480,614,718,933,2026-05-01
+E07000121,Lancaster,local_authority,807,590,738,906,1203,2026-05-01
+E07000122,Pendle,local_authority,652,483,616,719,1067,2026-05-01
+E07000123,Preston,local_authority,782,573,723,849,1240,2026-05-01
+E07000124,Ribble Valley,local_authority,810,602,764,927,1386,2026-05-01
+E07000125,Rossendale,local_authority,808,588,752,905,1224,2026-05-01
+E07000126,South Ribble,local_authority,793,553,727,876,1251,2026-05-01
+E07000127,West Lancashire,local_authority,799,584,726,837,1225,2026-05-01
+E07000128,Wyre,local_authority,726,515,701,835,1217,2026-05-01
+E07000129,Blaby,local_authority,982,700,898,1065,1547,2026-05-01
+E07000130,Charnwood,local_authority,955,674,842,1022,1468,2026-05-01
+E07000131,Harborough,local_authority,962,706,901,1104,1579,2026-05-01
+E07000132,Hinckley and Bosworth,local_authority,926,633,837,1020,1402,2026-05-01
+E07000133,Melton,local_authority,791,546,718,882,1345,2026-05-01
+E07000134,North West Leicestershire,local_authority,905,627,811,981,1406,2026-05-01
+E07000135,Oadby and Wigston,local_authority,1024,733,889,1121,1562,2026-05-01
+E07000136,Boston,local_authority,796,597,755,912,1271,2026-05-01
+E07000137,East Lindsey,local_authority,694,515,657,807,1131,2026-05-01
+E07000138,Lincoln,local_authority,951,665,836,999,1373,2026-05-01
+E07000139,North Kesteven,local_authority,828,582,761,926,1316,2026-05-01
+E07000140,South Holland,local_authority,762,583,727,887,1174,2026-05-01
+E07000141,South Kesteven,local_authority,838,580,751,907,1312,2026-05-01
+E07000142,West Lindsey,local_authority,728,531,662,809,1129,2026-05-01
+E07000143,Breckland,local_authority,920,659,838,1035,1507,2026-05-01
+E07000144,Broadland,local_authority,939,692,894,1079,1550,2026-05-01
+E07000145,Great Yarmouth,local_authority,833,585,763,924,1313,2026-05-01
+E07000146,King's Lynn and West Norfolk,local_authority,935,646,843,1045,1502,2026-05-01
+E07000147,North Norfolk,local_authority,860,619,804,995,1349,2026-05-01
+E07000148,Norwich,local_authority,1152,784,979,1145,1594,2026-05-01
+E07000149,South Norfolk,local_authority,981,696,890,1106,1574,2026-05-01
+E07000170,Ashfield,local_authority,785,552,715,835,1180,2026-05-01
+E07000171,Bassetlaw,local_authority,718,497,650,790,1121,2026-05-01
+E07000172,Broxtowe,local_authority,955,660,850,1017,1406,2026-05-01
+E07000173,Gedling,local_authority,892,621,784,966,1381,2026-05-01
+E07000174,Mansfield,local_authority,779,543,697,834,1142,2026-05-01
+E07000175,Newark and Sherwood,local_authority,794,545,721,869,1285,2026-05-01
+E07000176,Rushcliffe,local_authority,1033,714,886,1119,1545,2026-05-01
+E07000177,Cherwell,local_authority,1289,963,1203,1452,2181,2026-05-01
+E07000178,Oxford,local_authority,1958,1347,1662,2026,2857,2026-05-01
+E07000179,South Oxfordshire,local_authority,1381,1025,1272,1589,2292,2026-05-01
+E07000180,Vale of White Horse,local_authority,1333,972,1213,1480,2201,2026-05-01
+E07000181,West Oxfordshire,local_authority,1277,934,1182,1484,2041,2026-05-01
+E07000192,Cannock Chase,local_authority,848,576,765,943,1319,2026-05-01
+E07000193,East Staffordshire,local_authority,838,600,758,921,1374,2026-05-01
+E07000194,Lichfield,local_authority,1096,737,962,1151,1690,2026-05-01
+E07000195,Newcastle-under-Lyme,local_authority,826,574,737,887,1301,2026-05-01
+E07000196,South Staffordshire,local_authority,945,657,846,1004,1517,2026-05-01
+E07000197,Stafford,local_authority,891,624,782,966,1341,2026-05-01
+E07000198,Staffordshire Moorlands,local_authority,716,518,674,851,1170,2026-05-01
+E07000199,Tamworth,local_authority,938,685,840,1020,1462,2026-05-01
+E07000200,Babergh,local_authority,972,722,923,1118,1612,2026-05-01
+E07000202,Ipswich,local_authority,989,739,909,1038,1465,2026-05-01
+E07000203,Mid Suffolk,local_authority,994,712,913,1110,1570,2026-05-01
+E07000207,Elmbridge,local_authority,1831,1222,1538,1873,2797,2026-05-01
+E07000208,Epsom and Ewell,local_authority,1690,1181,1479,1868,2602,2026-05-01
+E07000209,Guildford,local_authority,1728,1179,1534,1856,2520,2026-05-01
+E07000210,Mole Valley,local_authority,1548,1136,1453,1852,2575,2026-05-01
+E07000211,Reigate and Banstead,local_authority,1636,1138,1479,1813,2556,2026-05-01
+E07000212,Runnymede,local_authority,1575,1076,1384,1660,2393,2026-05-01
+E07000213,Spelthorne,local_authority,1631,1184,1521,1768,2397,2026-05-01
+E07000214,Surrey Heath,local_authority,1508,1040,1339,1618,2422,2026-05-01
+E07000215,Tandridge,local_authority,1622,1147,1453,1815,2803,2026-05-01
+E07000216,Waverley,local_authority,1445,1047,1342,1618,2341,2026-05-01
+E07000217,Woking,local_authority,1618,1131,1442,1758,2694,2026-05-01
+E07000218,North Warwickshire,local_authority,975,715,877,1051,1592,2026-05-01
+E07000219,Nuneaton and Bedworth,local_authority,916,648,829,1003,1453,2026-05-01
+E07000220,Rugby,local_authority,1038,747,923,1110,1640,2026-05-01
+E07000221,Stratford-on-Avon,local_authority,1135,805,1007,1250,1794,2026-05-01
+E07000222,Warwick,local_authority,1238,881,1102,1326,1906,2026-05-01
+E07000223,Adur,local_authority,1383,981,1275,1575,2042,2026-05-01
+E07000224,Arun,local_authority,1224,845,1134,1387,1974,2026-05-01
+E07000225,Chichester,local_authority,1325,941,1214,1497,2109,2026-05-01
+E07000226,Crawley,local_authority,1482,1062,1380,1634,2255,2026-05-01
+E07000227,Horsham,local_authority,1455,1009,1334,1676,2400,2026-05-01
+E07000228,Mid Sussex,local_authority,1415,1003,1284,1611,2200,2026-05-01
+E07000229,Worthing,local_authority,1311,899,1194,1442,1954,2026-05-01
+E07000234,Bromsgrove,local_authority,979,708,887,1077,1585,2026-05-01
+E07000235,Malvern Hills,local_authority,940,692,873,1077,1474,2026-05-01
+E07000236,Redditch,local_authority,904,631,817,976,1341,2026-05-01
+E07000237,Worcester,local_authority,965,703,897,1073,1525,2026-05-01
+E07000238,Wychavon,local_authority,938,658,857,1056,1546,2026-05-01
+E07000239,Wyre Forest,local_authority,821,581,738,892,1236,2026-05-01
+E07000240,St Albans,local_authority,1925,1266,1627,2011,2897,2026-05-01
+E07000241,Welwyn Hatfield,local_authority,1482,1041,1348,1612,2294,2026-05-01
+E07000242,East Hertfordshire,local_authority,1503,1064,1356,1640,2406,2026-05-01
+E07000243,Stevenage,local_authority,1426,1018,1309,1536,2110,2026-05-01
+E07000244,East Suffolk,local_authority,834,597,785,931,1332,2026-05-01
+E07000245,West Suffolk,local_authority,1177,813,1055,1311,1848,2026-05-01
+E08000001,Bolton,local_authority,883,646,805,975,1433,2026-05-01
+E08000002,Bury,local_authority,967,684,886,1062,1559,2026-05-01
+E08000003,Manchester,local_authority,1352,989,1216,1410,1989,2026-05-01
+E08000004,Oldham,local_authority,917,684,855,1037,1416,2026-05-01
+E08000005,Rochdale,local_authority,829,603,775,931,1338,2026-05-01
+E08000006,Salford,local_authority,1162,883,1078,1277,1761,2026-05-01
+E08000007,Stockport,local_authority,1100,798,1018,1244,1719,2026-05-01
+E08000008,Tameside,local_authority,920,677,875,1050,1389,2026-05-01
+E08000009,Trafford,local_authority,1362,938,1195,1474,2098,2026-05-01
+E08000010,Wigan,local_authority,741,538,694,831,1137,2026-05-01
+E08000011,Knowsley,local_authority,814,571,727,880,1260,2026-05-01
+E08000012,Liverpool,local_authority,901,677,826,950,1279,2026-05-01
+E08000013,St. Helens,local_authority,790,581,722,881,1275,2026-05-01
+E08000014,Sefton,local_authority,928,616,805,982,1400,2026-05-01
+E08000015,Wirral,local_authority,838,558,722,883,1222,2026-05-01
+E08000017,Doncaster,local_authority,689,489,632,751,1070,2026-05-01
+E08000018,Rotherham,local_authority,679,483,609,736,1065,2026-05-01
+E08000021,Newcastle upon Tyne,local_authority,1204,806,997,1182,1825,2026-05-01
+E08000022,North Tyneside,local_authority,838,577,720,884,1197,2026-05-01
+E08000023,South Tyneside,local_authority,726,508,631,757,1006,2026-05-01
+E08000024,Sunderland,local_authority,701,519,642,766,1073,2026-05-01
+E08000025,Birmingham,local_authority,1088,821,993,1121,1563,2026-05-01
+E08000026,Coventry,local_authority,1017,757,911,1063,1452,2026-05-01
+E08000027,Dudley,local_authority,849,605,774,932,1239,2026-05-01
+E08000028,Sandwell,local_authority,940,672,839,1000,1388,2026-05-01
+E08000029,Solihull,local_authority,1260,844,1048,1242,1851,2026-05-01
+E08000030,Walsall,local_authority,908,642,783,936,1305,2026-05-01
+E08000031,Wolverhampton,local_authority,934,666,832,997,1427,2026-05-01
+E08000032,Bradford,local_authority,746,551,677,809,1112,2026-05-01
+E08000033,Calderdale,local_authority,750,543,678,809,1116,2026-05-01
+E08000034,Kirklees,local_authority,775,578,705,857,1221,2026-05-01
+E08000035,Leeds,local_authority,1134,774,964,1125,1677,2026-05-01
+E08000036,Wakefield,local_authority,794,567,715,855,1200,2026-05-01
+E08000037,Gateshead,local_authority,790,581,711,828,1179,2026-05-01
+E08000038,Barnsley,local_authority,678,494,613,732,1061,2026-05-01
+E08000039,Sheffield,local_authority,922,683,832,956,1327,2026-05-01
+E09000002,Barking and Dagenham,local_authority,1690,1371,1712,1887,2507,2026-05-01
+E09000003,Barnet,local_authority,1934,1487,1844,2236,3174,2026-05-01
+E09000004,Bexley,local_authority,1528,1221,1517,1855,2413,2026-05-01
+E09000005,Brent,local_authority,2005,1571,1927,2260,3048,2026-05-01
+E09000006,Bromley,local_authority,1675,1304,1632,1978,2915,2026-05-01
+E09000007,Camden,local_authority,2759,2008,2563,2989,3890,2026-05-01
+E09000008,Croydon,local_authority,1572,1256,1563,1844,2654,2026-05-01
+E09000009,Ealing,local_authority,2060,1590,1985,2348,3217,2026-05-01
+E09000010,Enfield,local_authority,1788,1391,1727,2050,2752,2026-05-01
+E09000011,Greenwich,local_authority,1952,1529,1891,2192,2941,2026-05-01
+E09000012,Hackney,local_authority,2622,1972,2453,2804,3630,2026-05-01
+E09000013,Hammersmith and Fulham,local_authority,2770,1959,2568,2932,4110,2026-05-01
+E09000014,Haringey,local_authority,2212,1633,2029,2346,3181,2026-05-01
+E09000015,Harrow,local_authority,1759,1379,1698,2041,2765,2026-05-01
+E09000016,Havering,local_authority,1564,1215,1541,1844,2497,2026-05-01
+E09000017,Hillingdon,local_authority,1557,1241,1573,1895,2616,2026-05-01
+E09000018,Hounslow,local_authority,1933,1567,1929,2218,3054,2026-05-01
+E09000019,Islington,local_authority,2828,2144,2658,2959,4176,2026-05-01
+E09000020,Kensington and Chelsea,local_authority,3591,2567,3335,3959,5497,2026-05-01
+E09000021,Kingston upon Thames,local_authority,1803,1372,1747,2142,2827,2026-05-01
+E09000022,Lambeth,local_authority,2527,1882,2344,2683,3725,2026-05-01
+E09000023,Lewisham,local_authority,1821,1450,1782,2047,2705,2026-05-01
+E09000024,Merton,local_authority,2114,1594,1969,2341,3188,2026-05-01
+E09000025,Newham,local_authority,1923,1626,1988,2202,2664,2026-05-01
+E09000026,Redbridge,local_authority,1725,1365,1680,1977,2714,2026-05-01
+E09000027,Richmond upon Thames,local_authority,2305,1710,2195,2649,3866,2026-05-01
+E09000028,Southwark,local_authority,2394,1814,2272,2640,3491,2026-05-01
+E09000029,Sutton,local_authority,1550,1233,1549,1889,2486,2026-05-01
+E09000030,Tower Hamlets,local_authority,2419,1964,2385,2709,3335,2026-05-01
+E09000031,Waltham Forest,local_authority,1763,1400,1724,2022,2568,2026-05-01
+E09000032,Wandsworth,local_authority,2599,1911,2430,2773,3782,2026-05-01
+E09000033,Westminster,local_authority,3163,2517,3268,3849,5378,2026-05-01
+E12000001,North East,region,776,546,686,821,1199,2026-05-01
+E12000002,North West,region,954,692,869,1039,1477,2026-05-01
+E12000003,Yorkshire and The Humber,region,856,608,761,904,1310,2026-05-01
+E12000004,East Midlands,region,914,644,818,984,1394,2026-05-01
+E12000005,West Midlands,region,966,701,872,1034,1462,2026-05-01
+E12000006,East of England,region,1280,889,1138,1382,1962,2026-05-01
+E12000007,London,region,2294,1733,2196,2596,3586,2026-05-01
+E12000008,South East,region,1418,987,1266,1541,2200,2026-05-01
+E12000009,South West,region,1234,823,1056,1285,1857,2026-05-01
+E92000001,England,country,1442,1180,1318,1470,2135,2026-05-01
+W06000001,Isle of Anglesey,local_authority,706,545,687,788,1077,2026-05-01
+W06000002,Gwynedd,local_authority,708,548,661,786,1035,2026-05-01
+W06000003,Conwy,local_authority,781,578,722,845,1215,2026-05-01
+W06000004,Denbighshire,local_authority,706,541,696,796,1097,2026-05-01
+W06000005,Flintshire,local_authority,790,579,738,867,1293,2026-05-01
+W06000006,Wrexham,local_authority,757,588,699,824,1206,2026-05-01
+W06000008,Ceredigion,local_authority,714,555,655,757,1074,2026-05-01
+W06000009,Pembrokeshire,local_authority,690,511,637,754,1034,2026-05-01
+W06000010,Carmarthenshire,local_authority,680,495,641,731,990,2026-05-01
+W06000011,Swansea,local_authority,838,677,785,880,1257,2026-05-01
+W06000012,Neath Port Talbot,local_authority,681,493,627,715,967,2026-05-01
+W06000013,Bridgend,local_authority,749,552,689,799,1123,2026-05-01
+W06000014,Vale of Glamorgan,local_authority,984,729,892,997,1485,2026-05-01
+W06000015,Cardiff,local_authority,1157,894,1068,1187,1677,2026-05-01
+W06000016,Rhondda Cynon Taf,local_authority,748,524,670,750,991,2026-05-01
+W06000018,Caerphilly,local_authority,742,548,684,769,1091,2026-05-01
+W06000019,Blaenau Gwent,local_authority,674,498,599,681,897,2026-05-01
+W06000020,Torfaen,local_authority,856,613,761,889,1373,2026-05-01
+W06000021,Monmouthshire,local_authority,992,729,920,1060,1494,2026-05-01
+W06000022,Newport,local_authority,952,694,858,956,1356,2026-05-01
+W06000023,Powys,local_authority,620,461,578,698,951,2026-05-01
+W06000024,Merthyr Tydfil,local_authority,754,553,641,722,1092,2026-05-01
+W92000004,Wales,country,836,629,771,880,1237,2026-05-01

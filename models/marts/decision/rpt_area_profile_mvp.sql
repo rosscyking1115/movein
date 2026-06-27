@@ -93,6 +93,10 @@ select
     round(
         rent.rent_monthly_gbp / {{ var('default_monthly_net_income_gbp') }}, 3
     ) as affordability_ratio,
+    rent.rent_1bed_gbp,
+    rent.rent_2bed_gbp,
+    rent.rent_3bed_gbp,
+    rent.rent_4plus_gbp,
     case
         when area_energy.epc_median_efficiency >= 92 then 'A'
         when area_energy.epc_median_efficiency >= 81 then 'B'

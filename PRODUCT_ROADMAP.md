@@ -185,7 +185,7 @@ Ordered by value-per-effort and dependency. Each phase ships something usable.
 
 | Phase | What | Depends on | Why first/next |
 |---|---|---|---|
-| **0 — Quick wins (no new infra)** | (a) **Listing checker, manual entry**, added to the *current Streamlit app*; (b) **ingest ONS PIPR per-bedroom rent** | nothing | Ships the most-requested feature now, with zero legal surface, and the per-bed data is the single biggest accuracy win — pure data work. |
+| **0 — Quick wins (no new infra)** ✅ **done** | (a) **Listing checker, manual entry** (`app/pages/3_Listing_checker.py`) — postcode → MSOA via postcodes.io, area scores + price-vs-local; (b) **ONS PIPR per-bedroom rent** ingested (`rent_1bed_gbp`…`rent_4plus_gbp`) so the price check matches the listing's bed count | nothing | Shipped the most-requested feature with zero legal surface; per-bed rent is the biggest accuracy win. |
 | **1 — API** | FastAPI on Fly.io: resolve / search / listing-check / meta, OpenAPI, caching, rate limits | Phase 0 data | The keystone every other client needs. |
 | **2 — Website** | Next.js/Vercel: search + compare + **the 7,264 programmatic area pages** (SEO growth engine) + listing checker | API | Where organic growth comes from; the area pages are the moat. |
 | **3 — Mobile** | Expo app: MVP screens + on-device re-rank; then **Rightmove share-in** (deep links → iOS share extension) | API | The native share-in is the standout differentiator. |
