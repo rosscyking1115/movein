@@ -41,7 +41,7 @@ over fragmented official UK datasets.
 | Convenience / amenities (OSM) | ✅ Built | Spatial roll-up of 437k OpenStreetMap amenities (nodes + way centroids) → per-MSOA nearest supermarket/school/GP/park/station + walkable-essentials count on 100% of MSOAs; committed fixture is the CI default, real via `--vars 'amenities_source: computed'` |
 | Door-to-door commute time | ⬜ Planned | Station proximity is already in the amenities layer; journey-time routing (TfL London-first) is the remaining refinement |
 | Explainable weighted neighbourhood score | ⬜ Planned | Phase 4 — component scores, confidence, "why this area" |
-| Renter-facing decision app (replacing the chart dashboard) | ⬜ Planned | Phase 5 — search, ranking, compare, source/caveat views |
+| Renter-facing decision app (`app/`) | ✅ Built | Streamlit workflow: set income/budget/priorities → live-reranked shortlist, per-area trade-off receipt, side-by-side compare, sources & caveats. Reads the committed `data/decision.duckdb` extract |
 
 The full reasoning lives in four planning docs at the repo root:
 
@@ -193,7 +193,7 @@ The phased plan lives in [`HOUSING_DECISION_SUPPORT_BUILD_PLAN.md`](HOUSING_DECI
 2. **Geography foundation** — ✅ done: real ONSPD snapshot, 99.999% Land Registry coverage, decision marts keyed on `area_id`, readable names.
 3. **MVP data sources** — ONS rent ✅; EPC energy ✅ (23.5M certificates); crime ✅ (17.1M police crimes); flood + planning ✅ (spatial point-in-polygon); convenience/amenities ✅ (437k OSM amenities → nearest-amenity + walkable count). Only door-to-door commute time remains (station proximity already covered).
 4. **Decision marts** — ✅ done: `rpt_neighbourhood_score` — explainable 0–100 component scores, a weighted overall that re-ranks on user weights, per-area confidence/coverage, and "why this area" fragments.
-5. **Renter-facing app** — search/preferences, ranked areas, compare, per-area "trade-off receipt", source/caveat views.
+5. **Renter-facing app** — ✅ done (`app/`): income/budget/priority inputs, a live-reranked shortlist, per-area trade-off receipt, side-by-side compare, and a sources & caveats page. Run with `streamlit run app/streamlit_app.py`.
 6. **Quality gates** — score-bound, coverage, and explanation-completeness tests; UI accessibility review.
 7. **Deployment** — Streamlit Cloud + GitHub Pages + slim committed extract.
 
