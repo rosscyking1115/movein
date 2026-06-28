@@ -68,6 +68,46 @@ export const getArea = cache(
     getJson<Area>(`/v1/areas/${encodeURIComponent(msoa)}`),
 );
 
+/** getArea, but a clean null for unknown codes instead of throwing. */
+export async function getAreaOrNull(msoa: string): Promise<Area | null> {
+  try {
+    return await getArea(msoa);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
+  }
+}
+
+// The whole dataset, paginated out of /v1/search. Hubs and the link mesh group
+// over this until a slim /v1/areas/index endpoint exists. Because /v1/search is
+// POST (never fetch-cached), we memo at module scope with a TTL so every hub
+// render in a server process shares one ~37-request load, not its own.
+const ALL_TTL_MS = 60 * 60 * 1000;
+let allAreasCache: { at: number; promise: Promise<Area[]> } | null = null;
+
+async function fetchAllAreas(): Promise<Area[]> {
+  const PAGE = 200;
+  const out: Area[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const res = await search({ limit: PAGE, offset });
+    out.push(...res.results);
+    if (res.offset + res.limit >= res.total) break;
+  }
+  return out;
+}
+
+export function getAllAreas(): Promise<Area[]> {
+  const now = Date.now();
+  if (!allAreasCache || now - allAreasCache.at > ALL_TTL_MS) {
+    const promise = fetchAllAreas().catch((err) => {
+      allAreasCache = null; // don't cache a failed load
+      throw err;
+    });
+    allAreasCache = { at: now, promise };
+  }
+  return allAreasCache.promise;
+}
+
 export function resolvePostcode(postcode: string): Promise<ResolveResponse> {
   return getJson<ResolveResponse>(
     `/v1/areas/resolve?postcode=${encodeURIComponent(postcode)}`,

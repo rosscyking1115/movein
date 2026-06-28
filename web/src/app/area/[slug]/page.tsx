@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { ApiError, getArea } from "@/lib/api";
+import { getAreaOrNull } from "@/lib/api";
+import { regionSlug, townSlug } from "@/lib/geo";
 import { areaSlug, msoaFromSlug } from "@/lib/slug";
 import { completeness } from "@/lib/quality";
 import { answerSentence } from "@/lib/summary";
@@ -16,14 +17,7 @@ export const revalidate = 86400;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function load(slug: string): Promise<Area | null> {
-  try {
-    return await getArea(msoaFromSlug(slug));
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 404) return null;
-    throw err;
-  }
-}
+const load = (slug: string): Promise<Area | null> => getAreaOrNull(msoaFromSlug(slug));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -69,16 +63,40 @@ export default async function AreaPage({ params }: Props) {
       <div className="mt-10 rounded-card border border-rule bg-paper-raised p-5">
         <h2 className="text-sm font-semibold">Compare this with somewhere else</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Set your own priorities and see how {area.area_name} ranks against every
-          other neighbourhood.
+          Put {area.area_name} side by side with another area, or rank by your own
+          priorities.
         </p>
-        <Link
-          href={`/search?regions=${encodeURIComponent(area.region ?? "")}`}
-          className="mt-3 inline-block text-sm font-medium text-accent hover:underline"
-        >
-          Search areas in {area.region ?? "England & Wales"} →
-        </Link>
+        <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium text-accent">
+          <Link href={`/compare?areas=${area.area_id}`} className="hover:underline">
+            Compare {area.area_name} →
+          </Link>
+          <Link href="/search" className="hover:underline">
+            Rank by priorities →
+          </Link>
+        </div>
       </div>
+
+      {/* Link mesh: area → its town and region hubs (which list the neighbours). */}
+      {(area.local_authority_name || area.region) && (
+        <nav className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          {area.local_authority_name && (
+            <Link
+              href={`/town/${townSlug(area.local_authority_name)}`}
+              className="text-accent hover:underline"
+            >
+              Other areas in {area.local_authority_name} →
+            </Link>
+          )}
+          {area.region && (
+            <Link
+              href={`/rankings/${regionSlug(area.region)}`}
+              className="text-accent hover:underline"
+            >
+              Best areas in {area.region} →
+            </Link>
+          )}
+        </nav>
+      )}
 
       <p className="mt-8 text-xs text-ink-faint">
         Area-level indicators only — not a property valuation, and never a

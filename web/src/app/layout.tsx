@@ -34,6 +34,7 @@ function Nav() {
         </Link>
         <div className="ml-auto flex items-center gap-5 text-ink-muted">
           <Link href="/search" className="hover:text-ink">Search</Link>
+          <Link href="/compare" className="hover:text-ink">Compare</Link>
           <Link href="/check" className="hover:text-ink">Check a listing</Link>
           <Link href="/methodology" className="hover:text-ink">Methodology</Link>
         </div>
@@ -52,9 +53,11 @@ function Footer() {
           &ldquo;safe&rdquo; or &ldquo;unsafe&rdquo;. Not a property valuation.
         </p>
         <div className="mt-4 flex flex-wrap gap-4">
+          <Link href="/search" className="hover:text-ink">Search areas</Link>
+          <Link href="/rankings" className="hover:text-ink">Rankings</Link>
+          <Link href="/compare" className="hover:text-ink">Compare</Link>
           <Link href="/methodology" className="hover:text-ink">Methodology</Link>
           <Link href="/methodology#sources" className="hover:text-ink">Data sources</Link>
-          <Link href="/search" className="hover:text-ink">Search areas</Link>
         </div>
       </div>
     </footer>

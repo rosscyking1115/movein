@@ -4,6 +4,43 @@ import { answerSentence } from "./summary";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 
+/** ItemList + BreadcrumbList for a ranking/hub page. */
+export function rankingJsonLd(
+  opts: {
+    title: string;
+    path: string;
+    crumbs: { name: string; path: string }[];
+    items: { name: string; path: string }[];
+  },
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ItemList",
+        name: opts.title,
+        url: `${SITE_URL}${opts.path}`,
+        numberOfItems: opts.items.length,
+        itemListElement: opts.items.map((it, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: it.name,
+          url: `${SITE_URL}${it.path}`,
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: opts.crumbs.map((c, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: c.name,
+          item: `${SITE_URL}${c.path}`,
+        })),
+      },
+    ],
+  };
+}
+
 /** schema.org Place + BreadcrumbList for an area page, as a @graph. */
 export function areaJsonLd(area: Area, slug: string): Record<string, unknown> {
   const url = `${SITE_URL}/area/${slug}`;
