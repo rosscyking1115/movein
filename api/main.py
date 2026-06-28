@@ -7,6 +7,8 @@ Interactive docs at /docs. Indicators only — never a "safe/unsafe" verdict.
 
 from __future__ import annotations
 
+import os
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -33,10 +35,13 @@ app = FastAPI(
         "not a property valuation, never a safe/unsafe label."
     ),
 )
-# Open CORS for the MVP; tighten to the website/app origins before launch.
+# CORS allowlist from CORS_ALLOW_ORIGINS (comma-separated). Defaults to "*" for
+# local dev; set it to the website origin(s) in production, e.g.
+#   CORS_ALLOW_ORIGINS=https://www.example.com,https://example.com
+_origins = [o.strip() for o in os.getenv("CORS_ALLOW_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins or ["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

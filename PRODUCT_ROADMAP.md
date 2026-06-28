@@ -97,7 +97,11 @@ normalisation + clean 404s for out-of-scope (Scotland/NI/retired).
 > price-led hubs, the area↔town↔rent↔region internal-link mesh, and an expanded
 > sitemap (~7,100 URLs). A slim `GET /v1/areas/index` endpoint now backs the hubs
 > in one cacheable request (was 37 POSTs to `/v1/search`).
-> **Backlog:** deploy (Vercel + Fly.io — needs account/domain decisions).
+> **Deploy:** prepped — see [`DEPLOY.md`](DEPLOY.md). Web → **Vercel** (root dir
+> `web/`), API → **Fly.io** (`api/fly.toml`). API CORS is env-configurable
+> (`CORS_ALLOW_ORIGINS`); portable security headers in `web/next.config.ts`.
+> **Remaining:** a Vercel account + a domain name (then set the two env vars and
+> deploy). Optional Cloudflare in front for CDN/WAF/rate-limiting.
 
 **Stack: Next.js App Router on Vercel**, RSC-first, TypeScript, Tailwind. Rendering
 chosen per route: SSG (home/methodology), **ISR for the ~7,264 area pages**
