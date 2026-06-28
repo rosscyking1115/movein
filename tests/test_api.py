@@ -27,6 +27,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["components"]), 5)
 
+    def test_areas_index(self) -> None:
+        response = client.get("/v1/areas/index")
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertGreater(body["count"], 7000)
+        self.assertEqual(body["count"], len(body["areas"]))
+        self.assertIn("area_id", body["areas"][0])
+
     def test_area_lookup_and_404(self) -> None:
         code = _an_area_code()
         ok = client.get(f"/v1/areas/{code}")

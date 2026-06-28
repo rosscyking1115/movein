@@ -1,9 +1,15 @@
-# Fly.io config for the API. Run `fly launch --no-deploy` once to claim an app
-# name (Fly names are global), then `fly deploy`. Scales to zero when idle.
+# Fly.io config for the API. Deploy from the REPO ROOT (the Dockerfile copies
+# api/ + data/decision.duckdb, so the build context must be the root):
+#   fly apps create uk-housing-decision-support-api    # one-time, claim the name
+#   fly deploy --config api/fly.toml                   # build + ship
+# Scales to zero when idle.
 app = "uk-housing-decision-support-api"
 primary_region = "lhr"
 
 [build]
+  # Path is relative to THIS config file (api/), while the build context is the
+  # working dir you run `fly deploy` from (the repo root) — so the Dockerfile's
+  # `COPY api/ ... data/decision.duckdb` resolve against the root.
   dockerfile = "Dockerfile"
 
 [http_service]

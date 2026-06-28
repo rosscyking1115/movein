@@ -7,6 +7,8 @@ Interactive docs at /docs. Indicators only — never a "safe/unsafe" verdict.
 
 from __future__ import annotations
 
+import os
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -14,6 +16,7 @@ from fastapi.responses import RedirectResponse
 from . import data, postcodes, scoring
 from .models import (
     Area,
+    AreaIndexResponse,
     ListingCheckRequest,
     ListingCheckResponse,
     Meta,
@@ -32,10 +35,13 @@ app = FastAPI(
         "not a property valuation, never a safe/unsafe label."
     ),
 )
-# Open CORS for the MVP; tighten to the website/app origins before launch.
+# CORS allowlist from CORS_ALLOW_ORIGINS (comma-separated). Defaults to "*" for
+# local dev; set it to the website origin(s) in production, e.g.
+#   CORS_ALLOW_ORIGINS=https://www.example.com,https://example.com
+_origins = [o.strip() for o in os.getenv("CORS_ALLOW_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins or ["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -85,6 +91,17 @@ def resolve_postcode(postcode: str = Query(..., min_length=5, description="UK po
         msoa_code=location["msoa_code"],
         msoa_name=location.get("msoa_name"),
         area=Area(**record),
+    )
+
+
+# Declared before /v1/areas/{msoa_code} so the literal path wins the match.
+@app.get("/v1/areas/index", response_model=AreaIndexResponse, tags=["areas"])
+def areas_index() -> AreaIndexResponse:
+    records = [Area(**data.clean(record)) for record in data.areas().to_dict("records")]
+    return AreaIndexResponse(
+        count=len(records),
+        data_vintage=data.data_vintage(),
+        areas=records,
     )
 
 
