@@ -1,0 +1,28 @@
+# The API image only needs api/ + data/decision.duckdb (see api/Dockerfile),
+# but the build context is the repo root. Keep the upload small: drop the huge
+# warehouse, virtualenvs, the web app, and build/cache cruft.
+.git
+.github
+.venv
+.venv-1
+**/__pycache__
+.pytest_cache
+.mypy_cache
+*.pyc
+
+# web app — not part of the API image
+web
+
+# heavy / derived data the API does not ship
+data/warehouse.duckdb
+data/dashboard.duckdb
+data/raw
+data/duckdb_tmp
+target
+logs
+dbt_packages
+
+# docs / local
+*.md
+.env
+.env.*

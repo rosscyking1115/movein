@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/*
+  "Map-and-ledger": warm paper, ink text, one restrained accent. Numbers are set
+  in mono to read like a ledger. Score bars are a single neutral fill — we show
+  indicators, never colour-coded safe/unsafe verdicts.
+*/
+@theme {
+  --color-paper: #faf8f3;
+  --color-paper-raised: #ffffff;
+  --color-ink: #1b1a17;
+  --color-ink-muted: #6c665a;
+  --color-ink-faint: #9a9384;
+  --color-rule: rgba(27, 26, 23, 0.12);
+  --color-rule-strong: rgba(27, 26, 23, 0.28);
+  --color-accent: #1f5c4d; /* deep ledger green */
+  --color-accent-soft: #e4ece7;
+  --color-track: rgba(27, 26, 23, 0.08);
+  --color-flag: #9a5b1f; /* amber, for "above typical" emphasis only */
+  --color-flag-soft: #f4e9dc;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-card: 10px;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Tabular figures everywhere numbers matter. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* Hairline ledger rule used between fact rows. */
+.rule-b {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}

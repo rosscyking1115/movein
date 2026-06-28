@@ -52,6 +52,15 @@ class Meta(BaseModel):
     note: str
 
 
+class AreaIndexResponse(BaseModel):
+    """The whole dataset in one cacheable GET — for clients that group/rank/index
+    over all areas (the website's hubs, sitemap, link mesh)."""
+
+    count: int
+    data_vintage: str
+    areas: list[Area]
+
+
 class SearchRequest(BaseModel):
     weights: dict[str, float] = Field(
         default_factory=dict,
