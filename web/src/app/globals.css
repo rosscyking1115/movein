@@ -64,17 +64,6 @@
   --font-mono: var(--ff-mono), ui-monospace, monospace;
 
   --radius-card: 16px;
-
-  /* TEMPORARY: aliases from the pre-MoveIn tokens so not-yet-restyled pages keep
-     rendering during the phased migration. Remove in Phase E once every page is
-     on the new tokens. */
-  --color-ink-muted: var(--ink2);
-  --color-ink-faint: var(--muted);
-  --color-paper-raised: var(--card);
-  --color-rule-strong: var(--rule2);
-  --color-accent-soft: var(--accent-wash);
-  --color-track: var(--bar-track);
-  --color-flag: var(--caution);
 }
 
 html {
@@ -91,6 +80,13 @@ body {
 ::selection {
   background: var(--accent);
   color: #fff;
+}
+
+/* Visible keyboard focus everywhere (mouse clicks stay clean via :focus-visible). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 /* Mono numerals — scores, rents, distances, ranks read like a ledger. */

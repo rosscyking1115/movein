@@ -83,21 +83,21 @@ export default async function RentTownPage({ params }: Props) {
       {/* LA-level averages per bedroom. */}
       <section className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {averages.map((a) => (
-          <div key={a.key} className="rounded-card border border-rule bg-paper-raised px-4 py-3">
-            <div className="text-xs uppercase tracking-wide text-ink-faint">{a.label}</div>
+          <div key={a.key} className="rounded-card border border-rule bg-card px-4 py-3">
+            <div className="text-xs uppercase tracking-wide text-muted">{a.label}</div>
             <div className="tnum mt-1 text-xl font-semibold">{rentPerMonth(a.avg)}</div>
           </div>
         ))}
       </section>
 
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
           By neighbourhood — cheapest first
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[34rem] border-collapse text-sm">
             <thead>
-              <tr className="rule-b text-ink-faint">
+              <tr className="rule-b text-muted">
                 <th className="px-3 py-2 text-left font-normal">Neighbourhood</th>
                 {BEDS.map((b) => (
                   <th key={b.key} className="px-3 py-2 text-right font-normal">{b.label}</th>

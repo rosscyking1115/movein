@@ -42,8 +42,8 @@ export default async function ComparePage({ searchParams }: Props) {
 
       <div className="mt-8">
         {areas.length === 0 ? (
-          <div className="rounded-card border border-rule bg-paper-raised px-5 py-10 text-center">
-            <p className="text-sm text-ink-muted">
+          <div className="rounded-card border border-rule bg-card px-5 py-10 text-center">
+            <p className="text-sm text-ink2">
               Add an area above to start comparing, or{" "}
               <Link href="/search" className="text-accent underline">
                 browse the rankings
@@ -56,7 +56,7 @@ export default async function ComparePage({ searchParams }: Props) {
         )}
       </div>
 
-      <p className="mt-8 text-xs text-ink-faint">
+      <p className="mt-8 text-xs text-muted">
         Bold marks the highest score in each row. Facts are shown without a
         winner — area-level indicators only, never a &ldquo;safe&rdquo;/&ldquo;unsafe&rdquo;
         verdict or a property valuation.

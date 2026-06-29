@@ -72,7 +72,7 @@ export default async function RegionRanking({ params }: Props) {
 
       {towns.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
             By local authority
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -80,10 +80,10 @@ export default async function RegionRanking({ params }: Props) {
               <Link
                 key={t.name}
                 href={`/town/${townSlug(t.name)}`}
-                className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper-raised px-3 py-1 text-sm hover:border-rule-strong"
+                className="inline-flex items-center gap-2 rounded-full border border-rule bg-card px-3 py-1 text-sm hover:border-rule2"
               >
                 {t.name}
-                <span className="tnum text-xs text-ink-faint">{score(t.avgScore)}</span>
+                <span className="tnum text-xs text-muted">{score(t.avgScore)}</span>
               </Link>
             ))}
           </div>
@@ -91,7 +91,7 @@ export default async function RegionRanking({ params }: Props) {
       )}
 
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
           Top {top.length} areas
         </h2>
         <div className="space-y-2">
