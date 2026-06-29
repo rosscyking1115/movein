@@ -1,0 +1,68 @@
+# Data-refresh deploy — the automated half of a data refresh.
+#
+# A refresh is: rebuild the decision marts on real sources, run
+# scripts/build_decision_db.py, and commit the new data/decision.duckdb to main
+# (the data-build half is local — it needs the large/licensed source files; see
+# DEPLOY.md § Data refresh). This workflow then ships it:
+#   1. Redeploy the API to Fly.io (bakes the new extract into the image).
+#   2. Trigger a Vercel rebuild so the website's ISR pages + sitemap regenerate
+#      against the fresh data.
+#
+# Triggers on a push to main that changes the extract, or manually.
+#
+# Required repository secrets:
+#   FLY_API_TOKEN          — `fly tokens create deploy` (scoped to the app)
+#   VERCEL_DEPLOY_HOOK_URL — Vercel → Settings → Git → Deploy Hooks (optional;
+#                            skipped if unset)
+
+name: Data-refresh deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/decision.duckdb"
+  workflow_dispatch:
+
+# Never run two deploys at once; let the latest win.
+concurrency:
+  group: refresh-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy API to Fly.io
+        # Run from the repo root: api/Dockerfile copies api/ + data/decision.duckdb,
+        # and the root .dockerignore keeps the build context small.
+        run: flyctl deploy --config api/fly.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Wait for the API to report the new data
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS -m 10 https://uk-housing-decision-support-api.fly.dev/healthz; then
+              echo; echo "API healthy"; exit 0
+            fi
+            echo "waiting for API… ($i)"; sleep 6
+          done
+          echo "API did not become healthy in time" >&2; exit 1
+
+      - name: Trigger website rebuild (Vercel)
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$HOOK" ]; then
+            curl -fsSL -X POST "$HOOK" && echo "Vercel rebuild triggered"
+          else
+            echo "VERCEL_DEPLOY_HOOK_URL not set — skipping website rebuild."
+            echo "ISR will pick up the new data within its revalidate window (1 day)."
+          fi

@@ -78,6 +78,38 @@ per-IP rate-limiting. Keep "respect existing cache headers" on so Next's ISR
   the receipt; check `view-source` for `<title>`, canonical and JSON-LD.
 - A sparse area page is `noindex` (quality gate); a complete one is `index`.
 
+## Data refresh
+
+A refresh has two halves: a **local data build** (manual — it needs the large /
+licensed source files), then an **automated deploy** (`.github/workflows/refresh.yml`).
+
+**1. Build the new extract locally** (from the repo root, with the real sources
+prepared — see the per-source steps in
+[`HOUSING_DECISION_SUPPORT_DATA_SOURCES.md`](HOUSING_DECISION_SUPPORT_DATA_SOURCES.md)):
+
+```bash
+dbt run --select rpt_area_profile_mvp rpt_neighbourhood_score \
+  --vars '{geo_source: onspd, epc_source: bulk, crime_source: bulk, \
+           constraints_source: computed, amenities_source: computed}'
+python scripts/build_decision_db.py        # → data/decision.duckdb
+```
+
+**2. Commit `data/decision.duckdb` to `main`.** That push triggers
+`refresh.yml`, which **redeploys the API to Fly** (baking in the new extract) and
+then **triggers a Vercel rebuild** so the website's ISR pages + sitemap regenerate
+against the fresh data. You can also run it manually (Actions → *Data-refresh
+deploy* → Run workflow).
+
+**Required repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | How to get it |
+|---|---|
+| `FLY_API_TOKEN` | `fly tokens create deploy` (scoped to the app). |
+| `VERCEL_DEPLOY_HOOK_URL` | Vercel → Settings → Git → Deploy Hooks (optional — without it, ISR picks up the new data within a day). |
+
+The API exposes the extract's date as `data_vintage` in `/healthz` and `/v1/meta`,
+so you can confirm a refresh shipped.
+
 ## Architecture notes
 
 - `web` is a pure HTTP client of the API. Client components call same-origin

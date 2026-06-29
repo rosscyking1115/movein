@@ -1,17 +1,21 @@
-"""Build the slim DuckDB the renter-facing app reads (app/).
+"""Build the slim read-only DuckDB extract the API ships (api/).
 
 Exports the two decision marts — rpt_neighbourhood_score (component + overall
 scores, one row per MSOA) and rpt_area_profile_mvp (the raw per-area facts) —
 from the full warehouse into data/decision.duckdb. Both are ~7,300 rows, so the
-file stays small enough to commit for Streamlit Cloud (kit lesson L13).
+file stays small enough to commit and bake into the API image.
 
-Build the decision marts on real data first, e.g.:
+This is the last step of a data refresh. Build the decision marts on real data
+first, e.g.:
     dbt run --select rpt_area_profile_mvp rpt_neighbourhood_score \\
         --vars '{geo_source: onspd, epc_source: bulk, crime_source: bulk, \\
                  constraints_source: computed, amenities_source: computed}'
 
 Then:
     python scripts/build_decision_db.py
+
+Committing the refreshed data/decision.duckdb to main triggers the deploy half
+of the refresh (.github/workflows/refresh.yml) — see DEPLOY.md § Data refresh.
 """
 
 from __future__ import annotations
