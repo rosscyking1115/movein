@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Spectral:wght@400;500;600&family=Playfair+Display:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:#EFF1EC;}
+  @keyframes pl-fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;}}
+  ::selection{background:#13476B;color:#fff;}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+
+  <header style="position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--rule);">
+    <div style="max-width:1140px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;gap:28px;">
+      <button onClick="{{ goHome }}" aria-label="MoveIn home" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:6px 0;">
+        <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true" style="display:block;">
+          <path d="M4 27 L24 11 L44 27" fill="none" stroke="var(--ink)" stroke-width="4.2" stroke-linejoin="miter"/>
+          <line x1="9" y1="27" x2="9" y2="41" stroke="var(--ink)" stroke-width="4.2"/>
+          <line x1="39" y1="27" x2="39" y2="41" stroke="var(--ink)" stroke-width="4.2"/>
+          <line x1="7" y1="41.5" x2="41" y2="41.5" stroke="var(--accent)" stroke-width="4"/>
+        </svg>
+        <span style="font-family:var(--display);font-weight:var(--display-wt);font-size:25px;letter-spacing:.2px;color:var(--ink);line-height:1;">MoveIn</span>
+      </button>
+      <nav style="display:flex;gap:2px;flex-wrap:wrap;margin-left:4px;">
+        <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+          <button onClick="{{ n.onClick }}" style="{{ n.style }}">{{ n.label }}</button>
+        </sc-for>
+      </nav>
+      <button onClick="{{ toggleTheme }}" aria-label="Toggle colour theme" style="margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--rule);color:var(--ink2);border-radius:999px;padding:7px 13px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;min-height:34px;">{{ themeLabel }}</button>
+    </div>
+  </header>
+
+  <main style="max-width:1140px;margin:0 auto;padding:0 24px;">
+
+    <!-- ================= HOME ================= -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="">
+      <div style="padding:74px 0 26px;max-width:780px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:22px;">Official open data · England &amp; Wales</div>
+        <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(40px,6.6vw,74px);line-height:1.02;letter-spacing:-.01em;color:var(--ink);margin:0 0 22px;">Every score, shown next&nbsp;to the fact behind&nbsp;it.</h1>
+        <p style="font-size:19px;line-height:1.6;color:var(--ink2);max-width:600px;margin:0 0 34px;">MoveIn reads a neighbourhood from official open data and lays it out like a surveyor's schedule — five indicators, each beside the figure it came from. We show you the evidence; we never tell you a place is &ldquo;good&rdquo; or &ldquo;safe.&rdquo;</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;max-width:520px;">
+          <div style="flex:1;min-width:230px;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--rule2);border-radius:10px;padding:6px 6px 6px 16px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);">Postcode</span>
+            <input value="{{ postcode }}" onInput="{{ onPostcode }}" onKeyDown="{{ onPostcodeKey }}" placeholder="e.g. M21 9HZ" aria-label="Enter a postcode" style="flex:1;min-width:0;border:none;background:none;outline:none;font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--ink);letter-spacing:.04em;padding:8px 0;">
+            <button onClick="{{ jumpPostcode }}" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:0 18px;height:42px;cursor:pointer;font-family:'IBM Plex Sans';font-weight:600;font-size:14px;">Look up</button>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:11px;">Or explore a worked example →
+          <button onClick="{{ goExample }}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;font-family:'IBM Plex Sans';text-decoration:underline;text-underline-offset:3px;padding:0;">Chorlton, Manchester</button>
+        </div>
+      </div>
+
+      <!-- receipt thesis preview -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin:44px 0 20px;align-items:start;">
+        <div style="background:var(--card);border:1px solid var(--rule2);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(20,30,40,.04);">
+          <div style="height:9px;background:repeating-linear-gradient(90deg,var(--rule2) 0 5px,transparent 5px 11px);opacity:.6;"></div>
+          <div style="padding:20px 22px 24px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">The trade-off receipt</div>
+            <sc-for list="{{ heroRows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid var(--rule);">
+                <div style="min-width:0;">
+                  <div style="font-size:14px;font-weight:600;color:var(--ink);">{{ r.name }}</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px;">{{ r.fact }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                  <div style="width:74px;height:6px;background:var(--bar-track);border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ r.w }};background:var(--bar);border-radius:3px;"></div></div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:var(--ink);min-width:42px;text-align:right;">{{ r.scoreText }}</div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="font-size:11px;color:var(--muted);margin-top:14px;font-style:italic;">Sourced from ONS, Police.uk, EPC Register &amp; the Environment Agency.</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <sc-for list="{{ principles }}" as="p" hint-placeholder-count="3">
+            <div style="background:var(--card2);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);margin-bottom:7px;">{{ p.no }}</div>
+              <div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:4px;">{{ p.title }}</div>
+              <div style="font-size:14px;line-height:1.55;color:var(--ink2);">{{ p.body }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:18px 0 70px;">
+        <span style="font-size:14px;color:var(--ink2);">Popular right now:</span>
+        <sc-for list="{{ popularAreas }}" as="a" hint-placeholder-count="5">
+          <button onClick="{{ a.open }}" style="background:var(--card);border:1px solid var(--rule2);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;color:var(--ink);font-family:'IBM Plex Sans';min-height:34px;">{{ a.label }}</button>
+        </sc-for>
+        <button onClick="{{ goMethod }}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;font-weight:600;font-family:'IBM Plex Sans';text-decoration:underline;text-underline-offset:3px;margin-left:6px;">How we score →</button>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ================= AREA (hero) ================= -->
+    <sc-if value="{{ isArea }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="padding:30px 0 70px;">
+      <!-- breadcrumb -->
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button onClick="{{ goHome }}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12px;padding:0;">England &amp; Wales</button><span>›</span>
+        <span>{{ area.region }}</span><span>›</span>
+        <span style="color:var(--ink2);">{{ area.la }}</span>
+      </div>
+
+      <!-- header block -->
+      <div style="display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--rule2);padding-bottom:26px;">
+        <div style="max-width:560px;">
+          <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(38px,5.4vw,60px);line-height:1.04;letter-spacing:-.01em;color:var(--ink);margin:0 0 10px;">{{ area.name }}</h1>
+          <div style="font-size:16px;color:var(--ink2);">{{ area.la }} · {{ area.region }}</div>
+          <p style="font-size:17px;line-height:1.6;color:var(--ink2);margin:18px 0 0;">{{ area.citable }}</p>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:26px;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Composite</div>
+            <div style="display:flex;align-items:baseline;gap:2px;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:62px;font-weight:500;line-height:.9;color:var(--ink);letter-spacing:-.02em;">{{ area.overall }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:var(--muted);">/100</span>
+            </div>
+            <div style="font-size:13px;color:var(--ink2);margin-top:8px;">Rank <span style="font-family:'IBM Plex Mono',monospace;color:var(--ink);">{{ area.rankText }}</span> of 7,264</div>
+          </div>
+          <div style="border-left:1px solid var(--rule2);padding-left:24px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Confidence</div>
+            <div style="display:flex;gap:4px;align-items:flex-end;height:24px;">
+              <span style="width:7px;height:24px;border-radius:2px;background:{{ area.confDot1 }};"></span>
+              <span style="width:7px;height:18px;border-radius:2px;background:{{ area.confDot2 }};"></span>
+              <span style="width:7px;height:12px;border-radius:2px;background:{{ area.confDot3 }};"></span>
+            </div>
+            <div style="font-size:13px;color:var(--ink2);margin-top:8px;text-transform:capitalize;">{{ area.conf }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- two-column: receipt + what this means -->
+      <div style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:26px;margin-top:30px;align-items:start;">
+
+        <!-- RECEIPT -->
+        <div style="background:var(--card);border:1px solid var(--rule2);border-radius:16px;overflow:hidden;box-shadow:0 2px 5px rgba(20,30,40,.05);">
+          <div style="height:11px;background:repeating-linear-gradient(90deg,var(--rule2) 0 6px,transparent 6px 13px);opacity:.55;"></div>
+          <div style="padding:22px 26px 8px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);">Indicator schedule</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);">score · 0–100 · neutral scale</div>
+          </div>
+          <div style="padding:0 26px 8px;">
+            <sc-for list="{{ receiptRows }}" as="r" hint-placeholder-count="5">
+              <div style="border-top:1px solid var(--rule);padding:18px 0;background:{{ r.rowBg }};">
+                <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+                  <div style="min-width:180px;flex:1;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <span style="font-size:16px;font-weight:600;color:var(--ink);">{{ r.name }}</span>
+                      <sc-if value="{{ r.chosen }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 6px;">Your priority</span></sc-if>
+                    </div>
+                    <div style="font-size:13px;color:var(--muted);margin-top:3px;">{{ r.measure }}<sup style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:10px;margin-left:2px;">{{ r.footnote }}</sup></div>
+                    <div style="font-size:13.5px;line-height:1.5;color:var(--ink2);margin-top:9px;max-width:340px;">{{ r.plain }}</div>
+                  </div>
+                  <div style="width:200px;flex-shrink:0;">
+                    <sc-if value="{{ r.hasData }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:baseline;justify-content:flex-end;gap:3px;">
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;color:var(--ink);">{{ r.scoreText }}</span>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);">/100</span>
+                      </div>
+                      <div style="position:relative;height:7px;background:var(--bar-track);border-radius:4px;margin-top:9px;overflow:visible;">
+                        <div style="height:100%;width:{{ r.barWidth }};background:var(--bar);border-radius:4px;"></div>
+                        <span title="median area = 50" style="position:absolute;top:-3px;left:50%;width:1px;height:13px;background:var(--rule2);"></span>
+                      </div>
+                      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:7px;font-family:'IBM Plex Mono',monospace;">{{ r.percentileTick }}</div>
+                    </sc-if>
+                    <sc-if value="{{ r.noData }}" hint-placeholder-val="{{ false }}">
+                      <div style="text-align:right;">
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:var(--muted);">—</span>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px;border:1px dashed var(--rule2);border-radius:6px;padding:5px 8px;display:inline-block;">No data · not scored as zero</div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+                <!-- provenance fact -->
+                <div style="display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:14px;background:var(--card2);border:1px solid var(--rule);border-radius:9px;padding:11px 14px;flex-wrap:wrap;">
+                  <div style="font-size:12px;color:var(--muted);">{{ r.factLabel }}</div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <sc-if value="{{ r.isEpc }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;color:{{ r.epcText }};background:{{ r.epcColor }};border-radius:5px;padding:3px 10px;">{{ r.factValue }}</span>
+                    </sc-if>
+                    <sc-if value="{{ r.notEpc }}" hint-placeholder-val="{{ true }}">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;color:var(--ink);">{{ r.factValue }}</span>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <!-- provenance footer -->
+          <div style="border-top:1px solid var(--rule2);background:var(--card2);padding:16px 26px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;">Sources</div>
+            <sc-for list="{{ sourceNotes }}" as="s" hint-placeholder-count="5">
+              <div style="font-size:12px;color:var(--ink2);line-height:1.7;"><sup style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">{{ s.no }}</sup> {{ s.text }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- RIGHT RAIL: what this means + facts -->
+        <div style="display:flex;flex-direction:column;gap:20px;position:sticky;top:78px;">
+
+          <!-- WHAT THIS MEANS FOR YOU -->
+          <div style="background:var(--accent-wash);border:1px solid var(--accent-line);border-radius:16px;padding:22px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">What this means for you</div>
+            <p style="font-size:15.5px;line-height:1.6;color:var(--ink);margin:0 0 16px;">{{ area.summary }}</p>
+
+            <div style="font-size:13px;color:var(--ink2);margin-bottom:10px;">Tell us what matters and we'll reorder the schedule:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;">
+              <sc-for list="{{ priorityChips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.toggle }}" aria-pressed="{{ c.active }}" style="{{ c.style }}">{{ c.label }}</button>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ priorityPanel.hasAny }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;border-top:1px solid var(--accent-line);padding-top:14px;">
+                <div style="font-size:13px;color:var(--ink2);margin-bottom:10px;">{{ priorityPanel.intro }}</div>
+                <sc-for list="{{ priorityPanel.items }}" as="i" hint-placeholder-count="2">
+                  <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0;width:30px;">{{ i.scoreText }}</span>
+                    <span style="font-size:13.5px;line-height:1.5;color:var(--ink);">{{ i.sentence }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="font-size:11.5px;line-height:1.55;color:var(--muted);margin-top:16px;border-top:1px solid var(--accent-line);padding-top:12px;">These are indicators, not a verdict. We never label an area &ldquo;good,&rdquo; &ldquo;bad,&rdquo; &ldquo;safe&rdquo; or &ldquo;unsafe&rdquo; — only higher or lower than other areas, with the figure shown.</div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div style="display:flex;gap:10px;">
+            <button onClick="{{ area.compareThis }}" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;cursor:pointer;font-family:'IBM Plex Sans';font-weight:600;font-size:14px;min-height:46px;">Compare</button>
+            <button onClick="{{ goSearch }}" style="flex:1;background:var(--card);color:var(--ink);border:1px solid var(--rule2);border-radius:10px;padding:13px;cursor:pointer;font-family:'IBM Plex Sans';font-weight:600;font-size:14px;min-height:46px;">Rank by my priorities</button>
+          </div>
+
+          <!-- FACTS GRID -->
+          <div style="background:var(--card);border:1px solid var(--rule2);border-radius:16px;padding:22px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:16px;">Full schedule of facts</div>
+            <dl style="margin:0;">
+              <div style="margin-bottom:18px;">
+                <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;">Rent by bedrooms</div>
+                <sc-for list="{{ rentRows }}" as="r" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;border-top:1px solid var(--rule);padding:8px 0;">
+                    <dt style="font-size:13.5px;color:var(--ink2);">{{ r.label }}</dt>
+                    <dd style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);">{{ r.value }}</dd>
+                  </div>
+                </sc-for>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;">Area facts</div>
+                <sc-for list="{{ factRows }}" as="r" hint-placeholder-count="6">
+                  <div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--rule);padding:8px 0;">
+                    <dt style="font-size:13.5px;color:var(--ink2);">{{ r.label }}</dt>
+                    <dd style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);text-align:right;">{{ r.value }}</dd>
+                  </div>
+                </sc-for>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- mesh links -->
+      <div style="margin-top:34px;border-top:1px solid var(--rule2);padding-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px;">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;">Nearby in {{ area.la }}</div>
+          <sc-for list="{{ meshNearby }}" as="m" hint-placeholder-count="3">
+            <button onClick="{{ m.open }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">{{ m.label }} →</button>
+          </sc-for>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;">Browse</div>
+          <button onClick="{{ goRankings }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">Best areas in {{ area.region }} →</button>
+          <button onClick="{{ area.rentLink }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">Rent in {{ area.town }} by bedroom →</button>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;">Checking a listing?</div>
+          <button onClick="{{ area.checkThis }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">Is an asking price sane for {{ area.town }}? →</button>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ================= SEARCH ================= -->
+    <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="padding:34px 0 70px;">
+      <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,4.6vw,52px);line-height:1.05;color:var(--ink);margin:0 0 8px;">Rank by what matters to you</h1>
+      <p style="font-size:17px;color:var(--ink2);max-width:620px;margin:0 0 28px;">Move the sliders. The list re-ranks live — and shows you exactly which indicators did the lifting. No black box.</p>
+
+      <div style="display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:26px;align-items:start;">
+        <!-- controls -->
+        <div style="position:sticky;top:78px;background:var(--card);border:1px solid var(--rule2);border-radius:16px;padding:22px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:18px;">Weight each indicator</div>
+          <sc-for list="{{ weights }}" as="w" hint-placeholder-count="5">
+            <div style="margin-bottom:18px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;">
+                <label for="{{ w.id }}" style="font-size:14px;font-weight:600;color:var(--ink);">{{ w.label }}</label>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);">{{ w.tag }}</span>
+              </div>
+              <input id="{{ w.id }}" type="range" min="0" max="5" step="1" value="{{ w.value }}" onInput="{{ w.onInput }}" aria-label="{{ w.label }} importance" style="width:100%;accent-color:var(--accent);height:24px;cursor:pointer;">
+            </div>
+          </sc-for>
+          <div style="border-top:1px solid var(--rule);margin-top:6px;padding-top:16px;">
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Filters</div>
+            <label for="budget" style="font-size:13px;color:var(--ink2);display:block;margin-bottom:6px;">Max 2-bed rent · <span style="font-family:'IBM Plex Mono',monospace;color:var(--ink);">{{ budgetLabel }}</span></label>
+            <input id="budget" type="range" min="600" max="2200" step="50" value="{{ budget }}" onInput="{{ onBudget }}" style="width:100%;accent-color:var(--accent);height:24px;cursor:pointer;margin-bottom:16px;">
+            <div style="font-size:13px;color:var(--ink2);margin-bottom:8px;">Region</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <sc-for list="{{ regionChips }}" as="r" hint-placeholder-count="4">
+                <button onClick="{{ r.toggle }}" style="{{ r.style }}">{{ r.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <!-- results -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+            <div style="font-size:14px;color:var(--ink2);"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink);">{{ resultCount }}</span> areas match your filters</div>
+            <div style="font-size:13px;color:var(--muted);">Match = your weighting of the 5 indicators</div>
+          </div>
+          <div style="position:relative;{{ resultsBoxStyle }}">
+            <sc-for list="{{ rankedAreas }}" as="a" hint-placeholder-count="6">
+              <div style="{{ a.cardStyle }}">
+                <div style="display:flex;gap:16px;align-items:center;height:100%;background:var(--card);border:1px solid var(--rule2);border-radius:14px;padding:16px 18px;">
+                  <div style="text-align:center;flex-shrink:0;width:54px;">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);">{{ a.rankLabel }}</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:500;color:var(--ink);line-height:1;">{{ a.matchText }}</div>
+                    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">match</div>
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <button onClick="{{ a.open }}" style="background:none;border:none;cursor:pointer;text-align:left;padding:0;font-family:var(--display);font-weight:var(--display-wt);font-size:23px;color:var(--ink);line-height:1.1;">{{ a.name }}</button>
+                    <div style="font-size:13px;color:var(--muted);margin-top:2px;">{{ a.la }} · {{ a.region }} · <span style="font-family:'IBM Plex Mono',monospace;color:var(--ink2);">{{ a.rent }}</span> 2-bed</div>
+                    <div style="display:flex;gap:14px;margin-top:11px;flex-wrap:wrap;">
+                      <sc-for list="{{ a.bars }}" as="b" hint-placeholder-count="5">
+                        <div style="min-width:48px;">
+                          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between;gap:6px;"><span>{{ b.abbr }}</span><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink2);">{{ b.val }}</span></div>
+                          <div style="height:4px;width:100%;background:var(--bar-track);border-radius:2px;overflow:hidden;"><div style="height:100%;width:{{ b.w }};background:{{ b.fill }};border-radius:2px;"></div></div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <button onClick="{{ a.open }}" aria-label="Open area" style="flex-shrink:0;align-self:center;background:var(--card2);border:1px solid var(--rule2);color:var(--ink);border-radius:8px;width:38px;height:38px;cursor:pointer;font-size:16px;">→</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ================= COMPARE ================= -->
+    <sc-if value="{{ isCompare }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="padding:34px 0 70px;">
+      <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,4.6vw,52px);line-height:1.05;color:var(--ink);margin:0 0 8px;">Weigh places side by side</h1>
+      <p style="font-size:17px;color:var(--ink2);max-width:620px;margin:0 0 22px;">Up to four areas. Scores show the row leader in bold; facts stay neutral.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px;align-items:center;">
+        <span style="font-size:13px;color:var(--muted);margin-right:4px;">Areas:</span>
+        <sc-for list="{{ compareChips }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.toggle }}" style="{{ c.style }}">{{ c.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="overflow-x:auto;border:1px solid var(--rule2);border-radius:16px;background:var(--card);">
+        <table style="width:100%;border-collapse:collapse;min-width:560px;">
+          <thead>
+            <tr>
+              <th scope="col" style="text-align:left;padding:18px 20px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--rule2);position:sticky;left:0;background:var(--card);">Indicator</th>
+              <sc-for list="{{ compareHeaders }}" as="h" hint-placeholder-count="3">
+                <th scope="col" style="text-align:left;padding:18px 18px;border-bottom:1px solid var(--rule2);min-width:140px;vertical-align:bottom;">
+                  <button onClick="{{ h.open }}" style="background:none;border:none;cursor:pointer;text-align:left;padding:0;font-family:var(--display);font-weight:var(--display-wt);font-size:21px;color:var(--ink);line-height:1.05;display:block;">{{ h.name }}</button>
+                  <span style="font-size:12px;color:var(--muted);">{{ h.la }}</span>
+                </th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="padding:11px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--card2);">Scores · neutral 0–100</td></tr>
+            <sc-for list="{{ compareScoreRows }}" as="row" hint-placeholder-count="6">
+              <tr>
+                <th scope="row" style="text-align:left;padding:13px 20px;font-size:14px;font-weight:500;color:var(--ink2);border-bottom:1px solid var(--rule);position:sticky;left:0;background:var(--card);">{{ row.label }}</th>
+                <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="3">
+                  <td style="padding:13px 18px;border-bottom:1px solid var(--rule);">
+                    <div style="display:flex;align-items:center;gap:9px;">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:{{ c.weight }};color:{{ c.color }};min-width:30px;">{{ c.text }}</span>
+                      <div style="flex:1;height:5px;background:var(--bar-track);border-radius:3px;overflow:hidden;max-width:70px;"><div style="height:100%;width:{{ c.w }};background:var(--bar);border-radius:3px;"></div></div>
+                    </div>
+                  </td>
+                </sc-for>
+              </tr>
+            </sc-for>
+            <tr><td colspan="5" style="padding:11px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--card2);">Facts · the evidence</td></tr>
+            <sc-for list="{{ compareFactRows }}" as="row" hint-placeholder-count="6">
+              <tr>
+                <th scope="row" style="text-align:left;padding:13px 20px;font-size:14px;font-weight:500;color:var(--ink2);border-bottom:1px solid var(--rule);position:sticky;left:0;background:var(--card);">{{ row.label }}</th>
+                <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="3">
+                  <td style="padding:13px 18px;border-bottom:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);">{{ c.text }}</td>
+                </sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:14px;">Bold marks the highest score in each row — a reference point, not a recommendation.</div>
+    </section>
+    </sc-if>
+
+    <!-- ================= CHECK ================= -->
+    <sc-if value="{{ isCheck }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="padding:34px 0 70px;">
+      <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,4.6vw,52px);line-height:1.05;color:var(--ink);margin:0 0 8px;">Does this listing's price stack up?</h1>
+      <p style="font-size:17px;color:var(--ink2);max-width:640px;margin:0 0 28px;">An area-level sanity check — how an asking price sits against what's typical locally. Asking price isn't achieved price; treat this as a prompt to look closer, not a valuation.</p>
+
+      <div style="display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:26px;align-items:start;">
+        <div style="background:var(--card);border:1px solid var(--rule2);border-radius:16px;padding:22px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:18px;">The listing</div>
+          <label for="ckarea" style="font-size:13px;color:var(--ink2);display:block;margin-bottom:6px;">Area</label>
+          <select id="ckarea" value="{{ check.areaSlug }}" onChange="{{ check.onArea }}" style="width:100%;border:1px solid var(--rule2);background:var(--card2);color:var(--ink);border-radius:9px;padding:11px 12px;font-family:'IBM Plex Sans';font-size:14px;margin-bottom:18px;min-height:44px;">
+            <sc-for list="{{ check.areaOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.slug }}">{{ o.label }}</option></sc-for>
+          </select>
+
+          <div style="font-size:13px;color:var(--ink2);margin-bottom:7px;">Deal</div>
+          <div role="group" style="display:flex;gap:6px;margin-bottom:18px;">
+            <sc-for list="{{ check.dealOptions }}" as="d" hint-placeholder-count="2"><button onClick="{{ d.set }}" aria-pressed="{{ d.active }}" style="{{ d.style }}">{{ d.label }}</button></sc-for>
+          </div>
+
+          <div style="font-size:13px;color:var(--ink2);margin-bottom:7px;">Bedrooms</div>
+          <div role="group" style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;">
+            <sc-for list="{{ check.bedOptions }}" as="b" hint-placeholder-count="4"><button onClick="{{ b.set }}" aria-pressed="{{ b.active }}" style="{{ b.style }}">{{ b.label }}</button></sc-for>
+          </div>
+
+          <label for="ckask" style="font-size:13px;color:var(--ink2);display:block;margin-bottom:6px;">{{ check.askLabel }}</label>
+          <div style="display:flex;align-items:center;gap:8px;border:1px solid var(--rule2);background:var(--card2);border-radius:9px;padding:0 14px;">
+            <span style="font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:16px;">£</span>
+            <input id="ckask" inputmode="numeric" value="{{ check.asking }}" onInput="{{ check.onAsking }}" placeholder="{{ check.askPlaceholder }}" style="flex:1;border:none;background:none;outline:none;font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--ink);padding:12px 0;min-width:0;">
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <!-- price band -->
+          <div style="background:var(--card);border:1px solid {{ band.borderColor }};border-radius:16px;padding:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:{{ band.accent }};margin-bottom:7px;">{{ band.headline }}</div>
+                <div style="font-size:15px;color:var(--ink2);max-width:380px;line-height:1.5;">{{ band.note }}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:12px;color:var(--muted);">Local typical</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;color:var(--ink);">{{ band.typicalText }}</div>
+              </div>
+            </div>
+            <!-- band scale -->
+            <div style="position:relative;height:46px;margin:8px 0 6px;">
+              <div style="position:absolute;top:18px;left:0;right:0;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--card2),var(--bar-track));border:1px solid var(--rule);"></div>
+              <div style="position:absolute;top:14px;left:50%;width:2px;height:16px;background:var(--rule2);transform:translateX(-50%);"></div>
+              <div style="position:absolute;top:34px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">typical</div>
+              <div style="position:absolute;top:8px;left:{{ band.markerLeft }};transform:translateX(-50%);transition:left .5s cubic-bezier(.22,.61,.36,1);">
+                <div style="width:3px;height:28px;background:{{ band.accent }};border-radius:2px;margin:0 auto;"></div>
+              </div>
+              <div style="position:absolute;top:-2px;left:{{ band.markerLeft }};transform:translateX(-50%);transition:left .5s cubic-bezier(.22,.61,.36,1);font-family:'IBM Plex Mono',monospace;font-size:12px;color:{{ band.accent }};white-space:nowrap;font-weight:600;">{{ band.askingText }}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:2px;">
+              <span>well below</span><span>below</span><span>around</span><span>above</span><span>well above</span>
+            </div>
+          </div>
+
+          <!-- mini area receipt -->
+          <div style="background:var(--card);border:1px solid var(--rule2);border-radius:16px;padding:22px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <div style="font-family:var(--display);font-weight:var(--display-wt);font-size:24px;color:var(--ink);">{{ check.area.name }}</div>
+              <button onClick="{{ check.openArea }}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;font-family:'IBM Plex Sans';">Full receipt →</button>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">{{ check.area.la }} · {{ check.area.region }}</div>
+            <sc-for list="{{ checkRows }}" as="r" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--rule);padding:10px 0;">
+                <div style="font-size:13.5px;color:var(--ink);min-width:110px;">{{ r.name }}</div>
+                <div style="flex:1;height:5px;background:var(--bar-track);border-radius:3px;overflow:hidden;max-width:120px;"><div style="height:100%;width:{{ r.w }};background:var(--bar);border-radius:3px;"></div></div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink2);min-width:46px;text-align:right;">{{ r.scoreText }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ================= RANKINGS ================= -->
+    <sc-if value="{{ isRankings }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="padding:34px 0 70px;">
+      <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,4.6vw,52px);line-height:1.05;color:var(--ink);margin:0 0 8px;">Areas, by composite score</h1>
+      <p style="font-size:17px;color:var(--ink2);max-width:620px;margin:0 0 24px;">A starting point, not a league of &ldquo;best places.&rdquo; The composite weights all five indicators equally — change the weighting on <button onClick="{{ goSearch }}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:17px;font-family:'IBM Plex Sans';text-decoration:underline;text-underline-offset:3px;padding:0;">search</button>.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;">
+        <sc-for list="{{ rankRegionChips }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.toggle }}" style="{{ r.style }}">{{ r.label }}</button></sc-for>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <sc-for list="{{ rankingRows }}" as="a" hint-placeholder-count="8">
+          <div style="display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--rule2);border-radius:14px;padding:16px 20px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);width:64px;flex-shrink:0;">#{{ a.nationalRank }}</div>
+            <div style="flex:1;min-width:0;">
+              <button onClick="{{ a.open }}" style="background:none;border:none;cursor:pointer;text-align:left;padding:0;font-family:var(--display);font-weight:var(--display-wt);font-size:22px;color:var(--ink);">{{ a.name }}</button>
+              <div style="font-size:13px;color:var(--muted);">{{ a.la }} · {{ a.region }}</div>
+            </div>
+            <div style="display:none;gap:12px;{{ rankBarsDisplay }}">
+              <sc-for list="{{ a.bars }}" as="b" hint-placeholder-count="5">
+                <div style="width:46px;">
+                  <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">{{ b.abbr }}</div>
+                  <div style="height:4px;background:var(--bar-track);border-radius:2px;overflow:hidden;"><div style="height:100%;width:{{ b.w }};background:{{ b.fill }};border-radius:2px;"></div></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;color:var(--ink);line-height:1;">{{ a.overall }}</div>
+              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">composite</div>
+            </div>
+            <button onClick="{{ a.open }}" aria-label="Open area" style="flex-shrink:0;background:var(--card2);border:1px solid var(--rule2);color:var(--ink);border-radius:8px;width:38px;height:38px;cursor:pointer;font-size:16px;">→</button>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ================= METHODOLOGY ================= -->
+    <sc-if value="{{ isMethod }}" hint-placeholder-val="{{ true }}">
+    <section key="{{ routeKey }}" style="padding:34px 0 70px;max-width:780px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;">Methodology</div>
+      <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,5vw,56px);line-height:1.04;color:var(--ink);margin:0 0 18px;">How we read a neighbourhood — and what we refuse to do.</h1>
+      <p style="font-size:18px;line-height:1.6;color:var(--ink2);margin:0 0 40px;">MoveIn turns official open data into five 0–100 indicators. Every indicator sits beside the raw figure it came from, so you can audit it. We don't blend the figures into a judgement of whether a place is &ldquo;good.&rdquo;</p>
+
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">The five indicators</div>
+      <sc-for list="{{ methodIndicators }}" as="m" hint-placeholder-count="5">
+        <div style="border-top:1px solid var(--rule2);padding:18px 0;display:grid;grid-template-columns:160px 1fr;gap:20px;">
+          <div>
+            <div style="font-size:16px;font-weight:600;color:var(--ink);">{{ m.name }}</div>
+            <div style="font-size:12px;color:var(--accent);font-family:'IBM Plex Mono',monospace;margin-top:4px;">{{ m.source }}</div>
+          </div>
+          <div style="font-size:14.5px;line-height:1.6;color:var(--ink2);">{{ m.body }}</div>
+        </div>
+      </sc-for>
+
+      <div style="margin-top:44px;background:var(--accent-wash);border:1px solid var(--accent-line);border-radius:16px;padding:26px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;">What we deliberately don't do</div>
+        <sc-for list="{{ refusals }}" as="r" hint-placeholder-count="4">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0;">
+            <span style="color:var(--accent);font-size:18px;line-height:1.3;flex-shrink:0;">✕</span>
+            <span style="font-size:15px;line-height:1.55;color:var(--ink);">{{ r.text }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:36px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">Data sources</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+          <sc-for list="{{ dataSources }}" as="s" hint-placeholder-count="6">
+            <div style="border:1px solid var(--rule2);border-radius:11px;padding:14px 16px;background:var(--card);">
+              <div style="font-size:14px;font-weight:600;color:var(--ink);">{{ s.name }}</div>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:3px;">{{ s.detail }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--rule);background:var(--card2);margin-top:20px;">
+    <div style="max-width:1140px;margin:0 auto;padding:34px 24px 44px;">
+      <div style="display:flex;flex-wrap:wrap;gap:30px;justify-content:space-between;">
+        <div style="max-width:420px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true" style="display:block;"><path d="M4 27 L24 11 L44 27" fill="none" stroke="var(--ink)" stroke-width="4.2" stroke-linejoin="miter"/><line x1="9" y1="27" x2="9" y2="41" stroke="var(--ink)" stroke-width="4.2"/><line x1="39" y1="27" x2="39" y2="41" stroke="var(--ink)" stroke-width="4.2"/><line x1="7" y1="41.5" x2="41" y2="41.5" stroke="var(--accent)" stroke-width="4"/></svg>
+            <span style="font-family:var(--display);font-weight:var(--display-wt);font-size:21px;color:var(--ink);">MoveIn</span>
+          </div>
+          <p style="font-size:13.5px;line-height:1.6;color:var(--ink2);margin:0;">MoveIn shows official open data as indicators, never verdicts. Every figure links to its source. Area-level only — this is not a property valuation.</p>
+        </div>
+        <div style="display:flex;gap:48px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;">Explore</div>
+            <sc-for list="{{ footerNav }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.onClick }}" style="display:block;background:none;border:none;color:var(--ink2);cursor:pointer;font-size:13.5px;padding:4px 0;font-family:'IBM Plex Sans';text-align:left;">{{ f.label }}</button></sc-for>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;">Sources</div>
+            <sc-for list="{{ footerSources }}" as="s" hint-placeholder-count="5"><div style="font-size:13.5px;color:var(--ink2);padding:4px 0;">{{ s }}</div></sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:30px;border-top:1px solid var(--rule);padding-top:18px;">Worked example using representative open-data figures · England &amp; Wales · 7,264 areas</div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:820},&quot;displayFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Playfair Display&quot;,&quot;Newsreader&quot;,&quot;Spectral&quot;],&quot;default&quot;:&quot;Playfair Display&quot;,&quot;tsType&quot;:&quot;'Playfair Display'|'Newsreader'|'Spectral'&quot;,&quot;section&quot;:&quot;Typography&quot;},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Appearance&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state = {
+      route: 'home',
+      slug: 'chorlton',
+      dark: (props.defaultTheme === 'dark'),
+      displayFont: props.displayFont || 'Playfair Display',
+      postcode: '',
+      priorities: {},                 // area-page chosen priorities
+      weights: { affordability:3, safety:3, energy:3, flood:2, convenience:3 },
+      budget: 2200,
+      region: 'All',                  // search filter
+      rankRegion: 'All',
+      compare: ['jesmond','chorlton','bedminster'],
+      check: { areaSlug:'chorlton', deal:'rent', beds:'2', asking:'' },
+      reduce: false,
+      vw: 1200
+    };
+  }
+
+  componentDidMount(){
+    try { this.setState({ reduce: window.matchMedia('(prefers-reduced-motion: reduce)').matches, vw: window.innerWidth }); } catch(e){}
+    this._onResize = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount(){ if(this._onResize) window.removeEventListener('resize', this._onResize); }
+
+  // ---------- data ----------
+  get AREAS(){
+    return [
+      {slug:'jesmond', name:'Newcastle 022', town:'Newcastle', la:'Newcastle upon Tyne', region:'North East', overall:76, rank:412, conf:'high',
+        s:{affordability:68,safety:70,energy:58,flood:86,convenience:82}, p:{affordability:66,safety:72,energy:56,flood:84,convenience:83},
+        f:{rentAll:900,r1:640,r2:900,r3:1200,r4:1650,sale:285000,epc:'D',crime:64,flood:'Low',amen:124,dStation:1.0,dShop:0.4,dGp:0.5,dSchool:0.6,dGreen:0.4}},
+      {slug:'chorlton', name:'Chorlton 028', town:'Manchester', la:'Manchester', region:'North West', overall:74, rank:588, conf:'high',
+        s:{affordability:58,safety:66,energy:56,flood:90,convenience:88}, p:{affordability:55,safety:64,energy:53,flood:86,convenience:90},
+        f:{rentAll:1080,r1:760,r2:1080,r3:1430,r4:1880,sale:318000,epc:'D',crime:71,flood:'Low',amen:146,dStation:1.2,dShop:0.3,dGp:0.5,dSchool:0.4,dGreen:0.3}},
+      {slug:'bedminster', name:'Bristol 045', town:'Bristol', la:'Bristol', region:'South West', overall:73, rank:731, conf:'high',
+        s:{affordability:48,safety:60,energy:58,flood:76,convenience:87}, p:{affordability:44,safety:58,energy:56,flood:72,convenience:88},
+        f:{rentAll:1320,r1:980,r2:1320,r3:1700,r4:2250,sale:360000,epc:'C',crime:81,flood:'Medium',amen:150,dStation:1.1,dShop:0.3,dGp:0.4,dSchool:0.5,dGreen:0.4}},
+      {slug:'kingsheath', name:'Birmingham 098', town:'Birmingham', la:'Birmingham', region:'West Midlands', overall:72, rank:905, conf:'medium',
+        s:{affordability:70,safety:60,energy:54,flood:88,convenience:80}, p:{affordability:69,safety:58,energy:51,flood:85,convenience:81},
+        f:{rentAll:880,r1:640,r2:880,r3:1180,r4:1600,sale:248000,epc:'D',crime:79,flood:'Low',amen:118,dStation:1.6,dShop:0.5,dGp:0.6,dSchool:0.5,dGreen:0.7}},
+      {slug:'headingley', name:'Headingley 014', town:'Leeds', la:'Leeds', region:'Yorkshire and The Humber', overall:71, rank:1024, conf:'high',
+        s:{affordability:64,safety:58,energy:52,flood:82,convenience:84}, p:{affordability:62,safety:55,energy:49,flood:78,convenience:86},
+        f:{rentAll:950,r1:680,r2:950,r3:1250,r4:1700,sale:265000,epc:'D',crime:86,flood:'Low',amen:132,dStation:2.1,dShop:0.4,dGp:0.6,dSchool:0.5,dGreen:0.6}},
+      {slug:'cathays', name:'Cardiff 030', town:'Cardiff', la:'Cardiff', region:'Wales', overall:70, rank:1187, conf:'high',
+        s:{affordability:66,safety:54,energy:55,flood:78,convenience:86}, p:{affordability:64,safety:52,energy:53,flood:74,convenience:88},
+        f:{rentAll:920,r1:660,r2:920,r3:1280,r4:1750,sale:250000,epc:'D',crime:92,flood:'Medium',amen:138,dStation:1.4,dShop:0.3,dGp:0.5,dSchool:0.4,dGreen:0.5}},
+      {slug:'stokenewington', name:'Hackney 011', town:'London', la:'Hackney', region:'London', overall:69, rank:1342, conf:'high',
+        s:{affordability:28,safety:52,energy:60,flood:74,convenience:95}, p:{affordability:22,safety:50,energy:58,flood:70,convenience:97},
+        f:{rentAll:1850,r1:1500,r2:1850,r3:2400,r4:3200,sale:720000,epc:'C',crime:102,flood:'Medium',amen:188,dStation:0.6,dShop:0.2,dGp:0.3,dSchool:0.3,dGreen:0.2}},
+      {slug:'cowley', name:'Oxford 016', town:'Oxford', la:'Oxford', region:'South East', overall:67, rank:1610, conf:'high',
+        s:{affordability:32,safety:62,energy:57,flood:70,convenience:83}, p:{affordability:28,safety:60,energy:55,flood:66,convenience:85},
+        f:{rentAll:1550,r1:1150,r2:1550,r3:1980,r4:2600,sale:470000,epc:'C',crime:70,flood:'Medium',amen:126,dStation:2.4,dShop:0.4,dGp:0.5,dSchool:0.4,dGreen:0.5}},
+      {slug:'hydepark', name:'Leeds 021', town:'Leeds', la:'Leeds', region:'Yorkshire and The Humber', overall:64, rank:2480, conf:'medium',
+        s:{affordability:72,safety:46,energy:48,flood:80,convenience:82}, p:{affordability:71,safety:42,energy:45,flood:76,convenience:83},
+        f:{rentAll:820,r1:600,r2:820,r3:1150,r4:1550,sale:215000,epc:'E',crime:118,flood:'Low',amen:110,dStation:1.8,dShop:0.4,dGp:0.6,dSchool:0.5,dGreen:0.6}},
+      {slug:'ashton', name:'Preston 010', town:'Preston', la:'Preston', region:'North West', overall:62, rank:3150, conf:'medium',
+        s:{affordability:82,safety:56,energy:50,flood:72,convenience:null}, p:{affordability:83,safety:54,energy:47,flood:68,convenience:null},
+        f:{rentAll:620,r1:460,r2:620,r3:820,r4:1100,sale:142000,epc:'E',crime:88,flood:'Medium',amen:null,dStation:2.6,dShop:0.7,dGp:0.9,dSchool:0.8,dGreen:1.1}}
+    ];
+  }
+
+  get IND(){
+    return [
+      {key:'affordability', name:'Affordability', short:'Aff', measure:'Median rents & sale prices', source:'ONS Private Rents & HM Land Registry, 2024',
+        high:p=>`More affordable than ${p}% of areas in England & Wales`, low:'pricier than most areas in England & Wales', factLabel:'Typical 2-bed rent'},
+      {key:'safety', name:'Recorded crime', short:'Crime', measure:'Police recorded crime rate', source:'Police.uk / Home Office, 2024',
+        high:p=>`Lower recorded crime than ${p}% of areas in England & Wales`, low:'higher recorded crime than most areas', factLabel:'Recorded crime rate'},
+      {key:'energy', name:'Home energy', short:'Energy', measure:'Median EPC rating', source:'EPC Register (DLUHC), 2024',
+        high:p=>`More energy-efficient homes than ${p}% of areas`, low:'less energy-efficient homes than most areas', factLabel:'Median EPC rating'},
+      {key:'flood', name:'Flood risk', short:'Flood', measure:'Environment Agency flood map', source:'Environment Agency, 2024',
+        high:p=>`Lower flood risk than ${p}% of areas in England & Wales`, low:'higher flood risk than most areas', factLabel:'Flood risk category'},
+      {key:'convenience', name:'Getting around', short:'Around', measure:'Walkable amenities & key distances', source:'OS Open & OpenStreetMap, 2024',
+        high:p=>`More within walking distance than ${p}% of areas`, low:'fewer amenities within walking distance than most areas', factLabel:'Walkable amenities'}
+    ];
+  }
+
+  // ---------- helpers ----------
+  byslug(s){ return this.AREAS.find(a=>a.slug===s) || this.AREAS[0]; }
+  gbp(n){ return '£'+Number(n).toLocaleString('en-GB'); }
+  mo(n){ return this.gbp(n)+'/mo'; }
+  epcColor(l){ return {A:'#008054',B:'#19B459',C:'#8DCE46',D:'#FFD500',E:'#FCAA65',F:'#F18A31',G:'#E9153B'}[l]||'#999'; }
+  epcText(l){ return (l==='C'||l==='D')?'#1a1a1a':(l==='E'||l==='F'||l==='G'||l==='B'||l==='A')?'#fff':'#1a1a1a'; }
+  factValue(a,key){
+    const f=a.f;
+    if(key==='affordability') return this.mo(f.r2);
+    if(key==='safety') return f.crime+' / 1,000';
+    if(key==='energy') return f.epc;
+    if(key==='flood') return f.flood;
+    if(key==='convenience') return f.amen==null ? '—' : f.amen+' places';
+    return '';
+  }
+  matchScore(a, w){
+    const keys=Object.keys(w); let sum=0,wsum=0;
+    keys.forEach(k=>{ const sc=a.s[k]; if(sc!=null && w[k]>0){ sum+=sc*w[k]; wsum+=w[k]; } });
+    if(wsum===0){ // equal fallback over available
+      let s2=0,c=0; keys.forEach(k=>{ if(a.s[k]!=null){ s2+=a.s[k]; c++; }}); return c?Math.round(s2/c):0;
+    }
+    return Math.round(sum/wsum);
+  }
+  summaryFor(a){
+    const inds=this.IND;
+    const present=inds.filter(i=>a.p[i.key]!=null);
+    const top=[...present].sort((x,y)=>a.p[y.key]-a.p[x.key])[0];
+    const low=[...present].sort((x,y)=>a.p[x.key]-a.p[y.key])[0];
+    let s = top.high(a.p[top.key]).replace('More','more').replace('Lower','lower');
+    s = top.high(a.p[top.key]);
+    return `${s}, but ${low.low}. ${a.f.flood==='Low'?'Flood risk here is low':'Worth checking the flood data'} — see the figures on the left.`;
+  }
+  citableFor(a){
+    const inds=this.IND; const present=inds.filter(i=>a.p[i.key]!=null);
+    const top=[...present].sort((x,y)=>a.p[y.key]-a.p[x.key])[0];
+    return `${a.name} in ${a.la} ranks ${a.rank.toLocaleString('en-GB')} of 7,264 areas in England & Wales — ${top.high(a.p[top.key]).toLowerCase()}.`;
+  }
+  chipBtn(active){
+    return `display:inline-flex;align-items:center;min-height:34px;padding:7px 13px;border-radius:999px;cursor:pointer;font-family:'IBM Plex Sans';font-size:13px;font-weight:500;`
+      + (active
+        ? `background:var(--accent);color:#fff;border:1px solid var(--accent);`
+        : `background:var(--card);color:var(--ink2);border:1px solid var(--rule2);`);
+  }
+  navBtn(active){
+    return `background:none;border:none;cursor:pointer;font-family:'IBM Plex Sans';font-size:14px;font-weight:${active?'600':'500'};padding:8px 12px;border-radius:8px;min-height:38px;`
+      + (active ? `color:var(--ink);background:var(--card2);` : `color:var(--muted);`);
+  }
+
+  go(route, slug){ const s={route}; if(slug) s.slug=slug; this.setState(s); try{window.scrollTo(0,0);}catch(e){} }
+
+  // ---------- render ----------
+  renderVals(){
+    const S=this.state, A=this.AREAS, IND=this.IND, self=this;
+    const dark=S.dark;
+    const isNarrow = S.vw < 880;
+
+    const light = {ink:'#172026',ink2:'#3C4A52',muted:'#6B7A82',paper:'#EFF1EC',card:'#FBFCFA',card2:'#F2F4EF',rule:'#DEE2D9',rule2:'#CDD3C7',accent:'#13476B',accentWash:'#E9EFF2',accentLine:'#C2D2DC',bar:'#4A5C64',barTrack:'#E0E4DB',caution:'#9A5B1E'};
+    const night = {ink:'#E9EDE7',ink2:'#B6C0B8',muted:'#7F8C84',paper:'#0F1518',card:'#161D22',card2:'#1B242A',rule:'#283238',rule2:'#37434A',accent:'#7BB8DA',accentWash:'#16242C',accentLine:'#2C414C',bar:'#9DAEB6',barTrack:'#283238',caution:'#D69A5A'};
+    const t = dark?night:light;
+    const displayStacks = {
+      'Playfair Display': "'Playfair Display',Georgia,'Times New Roman',serif",
+      'Newsreader': "'Newsreader',Georgia,'Times New Roman',serif",
+      'Spectral': "'Spectral',Georgia,'Times New Roman',serif"
+    };
+    const displayWeights = { 'Playfair Display':700, 'Newsreader':600, 'Spectral':600 };
+    const fontKey = this.props.displayFont || S.displayFont;
+    const displayStack = displayStacks[fontKey] || displayStacks['Playfair Display'];
+    const displayWt = displayWeights[fontKey] || 700;
+    const rootStyle = [
+      `--display:${displayStack}`,`--display-wt:${displayWt}`,
+      `--ink:${t.ink}`,`--ink2:${t.ink2}`,`--muted:${t.muted}`,`--paper:${t.paper}`,`--card:${t.card}`,`--card2:${t.card2}`,
+      `--rule:${t.rule}`,`--rule2:${t.rule2}`,`--accent:${t.accent}`,`--accent-wash:${t.accentWash}`,`--accent-line:${t.accentLine}`,
+      `--bar:${t.bar}`,`--bar-track:${t.barTrack}`,`--caution:${t.caution}`,
+      `background:var(--paper)`,`color:var(--ink)`,`min-height:100vh`,`font-family:'IBM Plex Sans',system-ui,sans-serif`,`-webkit-font-smoothing:antialiased`,`transition:background .3s,color .3s`
+    ].join(';');
+
+    const trans = S.reduce ? 'none' : 'transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s ease';
+
+    // nav
+    const routes=[['home','Home'],['area','Area'],['search','Search'],['compare','Compare'],['check','Check'],['rankings','Rankings'],['methodology','Method']];
+    const navItems = routes.map(([r,l])=>({label:l, style:this.navBtn(S.route===r||(r==='area'&&S.route==='area')), onClick:()=>this.go(r==='area'?'area':r, r==='area'?S.slug:undefined)}));
+
+    // ===== HOME =====
+    const hArea=this.byslug('chorlton');
+    const heroRows = IND.slice(0,4).map(i=>({name:i.name, fact:`${i.factLabel}: ${this.factValue(hArea,i.key)}`, scoreText:(hArea.s[i.key]==null?'—':hArea.s[i.key]+'/100'), w:(hArea.s[i.key]||0)+'%'}));
+    const principles=[
+      {no:'01',title:'A score is a line item',body:'Each indicator sits beside the figure it came from — auditable, never asked to be trusted alone.'},
+      {no:'02',title:'Indicators, not verdicts',body:'Higher or lower than other areas. We never say a place is good, bad, safe or unsafe.'},
+      {no:'03',title:'Gaps stay visible',body:'Missing data lowers confidence — it is shown as “no data,” never scored as zero.'}
+    ];
+    const popularAreas = ['jesmond','stokenewington','headingley','cathays','cowley'].map(s=>{const a=this.byslug(s);return{label:a.town+' · '+a.name.split(' ')[1], open:()=>this.go('area',s)};});
+
+    // ===== AREA =====
+    const area0=this.byslug(S.slug);
+    const confN = {high:3,medium:2,low:1}[area0.conf];
+    const cdot=(n)=> confN>=n? 'var(--accent)':'var(--rule2)';
+    const prio=S.priorities;
+    const anyPrio=Object.keys(prio).filter(k=>prio[k]).length>0;
+    // ordered indicators: chosen first
+    const ordered=[...IND].sort((a,b)=>{ const pa=prio[a.key]?1:0, pb=prio[b.key]?1:0; return pb-pa; });
+    const sourceList=[];
+    const receiptRows = ordered.map((i)=>{
+      const has=area0.s[i.key]!=null;
+      const fnIndex = IND.findIndex(x=>x.key===i.key)+1;
+      sourceList[fnIndex-1]={no:fnIndex, text:i.source};
+      const isEpc=i.key==='energy';
+      return {
+        name:i.name, measure:i.measure, footnote:String(fnIndex),
+        plain: has? i.high(area0.p[i.key]) : 'Not enough records to score this indicator yet — it lowers our confidence, but we don’t treat it as a low score.',
+        hasData:has, noData:!has,
+        scoreText: has? String(area0.s[i.key]) : '—',
+        barWidth:(area0.s[i.key]||0)+'%',
+        percentileTick: has? `top ${100-area0.p[i.key]}% · median = 50` : '',
+        chosen: !!prio[i.key],
+        rowBg: prio[i.key] ? 'var(--accent-wash)' : 'transparent',
+        factLabel:i.factLabel,
+        factValue:this.factValue(area0,i.key),
+        isEpc:isEpc, notEpc:!isEpc,
+        epcColor:isEpc?this.epcColor(area0.f.epc):'transparent',
+        epcText:isEpc?this.epcText(area0.f.epc):'#000'
+      };
+    });
+    const sourceNotes = IND.map((i,ix)=>({no:String(ix+1), text:i.source}));
+    const priorityChips = IND.map(i=>({key:i.key, label:({affordability:'Budget',safety:'Lower crime',energy:'Energy bills',flood:'Flood resilience',convenience:'Getting around'})[i.key], active:!!prio[i.key], style:this.chipBtn(!!prio[i.key]), toggle:()=>{const np={...S.priorities};np[i.key]=!np[i.key];this.setState({priorities:np});}}));
+    const chosenInds=IND.filter(i=>prio[i.key] && area0.s[i.key]!=null);
+    const chosenLabels=chosenInds.map(i=>({affordability:'budget',safety:'lower crime',energy:'energy bills',flood:'flood resilience',convenience:'getting around'})[i.key]);
+    const priorityPanel={
+      hasAny:anyPrio && chosenInds.length>0,
+      intro: chosenLabels.length? `Against the things you picked (${chosenLabels.join(', ')}), here's how this area reads:` : '',
+      items: chosenInds.map(i=>({scoreText:area0.s[i.key]+'', sentence:i.high(area0.p[i.key])+'.'}))
+    };
+    const rentRows=[
+      {label:'1 bedroom',value:this.mo(area0.f.r1)},{label:'2 bedrooms',value:this.mo(area0.f.r2)},
+      {label:'3 bedrooms',value:this.mo(area0.f.r3)},{label:'4+ bedrooms',value:this.mo(area0.f.r4)}
+    ];
+    const factRows=[
+      {label:'Median sale price',value:this.gbp(area0.f.sale)},
+      {label:'Median EPC rating',value:area0.f.epc},
+      {label:'Recorded crime',value:area0.f.crime+' /1,000'},
+      {label:'Flood risk',value:area0.f.flood},
+      {label:'Walkable amenities',value:area0.f.amen==null?'— no data':area0.f.amen+''},
+      {label:'Nearest station',value:area0.f.dStation.toFixed(1)+' km'},
+      {label:'Nearest GP',value:area0.f.dGp.toFixed(1)+' km'},
+      {label:'Nearest green space',value:area0.f.dGreen.toFixed(1)+' km'}
+    ];
+    const meshNearby = A.filter(a=>a.region===area0.region && a.slug!==area0.slug).slice(0,3).map(a=>({label:a.name, open:()=>this.go('area',a.slug)}));
+
+    const areaVM={
+      name:area0.name, la:area0.la, region:area0.region, town:area0.town,
+      overall:area0.overall, rankText:area0.rank.toLocaleString('en-GB'), conf:area0.conf,
+      confDot1:cdot(1),confDot2:cdot(2),confDot3:cdot(3),
+      citable:this.citableFor(area0), summary:this.summaryFor(area0),
+      compareThis:()=>{ const c=S.compare.includes(area0.slug)?S.compare:[area0.slug,...S.compare].slice(0,4); this.setState({compare:c,route:'compare'}); window.scrollTo(0,0); },
+      checkThis:()=>{ this.setState({route:'check', check:{...S.check, areaSlug:area0.slug}}); window.scrollTo(0,0); },
+      rentLink:()=>this.go('rankings'),
+    };
+
+    // ===== SEARCH =====
+    const W=S.weights;
+    const wlabels={affordability:'Affordability',safety:'Lower crime',energy:'Energy efficiency',flood:'Flood resilience',convenience:'Getting around'};
+    const wtag=(v)=>['Ignore','Minor','Some','Matters','High','Top'][v];
+    const weights=Object.keys(W).map(k=>({key:k, id:'w_'+k, label:wlabels[k], value:W[k], tag:wtag(W[k]), onInput:(e)=>{const v=parseInt(e.target.value,10);this.setState({weights:{...this.state.weights,[k]:v}});}}));
+    const regions=['All',...Array.from(new Set(A.map(a=>a.region)))];
+    const regionChips=regions.map(r=>({label:r==='All'?'All regions':r, toggle:()=>this.setState({region:r}), style:this.chipBtn(S.region===r)}));
+    // compute ranks among visible
+    const scored=A.map(a=>({a, ms:this.matchScore(a,W), visible:(a.f.r2<=S.budget) && (S.region==='All'||a.region===S.region)}));
+    const visibleSorted=scored.filter(x=>x.visible).sort((x,y)=>y.ms-x.ms || y.a.overall-x.a.overall);
+    const rankMap={}; visibleSorted.forEach((x,ix)=>rankMap[x.a.slug]=ix);
+    const ROW=isNarrow?186:150;
+    const rankedAreas=scored.map(x=>{
+      const a=x.a; const idx=rankMap[a.slug];
+      const vis=x.visible;
+      const ty=vis? idx*ROW : (visibleSorted.length)*ROW + 40;
+      const cardStyle=`position:absolute;left:0;right:0;top:0;height:${ROW-12}px;transform:translateY(${ty}px);transition:${trans};opacity:${vis?1:0};pointer-events:${vis?'auto':'none'};`;
+      const bars=IND.map(i=>({abbr:i.short, val:a.s[i.key]==null?'—':a.s[i.key], w:(a.s[i.key]||0)+'%', fill:prio? 'var(--bar)':'var(--bar)'}));
+      // highlight bars matching high weights
+      const bars2=IND.map(i=>({abbr:i.short, val:a.s[i.key]==null?'—':a.s[i.key], w:(a.s[i.key]||0)+'%', fill: W[i.key]>=4?'var(--accent)':'var(--bar)'}));
+      return {slug:a.slug, name:a.name, la:a.la, region:a.region, rent:this.mo(a.f.r2), matchText:String(x.ms), rankLabel:vis?('#'+(idx+1)):'—', cardStyle, bars:bars2, open:()=>this.go('area',a.slug)};
+    });
+    const resultCount=visibleSorted.length;
+    const resultsBoxStyle=`height:${Math.max(visibleSorted.length,1)*ROW}px;transition:height .4s ease;`;
+    const budgetLabel=this.gbp(S.budget)+(S.budget>=2200?'+':'')+'/mo';
+
+    // ===== COMPARE =====
+    const compareChips=A.map(a=>{const on=S.compare.includes(a.slug);return{label:a.town+' · '+a.name.split(' ')[1], style:this.chipBtn(on), toggle:()=>{let c=[...S.compare]; if(on){c=c.filter(s=>s!==a.slug);} else if(c.length<4){c.push(a.slug);} this.setState({compare:c});}};});
+    const cAreas=S.compare.map(s=>this.byslug(s));
+    const compareHeaders=cAreas.map(a=>({name:a.name, la:a.la, open:()=>this.go('area',a.slug)}));
+    const compareScoreRows=IND.map(i=>{
+      const vals=cAreas.map(a=>a.s[i.key]);
+      const max=Math.max(...vals.filter(v=>v!=null));
+      return {label:i.name, cells:cAreas.map(a=>{const v=a.s[i.key]; const lead=v!=null&&v===max; return {text:v==null?'—':String(v), w:(v||0)+'%', weight:lead?'700':'400', color:lead?'var(--ink)':'var(--ink2)'};})};
+    });
+    const compareFactRows=[
+      {label:'Typical 2-bed rent', get:a=>this.mo(a.f.r2)},
+      {label:'Median sale price', get:a=>this.gbp(a.f.sale)},
+      {label:'Median EPC', get:a=>a.f.epc},
+      {label:'Recorded crime /1,000', get:a=>String(a.f.crime)},
+      {label:'Flood risk', get:a=>a.f.flood},
+      {label:'Walkable amenities', get:a=>a.f.amen==null?'—':String(a.f.amen)},
+      {label:'Nearest station', get:a=>a.f.dStation.toFixed(1)+'km'}
+    ].map(r=>({label:r.label, cells:cAreas.map(a=>({text:r.get(a)}))}));
+
+    // ===== CHECK =====
+    const ck=S.check; const ckA=this.byslug(ck.areaSlug);
+    const ckRentKey={'1':'r1','2':'r2','3':'r3','4':'r4'}[ck.beds];
+    const typical = ck.deal==='rent' ? ckA.f[ckRentKey] : ckA.f.sale;
+    const askingNum = parseInt(String(ck.asking).replace(/[^0-9]/g,''),10);
+    let band;
+    const bandColor={info:'var(--rule2)',caution:'var(--caution)'};
+    if(!askingNum){
+      band={headline:'Enter an asking price', note:'We’ll show how it compares to what’s typical for this area, bedroom count and deal type.', typicalText:ck.deal==='rent'?this.mo(typical):this.gbp(typical), askingText:'—', markerLeft:'50%', accent:'var(--muted)', borderColor:'var(--rule2)'};
+    } else {
+      const ratio=askingNum/typical;
+      const left=Math.max(4,Math.min(96, 50 + (ratio-1)*220 ))+'%';
+      let headline,note,accent='var(--accent)',border='var(--rule2)';
+      if(ratio<0.85){headline='Well below local typical';note='Notably cheaper than the local norm. Worth asking why — condition, lease, or it may simply be keenly priced.';}
+      else if(ratio<0.95){headline='Below local typical';note='A little under the local norm for this size and deal.';}
+      else if(ratio<=1.08){headline='Around local typical';note='In line with what’s typical locally for this size and deal.';}
+      else if(ratio<=1.2){headline='Above local typical';note='A little over the local norm — check what justifies it before you commit.';}
+      else {headline='Well above local typical';note='Markedly higher than the local norm. Treat as a prompt to look closer — asking price isn’t achieved price.';accent='var(--caution)';border='var(--caution)';}
+      band={headline, note, typicalText:ck.deal==='rent'?this.mo(typical):this.gbp(typical), askingText:ck.deal==='rent'?this.mo(askingNum):this.gbp(askingNum), markerLeft:left, accent, borderColor:border};
+    }
+    const checkVM={
+      areaSlug:ck.areaSlug, deal:ck.deal, beds:ck.beds, asking:ck.asking,
+      areaOptions:A.map(a=>({slug:a.slug, label:a.town+' — '+a.name})),
+      onArea:(e)=>this.setState({check:{...this.state.check,areaSlug:e.target.value}}),
+      dealOptions:[['rent','To rent'],['buy','To buy']].map(([v,l])=>({label:l, active:ck.deal===v, style:this.chipBtn(ck.deal===v), set:()=>this.setState({check:{...this.state.check,deal:v}})})),
+      bedOptions:[['1','1 bed'],['2','2 bed'],['3','3 bed'],['4','4+ bed']].map(([v,l])=>({label:l, active:ck.beds===v, style:this.chipBtn(ck.beds===v), set:()=>this.setState({check:{...this.state.check,beds:v}})})),
+      askLabel: ck.deal==='rent'?'Monthly asking rent':'Asking price',
+      askPlaceholder: ck.deal==='rent'?String(typical):String(typical),
+      onAsking:(e)=>this.setState({check:{...this.state.check,asking:e.target.value}}),
+      area:{name:ckA.name, la:ckA.la, region:ckA.region},
+      openArea:()=>this.go('area',ckA.slug)
+    };
+    const checkRows=IND.map(i=>({name:i.name, scoreText:ckA.s[i.key]==null?'—':ckA.s[i.key]+'/100', w:(ckA.s[i.key]||0)+'%'}));
+
+    // ===== RANKINGS =====
+    const rRegions=['All',...Array.from(new Set(A.map(a=>a.region)))];
+    const rankRegionChips=rRegions.map(r=>({label:r==='All'?'All regions':r, toggle:()=>this.setState({rankRegion:r}), style:this.chipBtn(S.rankRegion===r)}));
+    const rankingRows=[...A].filter(a=>S.rankRegion==='All'||a.region===S.rankRegion).sort((x,y)=>y.overall-x.overall).map(a=>({
+      name:a.name, la:a.la, region:a.region, overall:a.overall, nationalRank:a.rank.toLocaleString('en-GB'),
+      bars:IND.map(i=>({abbr:i.short, w:(a.s[i.key]||0)+'%', fill:'var(--bar)'})),
+      open:()=>this.go('area',a.slug)
+    }));
+    const rankBarsDisplay = isNarrow?'display:none':'display:flex';
+
+    // ===== METHOD =====
+    const methodIndicators=IND.map(i=>({name:i.name, source:i.source, body:({
+      affordability:'Median private rents (by bedroom) and Land Registry sale prices, normalised against the national distribution. A higher score means cheaper relative to England & Wales — not a claim about value for money.',
+      safety:'Police-recorded crime per 1,000 residents. A higher score means fewer recorded offences than other areas. Recorded crime reflects reporting and policing too — read it alongside the rate itself.',
+      energy:'The median EPC rating of homes in the area, shown with its official A–G band colour. A higher score means more efficient homes typically — useful as a running-cost signal.',
+      flood:'Environment Agency flood-risk classification for the area. A higher score means lower modelled flood risk. Always check the property-level flood map before committing.',
+      convenience:'Count of walkable amenities and distance to the nearest station, supermarket, GP, school and green space. A higher score means more is reachable on foot.'
+    })[i.key]}));
+    const refusals=[
+      {text:'Call any area “safe,” “unsafe,” “good” or “bad.” We report indicators against other areas — you draw the conclusion.'},
+      {text:'Colour scores red-to-green. Score bars use one neutral scale so no figure is pre-judged for you. (EPC keeps its official government band colours.)'},
+      {text:'Score a missing figure as zero. Gaps lower our confidence and are shown plainly as “no data.”'},
+      {text:'Value an individual property. Everything here is neighbourhood-level; asking price is not achieved price.'}
+    ];
+    const dataSources=[
+      {name:'ONS Private Rents',detail:'Private rental market statistics, by bedroom'},
+      {name:'HM Land Registry',detail:'Median sale prices'},
+      {name:'Police.uk / Home Office',detail:'Recorded crime by area'},
+      {name:'EPC Register (DLUHC)',detail:'Domestic energy ratings'},
+      {name:'Environment Agency',detail:'Flood-risk mapping'},
+      {name:'OS Open & OpenStreetMap',detail:'Amenities and distances'}
+    ];
+
+    // footer
+    const footerNav=[['search','Search by priorities'],['compare','Compare areas'],['check','Check a listing'],['rankings','Rankings'],['methodology','Methodology']].map(([r,l])=>({label:l,onClick:()=>this.go(r)}));
+    const footerSources=['ONS · Land Registry','Police.uk · Home Office','EPC Register','Environment Agency','Ordnance Survey'];
+
+    return {
+      rootStyle, routeKey:S.route+':'+S.slug,
+      isHome:S.route==='home', isArea:S.route==='area', isSearch:S.route==='search', isCompare:S.route==='compare', isCheck:S.route==='check', isRankings:S.route==='rankings', isMethod:S.route==='methodology',
+      navItems, goHome:()=>this.go('home'), goSearch:()=>this.go('search'), goMethod:()=>this.go('methodology'), goRankings:()=>this.go('rankings'), goExample:()=>this.go('area','chorlton'),
+      toggleTheme:()=>this.setState({dark:!S.dark}), themeLabel:dark?'Light':'Dark',
+      // home
+      postcode:S.postcode, onPostcode:(e)=>this.setState({postcode:e.target.value}), jumpPostcode:()=>this.go('area','chorlton'),
+      onPostcodeKey:(e)=>{ if(e.key==='Enter') this.go('area','chorlton'); },
+      heroRows, principles, popularAreas,
+      // area
+      area:areaVM, receiptRows, sourceNotes, priorityChips, priorityPanel, rentRows, factRows, meshNearby,
+      // search
+      weights, regionChips, budget:S.budget, onBudget:(e)=>this.setState({budget:parseInt(e.target.value,10)}), budgetLabel, rankedAreas, resultCount, resultsBoxStyle,
+      // compare
+      compareChips, compareHeaders, compareScoreRows, compareFactRows,
+      // check
+      check:checkVM, band, checkRows,
+      // rankings
+      rankRegionChips, rankingRows, rankBarsDisplay,
+      // method
+      methodIndicators, refusals, dataSources,
+      // footer
+      footerNav, footerSources
+    };
+  }
+}
+</script>
+</body>
+</html>

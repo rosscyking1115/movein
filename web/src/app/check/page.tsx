@@ -9,13 +9,15 @@ export const metadata: Metadata = {
 
 export default function CheckPage() {
   return (
-    <div className="mx-auto max-w-3xl px-5 py-10">
-      <header className="mb-8 max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight">Check a listing</h1>
-        <p className="mt-2 text-ink-muted">
-          Enter the details from any rental or sale listing. We resolve the
-          neighbourhood, band the price against our open-data local typical, and
-          show you the area receipt behind it.
+    <div className="mx-auto max-w-[1140px] px-6 pb-[70px] pt-[34px]">
+      <header className="mb-7 max-w-[640px]">
+        <h1 className="font-display text-[clamp(34px,4.6vw,52px)] font-bold leading-[1.05] text-ink">
+          Does this listing&rsquo;s price stack up?
+        </h1>
+        <p className="mt-2 text-[17px] text-ink2">
+          An area-level sanity check — how an asking price sits against what&rsquo;s
+          typical locally. Asking price isn&rsquo;t achieved price; treat this as a
+          prompt to look closer, not a valuation.
         </p>
       </header>
       <CheckClient />

@@ -27,12 +27,14 @@ export default async function ComparePage({ searchParams }: Props) {
   const current = areas.map((a) => ({ area_id: a.area_id, area_name: a.area_name }));
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10">
-      <header className="mb-6 max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight">Compare areas</h1>
-        <p className="mt-2 text-ink-muted">
-          Add up to four neighbourhoods by postcode and see them side by side —
-          scores on top, the facts behind them underneath.
+    <div className="mx-auto max-w-[1140px] px-6 pb-[70px] pt-[34px]">
+      <header className="mb-6 max-w-[620px]">
+        <h1 className="font-display text-[clamp(34px,4.6vw,52px)] font-bold leading-[1.05] text-ink">
+          Weigh places side by side
+        </h1>
+        <p className="mt-2 text-[17px] text-ink2">
+          Up to four areas. Scores show the row leader in bold; facts stay neutral
+          — a reference point, not a recommendation.
         </p>
       </header>
 
@@ -40,8 +42,8 @@ export default async function ComparePage({ searchParams }: Props) {
 
       <div className="mt-8">
         {areas.length === 0 ? (
-          <div className="rounded-card border border-rule bg-paper-raised px-5 py-10 text-center">
-            <p className="text-sm text-ink-muted">
+          <div className="rounded-card border border-rule bg-card px-5 py-10 text-center">
+            <p className="text-sm text-ink2">
               Add an area above to start comparing, or{" "}
               <Link href="/search" className="text-accent underline">
                 browse the rankings
@@ -54,7 +56,7 @@ export default async function ComparePage({ searchParams }: Props) {
         )}
       </div>
 
-      <p className="mt-8 text-xs text-ink-faint">
+      <p className="mt-8 text-xs text-muted">
         Bold marks the highest score in each row. Facts are shown without a
         winner — area-level indicators only, never a &ldquo;safe&rdquo;/&ldquo;unsafe&rdquo;
         verdict or a property valuation.

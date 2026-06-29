@@ -11,7 +11,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "Neighbourhood rankings by region",
   description:
-    "Browse ranked neighbourhoods across the ten regions of England & Wales — the best areas to live by our affordability, safety, energy, flood and convenience indicators.",
+    "Browse ranked neighbourhoods across the ten regions of England & Wales by our affordability, safety, energy, flood and convenience indicators.",
 };
 
 export default async function RankingsIndex() {
@@ -28,12 +28,15 @@ export default async function RankingsIndex() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10">
-      <header className="mb-8 max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight">Rankings by region</h1>
-        <p className="mt-2 text-ink-muted">
-          Pick a region to see its best-scoring neighbourhoods and a breakdown by
-          local authority.
+    <div className="mx-auto max-w-[1140px] px-6 pb-[70px] pt-[34px]">
+      <header className="mb-8 max-w-[620px]">
+        <div className="mb-3 font-mono text-xs uppercase tracking-[.18em] text-accent">Rankings</div>
+        <h1 className="font-display text-[clamp(34px,4.6vw,52px)] font-bold leading-[1.05] text-ink">
+          Rankings by region
+        </h1>
+        <p className="mt-2 text-[17px] text-ink2">
+          A starting point, not a league table. Pick a region to see its
+          best-scoring neighbourhoods and a breakdown by local authority.
         </p>
       </header>
 
@@ -42,17 +45,15 @@ export default async function RankingsIndex() {
           <Link
             key={r.name}
             href={`/rankings/${regionSlug(r.name)}`}
-            className="flex items-center justify-between rounded-card border border-rule bg-paper-raised px-4 py-3 transition-colors hover:border-rule-strong"
+            className="flex items-center justify-between rounded-[14px] border border-rule2 bg-card px-5 py-4 hover:border-accent-line"
           >
             <div>
-              <div className="font-medium">{r.name}</div>
-              <div className="text-xs text-ink-muted">
-                {r.count.toLocaleString("en-GB")} areas
-              </div>
+              <div className="font-display text-xl font-bold text-ink">{r.name}</div>
+              <div className="text-xs text-muted">{r.count.toLocaleString("en-GB")} areas</div>
             </div>
             <div className="text-right">
-              <div className="tnum text-lg font-semibold">{score(r.avg)}</div>
-              <div className="text-[10px] uppercase tracking-wide text-ink-faint">avg</div>
+              <div className="font-mono text-xl font-medium text-ink">{score(r.avg)}</div>
+              <div className="text-[10px] uppercase tracking-[.06em] text-muted">avg</div>
             </div>
           </Link>
         ))}
