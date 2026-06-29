@@ -6,17 +6,14 @@
 #
 # What it does:
 #   1. Set up Python 3.13 + the pinned dbt stack
-#   2. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
-#   3. Stage profiles.yml from the committed example
-#   4. Install Playwright browser runtime
-#   5. Python unit tests — downloader, dependency imports, Streamlit render/browser smoke
-#   6. Smoke-test the committed slim dashboard DuckDB extract
-#   7. Download two years of Land Registry data (--sample, enough for YoY)
-#   8. Load it into DuckDB
-#   9. dbt source freshness — proves the loaded source is current enough
-#   10. dbt build — runs all marts + 189 data tests against the sample
-#   11. Build + smoke-test a sample dashboard DuckDB extract
-#   12. sqlfluff lint — model SQL must satisfy .sqlfluff rules
+#   2. Python unit tests — downloader, dependency imports, FastAPI API suite
+#   3. Install dbt packages (dbt_utils, dbt_expectations, dbt_date)
+#   4. Stage profiles.yml from the committed example
+#   5. Download two years of Land Registry data (--sample, enough for YoY)
+#   6. Load it into DuckDB
+#   7. dbt source freshness — proves the loaded source is current enough
+#   8. dbt seed + dbt build — all marts + 189 data tests against the sample
+#   9. sqlfluff lint — model SQL must satisfy .sqlfluff rules
 #
 # Branch protection on main requires the "build-and-test" check to pass before
 # merging. See repo Settings → Branches.
@@ -68,14 +65,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Playwright Chromium
-        run: python -m playwright install --with-deps chromium
-
-      - name: Python unit tests + Streamlit render/browser smoke
+      - name: Python unit tests (downloader, dependency imports, API suite)
         run: python -m unittest discover -s tests -p "test_*.py"
-
-      - name: Smoke-test committed dashboard DuckDB extract
-        run: python scripts/smoke_dashboard_db.py
 
       - name: Install dbt packages
         run: dbt deps
@@ -99,12 +90,6 @@ jobs:
 
       - name: dbt build (runs all marts + 189 data tests)
         run: dbt build --target dev
-
-      - name: Build sample dashboard DuckDB extract
-        run: python scripts/build_dashboard_db.py
-
-      - name: Smoke-test sample dashboard DuckDB extract
-        run: python scripts/smoke_dashboard_db.py
 
       - name: sqlfluff lint (model SQL only)
         # Hard gate: a style violation in models/ fails the PR check, same as

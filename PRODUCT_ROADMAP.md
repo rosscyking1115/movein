@@ -216,10 +216,11 @@ Ordered by value-per-effort and dependency. Each phase ships something usable.
 | **1 — API** ✅ **built** | FastAPI (`api/`): resolve / search / listing-check / meta, OpenAPI, Dockerfile + fly.toml. Deploy = `fly deploy` | Phase 0 data | The keystone every other client needs. |
 | **2 — Website** 🚧 **in progress** (`web/`) | Next.js/Vercel: home, search (live re-rank), `/compare`, `/check`, the `/area/[slug]` SEO template (JSON-LD + quality gate), region + town hubs with the internal-link mesh, methodology, sitemap (~6.8k URLs)/robots/llms.txt. **Next:** `/rent/[town]` hubs, slim `/v1/areas/index` endpoint, deploy | API | Where organic growth comes from; the area pages are the moat. |
 | **3 — Mobile** | Expo app: MVP screens + on-device re-rank; then **Rightmove share-in** (deep links → iOS share extension) | API | The native share-in is the standout differentiator. |
-| **Cross-cutting** | Retire the legacy Streamlit dashboard once the website is live; data-refresh automation; analytics | — | — |
+| **Cross-cutting** | ✅ **Retired the legacy Streamlit apps** (`app/` + `dashboard/`) now the MoveIn website is live. **Next:** data-refresh automation; analytics | — | — |
 
-The current Streamlit app stays the **working demo** through Phases 0–2 and is retired
-when the website covers its job.
+The legacy Streamlit apps (`app/` renter demo + `dashboard/` market study) have been
+**removed** now the MoveIn website covers their job; the live Streamlit Cloud
+deployment should be taken down from the Streamlit Cloud dashboard.
 
 ## Decisions you'll need to make
 
