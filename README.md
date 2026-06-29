@@ -24,7 +24,6 @@ verdict.
 | 🌐 **MoveIn website** (Next.js / Vercel) | https://uk-housing-decision-support.vercel.app |
 | ⚙️ **API** (FastAPI / Fly.io) — OpenAPI docs | https://uk-housing-decision-support-api.fly.dev/docs |
 | 📊 **dbt docs** (lineage + column catalogue) | https://rosscyking1115.github.io/uk-housing-decision-support/ |
-| 📈 **Streamlit app** *(legacy — being retired)* | https://ross-uk-property-analytics.streamlit.app/ |
 
 ## Architecture
 
@@ -57,7 +56,6 @@ component scores for instant slider response. Design rationale lives in
 | `tests/` | 189 dbt data tests + the API test suite (`tests/test_api.py`). |
 | `api/` | **FastAPI service** over the decision marts (resolve / search / listing-check / areas index / meta). `Dockerfile` + `fly.toml`. |
 | `web/` | **MoveIn website** — Next.js. Search, compare, listing checker, and ~7k programmatic area/town/region/rent pages. See [`web/README.md`](web/README.md) and [`web/DESIGN_BRIEF.md`](web/DESIGN_BRIEF.md). |
-| `app/` | *Legacy* Streamlit app (the original renter-facing UI; being retired). |
 | `data/` | Local DuckDB warehouse + the committed `decision.duckdb` extract the API ships. |
 | `DEPLOY.md` | Runbook for deploying the API (Fly.io) and website (Vercel). |
 
@@ -167,8 +165,8 @@ Phased plan in [`PRODUCT_ROADMAP.md`](PRODUCT_ROADMAP.md). Current state:
 - **Phase 2 — Website** ✅ **deployed** (Vercel): the MoveIn UI — search, compare,
   listing checker, and ~7k programmatic area/town/region/rent pages.
 - **Phase 3 — Mobile (Expo)** ⬜ planned; the standout feature is Rightmove share-in.
-- **Cross-cutting** ⬜ retire the legacy Streamlit app, automate data refresh, add
-  analytics; door-to-door commute time.
+- **Cross-cutting** ✅ retired the legacy Streamlit apps; data-refresh deploy
+  automated. ⬜ analytics; custom domain + Search Console; door-to-door commute time.
 
 ## Source attribution
 
