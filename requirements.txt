@@ -17,16 +17,12 @@ sqlfluff-templater-dbt==4.1.0
 # --- pre-commit framework ---
 pre-commit==4.0.1
 
-# --- ingestion / dashboard (Phase 1 + 6) ---
-# pandas/pyarrow only needed for Phase 1 raw load and Phase 6 dashboard. Pinned to versions
-# with cp313 wheels.
+# --- ingestion (raw load + seed prep) ---
+# pandas/pyarrow needed for the raw load and the decision-extract build.
 pandas==2.2.3
 pyarrow==18.0.0
-streamlit==1.57.0    # 1.40 capped protobuf<6 and conflicted with dbt-core 1.11; 1.57 has protobuf<8,>=3.20
-plotly==5.24.1       # Phase 6 dashboard charts — interactive + recruiter-friendly polish
 requests==2.32.3
 chardet==5.2.0       # keep requests import compatibility check quiet when chardet is present
 openpyxl==3.1.5      # read the ONS PIPR .xlsx in scripts/prepare_ons_rent_seed.py
-playwright==1.60.0   # browser-level dashboard smoke tests in CI
 fastapi==0.138.1     # api/ service (deployed via api/requirements.txt; here for tests)
 httpx==0.28.1        # FastAPI TestClient in tests/test_api.py
