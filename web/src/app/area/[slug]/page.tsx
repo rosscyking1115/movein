@@ -7,12 +7,18 @@ import { areaSlug, msoaFromSlug } from "@/lib/slug";
 import { completeness } from "@/lib/quality";
 import { answerSentence } from "@/lib/summary";
 import { areaJsonLd } from "@/lib/structured-data";
-import { AreaReceipt } from "@/components/AreaReceipt";
+import {
+  buildReceiptRows,
+  confidenceFill,
+  factRows as buildFactRows,
+  RENT_LABELS,
+  SOURCE_NOTES,
+} from "@/lib/indicators";
+import { rentPerMonth, score as fmtScore } from "@/lib/format";
+import { AreaDetail } from "@/components/area/AreaDetail";
 import { JsonLd } from "@/components/JsonLd";
 import type { Area } from "@/lib/types";
 
-// ISR: pre-render on first request, then serve cached for a day. Long-tail
-// areas generate on demand (dynamicParams defaults to true).
 export const revalidate = 86400;
 
 type Props = { params: Promise<{ slug: string }> };
@@ -32,10 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: answerSentence(area),
     alternates: { canonical },
     openGraph: { title, description: answerSentence(area), url: canonical },
-    // Thin-content discipline: sparse areas stay out of the index until they fill in.
-    robots: indexable
-      ? { index: true, follow: true }
-      : { index: false, follow: true },
+    robots: indexable ? { index: true, follow: true } : { index: false, follow: true },
   };
 }
 
@@ -44,75 +47,116 @@ export default async function AreaPage({ params }: Props) {
   const area = await load(slug);
   if (!area) notFound();
 
-  // Canonicalise: send /area/<code> or a stale name straight to the human slug.
   const canonical = areaSlug(area.area_id, area.area_name);
   if (slug !== canonical) permanentRedirect(`/area/${canonical}`);
 
+  const rows = buildReceiptRows(area);
+  const fill = confidenceFill(area.confidence_level);
+  const rentRows = RENT_LABELS.map((r) => ({ label: r.label, value: rentPerMonth(area[r.key] as number | null) }));
+  const summary = area.why_this_area ?? answerSentence(area);
+
   return (
-    <article className="mx-auto max-w-3xl px-5 py-10">
-      <nav className="mb-6 text-xs text-ink-muted">
-        <Link href="/" className="hover:text-ink">Home</Link>
-        <span className="mx-2">/</span>
-        <Link href="/search" className="hover:text-ink">Areas</Link>
-        <span className="mx-2">/</span>
-        <span className="text-ink">{area.area_name}</span>
+    <article className="mx-auto max-w-[1140px] px-6 py-9">
+      <nav className="mb-5 flex flex-wrap items-center gap-2 font-mono text-xs text-muted">
+        <Link href="/" className="hover:text-ink">England &amp; Wales</Link>
+        <span>›</span>
+        <span>{area.region}</span>
+        <span>›</span>
+        <span className="text-ink2">{area.local_authority_name}</span>
       </nav>
 
-      <AreaReceipt area={area} />
-
-      <div className="mt-10 rounded-card border border-rule bg-paper-raised p-5">
-        <h2 className="text-sm font-semibold">Compare this with somewhere else</h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          Put {area.area_name} side by side with another area, or rank by your own
-          priorities.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium text-accent">
-          <Link href={`/compare?areas=${area.area_id}`} className="hover:underline">
-            Compare {area.area_name} →
-          </Link>
-          <Link href="/search" className="hover:underline">
-            Rank by priorities →
-          </Link>
+      {/* Header block */}
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-7 border-b border-rule2 pb-[26px]">
+        <div className="max-w-[560px]">
+          <h1 className="font-display text-[clamp(38px,5.4vw,60px)] font-bold leading-[1.04] tracking-[-.01em] text-ink">
+            {area.area_name}
+          </h1>
+          <div className="mt-2.5 text-base text-ink2">
+            {[area.local_authority_name, area.region].filter(Boolean).join(" · ")}
+          </div>
+          <p className="mt-[18px] text-[17px] leading-[1.6] text-ink2">{answerSentence(area)}</p>
+        </div>
+        <div className="flex items-end gap-[26px]">
+          <div>
+            <div className="mb-1.5 font-mono text-[11px] uppercase tracking-[.12em] text-muted">Composite</div>
+            <div className="flex items-baseline gap-[2px]">
+              <span className="font-mono text-[62px] font-medium leading-[.9] tracking-[-.02em] text-ink">
+                {fmtScore(area.overall_score)}
+              </span>
+              <span className="font-mono text-[22px] text-muted">/100</span>
+            </div>
+            <div className="mt-2 text-[13px] text-ink2">
+              Rank <span className="font-mono text-ink">{area.overall_rank?.toLocaleString("en-GB") ?? "—"}</span> of 7,264
+            </div>
+          </div>
+          <div className="border-l border-rule2 pl-6">
+            <div className="mb-2 font-mono text-[11px] uppercase tracking-[.12em] text-muted">Confidence</div>
+            <div className="flex h-6 items-end gap-1">
+              {[24, 18, 12].map((h, i) => (
+                <span
+                  key={h}
+                  className="w-[7px] rounded-[2px]"
+                  style={{ height: h, background: i < fill ? "var(--accent)" : "var(--rule2)" }}
+                />
+              ))}
+            </div>
+            <div className="mt-2 text-[13px] capitalize text-ink2">{area.confidence_level ?? "low"}</div>
+          </div>
         </div>
       </div>
 
-      {/* Link mesh: area → its town and region hubs (which list the neighbours). */}
-      {(area.local_authority_name || area.region) && (
-        <nav className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          {area.local_authority_name && (
-            <Link
-              href={`/town/${townSlug(area.local_authority_name)}`}
-              className="text-accent hover:underline"
-            >
-              Other areas in {area.local_authority_name} →
-            </Link>
-          )}
-          {area.local_authority_name && (
-            <Link
-              href={`/rent/${townSlug(area.local_authority_name)}`}
-              className="text-accent hover:underline"
-            >
-              Rent prices in {area.local_authority_name} →
-            </Link>
-          )}
-          {area.region && (
-            <Link
-              href={`/rankings/${regionSlug(area.region)}`}
-              className="text-accent hover:underline"
-            >
-              Best areas in {area.region} →
-            </Link>
-          )}
-        </nav>
-      )}
+      <AreaDetail
+        rows={rows}
+        summary={summary}
+        rentRows={rentRows}
+        factRows={buildFactRows(area)}
+        sources={SOURCE_NOTES}
+        areaId={area.area_id}
+      />
 
-      <p className="mt-8 text-xs text-ink-faint">
-        Area-level indicators only — not a property valuation, and never a
-        &ldquo;safe&rdquo; or &ldquo;unsafe&rdquo; label. See our{" "}
-        <Link href="/methodology" className="underline">methodology</Link>.
-      </p>
+      {/* Mesh links */}
+      <div className="mt-[34px] grid gap-[22px] border-t border-rule2 pt-[22px] sm:grid-cols-3">
+        <MeshCol title={`Nearby in ${area.local_authority_name ?? "this area"}`}>
+          {area.local_authority_name && (
+            <MeshLink href={`/town/${townSlug(area.local_authority_name)}`}>
+              Other areas in {area.local_authority_name}
+            </MeshLink>
+          )}
+        </MeshCol>
+        <MeshCol title="Browse">
+          {area.region && (
+            <MeshLink href={`/rankings/${regionSlug(area.region)}`}>Best areas in {area.region}</MeshLink>
+          )}
+          {area.local_authority_name && (
+            <MeshLink href={`/rent/${townSlug(area.local_authority_name)}`}>
+              Rent in {area.local_authority_name}
+            </MeshLink>
+          )}
+          <MeshLink href="/search">Rank by my priorities</MeshLink>
+        </MeshCol>
+        <MeshCol title="Checking a listing?">
+          <MeshLink href="/check">Check a listing&rsquo;s area &amp; price</MeshLink>
+        </MeshCol>
+      </div>
 
       <JsonLd data={areaJsonLd(area, canonical)} />
     </article>
+  );
+}
+
+function MeshCol({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="mb-[11px] font-mono text-[11px] uppercase tracking-[.1em] text-muted">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function MeshLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="block py-[5px] text-sm text-accent hover:underline">
+      {children} →
+    </Link>
   );
 }

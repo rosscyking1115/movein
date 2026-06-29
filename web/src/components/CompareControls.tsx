@@ -56,14 +56,14 @@ export function CompareControls({
           {current.map((c) => (
             <span
               key={c.area_id}
-              className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper-raised px-3 py-1 text-sm"
+              className="inline-flex items-center gap-2 rounded-full border border-rule bg-card px-3 py-1 text-sm"
             >
               {c.area_name}
               <button
                 type="button"
                 onClick={() => remove(c.area_id)}
                 aria-label={`Remove ${c.area_name}`}
-                className="text-ink-faint hover:text-ink"
+                className="text-muted hover:text-ink"
               >
                 ✕
               </button>
@@ -79,7 +79,7 @@ export function CompareControls({
             onChange={(e) => setPostcode(e.target.value)}
             placeholder="Add an area by postcode"
             aria-label="Add an area by postcode"
-            className="flex-1 rounded-md border border-rule bg-paper-raised px-3 py-2 text-sm"
+            className="flex-1 rounded-md border border-rule bg-card px-3 py-2 text-sm"
           />
           <button
             type="submit"
@@ -90,9 +90,9 @@ export function CompareControls({
           </button>
         </form>
       ) : (
-        <p className="text-xs text-ink-muted">Comparing the maximum of {MAX} areas.</p>
+        <p className="text-xs text-ink2">Comparing the maximum of {MAX} areas.</p>
       )}
-      {error && <p className="text-sm text-flag">{error}</p>}
+      {error && <p className="text-sm text-caution">{error}</p>}
     </div>
   );
 }

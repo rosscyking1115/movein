@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { ResolveResponse } from "@/lib/types";
 import { areaSlug } from "@/lib/slug";
 
-// Postcode → straight to that neighbourhood's receipt.
+// Postcode → straight to that neighbourhood's schedule.
 export function PostcodeBox() {
   const router = useRouter();
   const [postcode, setPostcode] = useState("");
@@ -29,24 +29,25 @@ export function PostcodeBox() {
   }
 
   return (
-    <form onSubmit={submit} className="w-full max-w-md">
-      <div className="flex gap-2">
+    <form onSubmit={submit} className="max-w-[520px]">
+      <div className="flex items-center gap-2.5 rounded-[10px] border border-rule2 bg-card py-1.5 pl-4 pr-1.5">
+        <span className="font-mono text-[13px] text-muted">Postcode</span>
         <input
           value={postcode}
           onChange={(e) => setPostcode(e.target.value)}
-          placeholder="Enter a UK postcode"
-          aria-label="UK postcode"
-          className="flex-1 rounded-md border border-rule bg-paper-raised px-4 py-3 text-sm"
+          placeholder="e.g. M21 9HZ"
+          aria-label="Enter a postcode"
+          className="min-w-0 flex-1 border-none bg-transparent py-2 font-mono text-base tracking-[.04em] text-ink outline-none"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-accent px-5 py-3 text-sm font-medium text-white disabled:opacity-60"
+          className="h-[42px] rounded-[7px] bg-accent px-[18px] text-sm font-semibold text-white disabled:opacity-60"
         >
           {loading ? "…" : "Look up"}
         </button>
       </div>
-      {error && <p className="mt-2 text-sm text-flag">{error}</p>}
+      {error && <p className="mt-2 text-sm text-caution">{error}</p>}
     </form>
   );
 }

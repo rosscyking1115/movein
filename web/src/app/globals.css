@@ -1,51 +1,121 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode (toggled on <html>, persisted to localStorage). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
-  "Map-and-ledger": warm paper, ink text, one restrained accent. Numbers are set
-  in mono to read like a ledger. Score bars are a single neutral fill — we show
-  indicators, never colour-coded safe/unsafe verdicts.
+  MoveIn — a surveyor's-schedule identity. Every score sits beside the figure
+  behind it; scores stay on a NEUTRAL scale (--bar), never red→green. The only
+  colours allowed to imply good/bad are the official EPC A–G bands.
+  Tokens are raw CSS variables (swapped per theme) so utilities theme-switch.
 */
-@theme {
-  --color-paper: #faf8f3;
-  --color-paper-raised: #ffffff;
-  --color-ink: #1b1a17;
-  --color-ink-muted: #6c665a;
-  --color-ink-faint: #9a9384;
-  --color-rule: rgba(27, 26, 23, 0.12);
-  --color-rule-strong: rgba(27, 26, 23, 0.28);
-  --color-accent: #1f5c4d; /* deep ledger green */
-  --color-accent-soft: #e4ece7;
-  --color-track: rgba(27, 26, 23, 0.08);
-  --color-flag: #9a5b1f; /* amber, for "above typical" emphasis only */
-  --color-flag-soft: #f4e9dc;
+:root {
+  --ink: #172026;
+  --ink2: #3c4a52;
+  --muted: #6b7a82;
+  --paper: #eff1ec;
+  --card: #fbfcfa;
+  --card2: #f2f4ef;
+  --rule: #dee2d9;
+  --rule2: #cdd3c7;
+  --accent: #13476b;
+  --accent-wash: #e9eff2;
+  --accent-line: #c2d2dc;
+  --bar: #4a5c64;
+  --bar-track: #e0e4db;
+  --caution: #9a5b1e;
+}
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+.dark {
+  --ink: #e9ede7;
+  --ink2: #b6c0b8;
+  --muted: #7f8c84;
+  --paper: #0f1518;
+  --card: #161d22;
+  --card2: #1b242a;
+  --rule: #283238;
+  --rule2: #37434a;
+  --accent: #7bb8da;
+  --accent-wash: #16242c;
+  --accent-line: #2c414c;
+  --bar: #9daeb6;
+  --bar-track: #283238;
+  --caution: #d69a5a;
+}
 
-  --radius-card: 10px;
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-muted: var(--muted);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-card2: var(--card2);
+  --color-rule: var(--rule);
+  --color-rule2: var(--rule2);
+  --color-accent: var(--accent);
+  --color-accent-wash: var(--accent-wash);
+  --color-accent-line: var(--accent-line);
+  --color-bar: var(--bar);
+  --color-bar-track: var(--bar-track);
+  --color-caution: var(--caution);
+
+  --font-display: var(--ff-display), Georgia, "Times New Roman", serif;
+  --font-sans: var(--ff-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--ff-mono), ui-monospace, monospace;
+
+  --radius-card: 16px;
 }
 
 html {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
 }
 
 body {
   font-family: var(--font-sans);
 }
 
-/* Tabular figures everywhere numbers matter. */
-.tnum {
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
-}
-
-/* Hairline ledger rule used between fact rows. */
-.rule-b {
-  border-bottom: 1px solid var(--color-rule);
-}
-
 ::selection {
-  background: var(--color-accent-soft);
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Visible keyboard focus everywhere (mouse clicks stay clean via :focus-visible). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Mono numerals — scores, rents, distances, ranks read like a ledger. */
+.tnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline ledger rule between fact rows (used by the receipt/cards). */
+.rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* The receipt's perforation strip — the signature device. */
+.perforation {
+  height: 9px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--rule2) 0 5px,
+    transparent 5px 11px
+  );
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

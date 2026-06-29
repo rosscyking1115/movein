@@ -51,20 +51,20 @@ export default async function RegionRanking({ params }: Props) {
   const towns = townsInRegion(all, region);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10">
-      <nav className="mb-6 text-xs text-ink-muted">
+    <div className="mx-auto max-w-[1140px] px-6 pb-[70px] pt-[34px]">
+      <nav className="mb-6 font-mono text-xs text-muted">
         <Link href="/" className="hover:text-ink">Home</Link>
-        <span className="mx-2">/</span>
+        <span className="mx-2">›</span>
         <Link href="/rankings" className="hover:text-ink">Rankings</Link>
-        <span className="mx-2">/</span>
-        <span className="text-ink">{region}</span>
+        <span className="mx-2">›</span>
+        <span className="text-ink2">{region}</span>
       </nav>
 
-      <header className="mb-8 max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight">
+      <header className="mb-8 max-w-[620px]">
+        <h1 className="font-display text-[clamp(34px,4.6vw,52px)] font-bold leading-[1.05] text-ink">
           Best areas to live in {region}
         </h1>
-        <p className="mt-2 text-ink-muted">
+        <p className="mt-2 text-[17px] text-ink2">
           {ranked.length.toLocaleString("en-GB")} neighbourhoods ranked by overall
           indicator score. Each score sits beside the fact behind it.
         </p>
@@ -72,7 +72,7 @@ export default async function RegionRanking({ params }: Props) {
 
       {towns.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
             By local authority
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -80,10 +80,10 @@ export default async function RegionRanking({ params }: Props) {
               <Link
                 key={t.name}
                 href={`/town/${townSlug(t.name)}`}
-                className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper-raised px-3 py-1 text-sm hover:border-rule-strong"
+                className="inline-flex items-center gap-2 rounded-full border border-rule bg-card px-3 py-1 text-sm hover:border-rule2"
               >
                 {t.name}
-                <span className="tnum text-xs text-ink-faint">{score(t.avgScore)}</span>
+                <span className="tnum text-xs text-muted">{score(t.avgScore)}</span>
               </Link>
             ))}
           </div>
@@ -91,7 +91,7 @@ export default async function RegionRanking({ params }: Props) {
       )}
 
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
           Top {top.length} areas
         </h2>
         <div className="space-y-2">
