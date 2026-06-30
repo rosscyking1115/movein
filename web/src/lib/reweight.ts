@@ -5,19 +5,21 @@ import { COMPONENT_KEYS } from "./types";
 // mean of the components an area actually has (missing ones are dropped, never
 // scored zero). Lets sliders re-rank the visible pool instantly, no round-trip.
 
+// Weighted GEOMETRIC mean of the available components (floored at 1), matching
+// the warehouse overall_score so a single excellent pillar can't mask a poor one.
 export function matchScore(area: Area, weights: Record<ComponentKey, number>): number | null {
-  let num = 0;
+  let logSum = 0;
   let den = 0;
   for (const k of COMPONENT_KEYS) {
     const v = area[k];
     const w = weights[k] ?? 0;
     if (v != null && w > 0) {
-      num += v * w;
+      logSum += w * Math.log(Math.max(v, 1));
       den += w;
     }
   }
   if (den === 0) return null;
-  return Math.round((num / den) * 10) / 10;
+  return Math.round(Math.exp(logSum / den) * 10) / 10;
 }
 
 export function reweight(

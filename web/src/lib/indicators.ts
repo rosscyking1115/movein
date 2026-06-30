@@ -122,7 +122,7 @@ export function buildReceiptRows(area: Area): ReceiptRow[] {
       score: s,
       scoreText: fmtScore(s),
       barWidth: has ? `${Math.max(0, Math.min(100, s))}%` : "0%",
-      percentileTick: has ? `Higher than ${Math.round(s)}% of areas` : "",
+      percentileTick: has ? (s >= 55 ? "Above the typical area" : s <= 45 ? "Below the typical area" : "About typical") : "",
       factLabel: d.factLabel,
       factValue: d.factValue(area),
       isEpc: Boolean(d.isEpc),

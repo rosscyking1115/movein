@@ -56,7 +56,10 @@ export default async function MethodologyPage() {
       <p className="mt-3 text-[18px] leading-[1.6] text-ink2">
         Five comparable indicators for every neighbourhood (MSOA) in England &amp;
         Wales{meta ? ` — ${meta.areas.toLocaleString("en-GB")} areas` : ""}. Each is
-        a 0–100 percentile rank against all other areas.
+        a 0–100 score where <strong className="text-ink">50 marks the typical area</strong>:
+        we clip the extremes (2nd/98th percentile) and stretch the rest so the
+        middle of the country sits at 50 and real magnitude is kept. EPC and flood
+        use fixed, absolute anchors.
         {meta?.data_vintage ? ` Data vintage: ${meta.data_vintage}.` : ""}
       </p>
 
@@ -75,11 +78,14 @@ export default async function MethodologyPage() {
       <section className="mt-8">
         <h2 className="font-display text-2xl font-bold text-ink">The overall score</h2>
         <p className="mt-3 text-[15px] leading-[1.6] text-ink2">
-          The overall score is a <strong className="text-ink">weighted average</strong>{" "}
+          The overall score is a <strong className="text-ink">weighted geometric mean</strong>{" "}
           of the five indicators — equal weights by default, or whatever priorities
           you set on the <Link href="/search" className="text-accent underline">search page</Link>.
-          Missing an indicator? We drop it from the average rather than scoring it
-          zero: missing data lowers confidence, it never silently penalises an area.
+          A geometric mean (rather than a plain average) means one excellent
+          indicator can&rsquo;t paper over a poor one — a place that&rsquo;s great on
+          energy but unaffordable and flood-prone won&rsquo;t float to the top.
+          Missing an indicator? We drop it rather than scoring it zero: missing data
+          lowers confidence, it never silently penalises an area.
         </p>
       </section>
 

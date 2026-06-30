@@ -4,3 +4,7 @@ dbt_packages/
 logs/
 analyses/
 macros/_generated/
+
+# Macro-expanded scoring math (median-anchored winsorised min-max) nests deeper
+# than sqlfluff's parser depth limit; the model is validated by dbt run + tests.
+models/marts/decision/rpt_neighbourhood_score.sql

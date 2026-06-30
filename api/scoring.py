@@ -30,13 +30,18 @@ RENT_BY_BEDS = {
 
 
 def reweight(df: pd.DataFrame, weights: dict[str, float]) -> pd.DataFrame:
-    """Add a match_score (weighted mean of available components) and sort by it."""
+    """Add a match_score (weighted GEOMETRIC mean of available components) and sort.
+
+    Mirrors the warehouse overall_score: a geometric mean (components floored at 1)
+    so one excellent pillar can't mask a poor one. Missing components are dropped.
+    """
     w = pd.Series({c: float(weights.get(c, 0)) for c in COMPONENTS})
     scores = df[COMPONENTS]
-    numerator = scores.mul(w, axis=1).sum(axis=1)
+    log_scores = np.log(scores.clip(lower=1))  # NaN stays NaN and is skipped below
+    numerator = log_scores.mul(w, axis=1).sum(axis=1)
     denominator = scores.notna().mul(w, axis=1).sum(axis=1)
     out = df.copy()
-    out["match_score"] = (numerator / denominator.replace(0, np.nan)).round(1)
+    out["match_score"] = np.exp(numerator / denominator.replace(0, np.nan)).round(1)
     return out.sort_values("match_score", ascending=False, na_position="last")
 
 
