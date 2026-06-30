@@ -1,11 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useMemo, useRef, useState } from "react";
 import type { Area, ComponentKey, SearchResponse } from "@/lib/types";
 import { reweight } from "@/lib/reweight";
 import { areaSlug } from "@/lib/slug";
 import { rentPerMonth, score as fmtScore } from "@/lib/format";
+
+// Leaflet touches window, so load the map client-only.
+const SearchMap = dynamic(() => import("./SearchMap"), {
+  ssr: false,
+  loading: () => <div className="h-[380px] w-full animate-pulse rounded-[14px] border border-rule2 bg-card2" />,
+});
 
 const SLIDERS: { key: ComponentKey; label: string; abbr: string }[] = [
   { key: "affordability_score", label: "Affordability", abbr: "Aff" },
@@ -165,6 +172,12 @@ export function SearchClient({
 
       {/* Results */}
       <div>
+        <div className="mb-4">
+          <SearchMap areas={ranked} />
+          <p className="mt-1.5 text-[11px] text-muted">
+            Showing the top {ranked.length} on the map — hover a pin for the score, click to open.
+          </p>
+        </div>
         <div className="mb-3.5 flex items-baseline justify-between">
           <div className="text-sm text-ink2">
             <span className="font-mono text-ink">{pool.length}</span> areas match your filters

@@ -28,7 +28,8 @@ _QUERY = """
         p.epc_median_rating, p.crime_rate_per_1000, p.flood_risk_flag,
         p.planning_constraint_count, p.walkable_amenity_count,
         p.nearest_station_km, p.nearest_supermarket_km, p.nearest_gp_km,
-        p.nearest_school_km, p.nearest_greenspace_km
+        p.nearest_school_km, p.nearest_greenspace_km,
+        p.latitude, p.longitude
     from app.rpt_neighbourhood_score as s
     left join app.rpt_area_profile_mvp as p using (area_id)
 """

@@ -55,6 +55,8 @@ export interface Area {
   nearest_gp_km: number | null;
   nearest_school_km: number | null;
   nearest_greenspace_km: number | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface Meta {

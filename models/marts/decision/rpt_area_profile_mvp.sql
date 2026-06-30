@@ -123,6 +123,8 @@ select
     amenity.nearest_school_km,
     amenity.nearest_greenspace_km,
     amenity.walkable_amenity_count,
+    cen.latitude,
+    cen.longitude,
     cast(null as numeric) as commute_minutes_sample,
     'low' as confidence_level,
     concat(
@@ -192,4 +194,6 @@ left join {{ ref('stg_constraints__area') }} as cons
     on area.area_id = cons.area_id
 left join {{ ref('stg_amenities__area') }} as amenity
     on area.area_id = amenity.area_id
+left join {{ ref('ref_msoa_centroid') }} as cen
+    on area.area_id = cen.area_id
 order by area.region, area.local_authority_name, area.area_name

@@ -42,6 +42,8 @@ class Area(BaseModel):
     nearest_gp_km: Optional[float] = None
     nearest_school_km: Optional[float] = None
     nearest_greenspace_km: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class Meta(BaseModel):
