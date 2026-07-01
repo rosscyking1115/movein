@@ -57,6 +57,8 @@ export interface Area {
   nearest_greenspace_km: number | null;
   latitude: number | null;
   longitude: number | null;
+  nearest_city: string | null;
+  distance_to_city_km: number | null;
 }
 
 export interface Meta {

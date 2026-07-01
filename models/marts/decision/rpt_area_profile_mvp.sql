@@ -68,6 +68,26 @@ area_crime as (
         on c.lsoa_code = l.lsoa_code
     group by l.area_id
 
+),
+
+nearest_city as (
+
+    select area_id, nearest_city, distance_to_city_km
+    from (
+        select
+            cen.area_id,
+            cty.city as nearest_city,
+            round({{ haversine_km('cen.latitude', 'cen.longitude', 'cty.latitude', 'cty.longitude') }}, 1)
+                as distance_to_city_km,
+            row_number() over (
+                partition by cen.area_id
+                order by {{ haversine_km('cen.latitude', 'cen.longitude', 'cty.latitude', 'cty.longitude') }} asc
+            ) as rn
+        from {{ ref('ref_msoa_centroid') }} as cen
+        cross join {{ ref('ref_city_centre') }} as cty
+    )
+    where rn = 1
+
 )
 
 select
@@ -125,6 +145,8 @@ select
     amenity.walkable_amenity_count,
     cen.latitude,
     cen.longitude,
+    near.nearest_city,
+    near.distance_to_city_km,
     cast(null as numeric) as commute_minutes_sample,
     'low' as confidence_level,
     concat(
@@ -196,4 +218,6 @@ left join {{ ref('stg_amenities__area') }} as amenity
     on area.area_id = amenity.area_id
 left join {{ ref('ref_msoa_centroid') }} as cen
     on area.area_id = cen.area_id
+left join nearest_city as near
+    on area.area_id = near.area_id
 order by area.region, area.local_authority_name, area.area_name

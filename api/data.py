@@ -29,7 +29,8 @@ _QUERY = """
         p.planning_constraint_count, p.walkable_amenity_count,
         p.nearest_station_km, p.nearest_supermarket_km, p.nearest_gp_km,
         p.nearest_school_km, p.nearest_greenspace_km,
-        p.latitude, p.longitude
+        p.latitude, p.longitude,
+        p.nearest_city, p.distance_to_city_km
     from app.rpt_neighbourhood_score as s
     left join app.rpt_area_profile_mvp as p using (area_id)
 """

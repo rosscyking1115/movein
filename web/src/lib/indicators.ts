@@ -153,6 +153,9 @@ export const RENT_LABELS: { key: keyof Area; label: string }[] = [
 
 export function factRows(area: Area): { label: string; value: string }[] {
   return [
+    ...(area.nearest_city
+      ? [{ label: `${area.nearest_city} city centre`, value: km(area.distance_to_city_km) }]
+      : []),
     { label: "Median sale price", value: area.median_sale_price_gbp == null ? "—" : `£${area.median_sale_price_gbp.toLocaleString("en-GB")}` },
     { label: "Crime per 1,000", value: rate(area.crime_rate_per_1000) },
     { label: "Median EPC", value: ratingOrDash(area.epc_median_rating) },

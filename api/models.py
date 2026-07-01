@@ -44,6 +44,8 @@ class Area(BaseModel):
     nearest_greenspace_km: Optional[float] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    nearest_city: Optional[str] = None
+    distance_to_city_km: Optional[float] = None
 
 
 class Meta(BaseModel):
