@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { search } from "@/lib/api";
+import type { SearchResponse } from "@/lib/types";
 import { SearchClient } from "@/components/SearchClient";
 
 export const metadata: Metadata = {
@@ -22,10 +23,16 @@ export default async function SearchPage({ searchParams }: Props) {
   const initialRegions = parseRegions((await searchParams).regions);
 
   // Server-render an initial pool so the page is useful with JS still loading.
-  const initial = await search({
-    regions: initialRegions.length ? initialRegions : null,
-    limit: 200,
-  });
+  // Degrade gracefully if the data API is unavailable rather than crashing.
+  let initial: SearchResponse | null = null;
+  try {
+    initial = await search({
+      regions: initialRegions.length ? initialRegions : null,
+      limit: 200,
+    });
+  } catch {
+    initial = null;
+  }
 
   return (
     <div className="mx-auto max-w-[1140px] px-6 pb-[70px] pt-[34px]">
@@ -35,11 +42,17 @@ export default async function SearchPage({ searchParams }: Props) {
         </h1>
         <p className="mt-2 text-[17px] text-ink2">
           Move the sliders. The list re-ranks live across{" "}
-          {initial.total.toLocaleString("en-GB")} neighbourhoods — and shows you
-          exactly which indicators did the lifting. No black box.
+          {(initial?.total ?? 7264).toLocaleString("en-GB")} neighbourhoods — and
+          shows you exactly which indicators did the lifting. No black box.
         </p>
       </header>
-      <SearchClient initialAreas={initial.results} initialRegions={initialRegions} />
+      {initial === null && (
+        <p className="mb-4 rounded-[10px] border border-caution bg-caution/10 px-4 py-3 text-sm text-caution">
+          The data service is starting up or briefly unavailable — results may be
+          empty for a moment. Try reloading shortly.
+        </p>
+      )}
+      <SearchClient initialAreas={initial?.results ?? []} initialRegions={initialRegions} />
     </div>
   );
 }
