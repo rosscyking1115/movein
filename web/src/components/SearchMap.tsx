@@ -9,7 +9,7 @@ import {
   InfoWindow,
   useMap,
 } from "@vis.gl/react-google-maps";
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
+import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 import type { Marker, Renderer } from "@googlemaps/markerclusterer";
 import type { Area } from "@/lib/types";
 import { areaSlug } from "@/lib/slug";
@@ -96,27 +96,53 @@ function MarkerLayer({ areas, selected, onSelect }: Props) {
   const markersRef = useRef<Map<string, Marker>>(new Map());
   const clusterer = useRef<MarkerClusterer | null>(null);
 
-  const setMarkerRef = useCallback((id: string, marker: Marker | null) => {
-    if (marker) markersRef.current.set(id, marker);
-    else markersRef.current.delete(id);
+  // Sync the clusterer from the ref callbacks, coalesced into one rAF pass.
+  // Markers attach asynchronously (after Google's marker library loads), so an
+  // effect keyed on the pin set fires too early and clusters an empty list —
+  // driving the sync from the attach itself is the only reliable timing.
+  const rafId = useRef<number | null>(null);
+  const syncedKey = useRef("");
+  const scheduleClusterSync = useCallback(() => {
+    if (rafId.current != null) return;
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null;
+      const c = clusterer.current;
+      if (!c) return;
+      const key = [...markersRef.current.keys()].sort().join(",");
+      if (key === syncedKey.current) return;
+      syncedKey.current = key;
+      c.clearMarkers();
+      c.addMarkers([...markersRef.current.values()]);
+    });
   }, []);
+
+  const setMarkerRef = useCallback(
+    (id: string, marker: Marker | null) => {
+      if (marker) markersRef.current.set(id, marker);
+      else markersRef.current.delete(id);
+      scheduleClusterSync();
+    },
+    [scheduleClusterSync],
+  );
 
   useEffect(() => {
     if (!map || clusterer.current) return;
-    clusterer.current = new MarkerClusterer({ map, renderer: clusterRenderer });
+    clusterer.current = new MarkerClusterer({
+      map,
+      renderer: clusterRenderer,
+      // Pills are ~36px wide, so cluster on a wider radius than the default 60
+      // or neighbouring pills overlap without ever grouping.
+      algorithm: new SuperClusterAlgorithm({ radius: 90, maxZoom: 15 }),
+    });
+    scheduleClusterSync();
     return () => {
+      if (rafId.current != null) cancelAnimationFrame(rafId.current);
+      rafId.current = null;
       clusterer.current?.clearMarkers();
       clusterer.current = null;
+      syncedKey.current = "";
     };
-  }, [map]);
-
-  // Re-sync the clusterer only when the pin SET changes (after refs have attached).
-  useEffect(() => {
-    const c = clusterer.current;
-    if (!c) return;
-    c.clearMarkers();
-    c.addMarkers([...markersRef.current.values()]);
-  }, [idKey, map]);
+  }, [map, scheduleClusterSync]);
 
   // Fit the view to the pins, but only when the SET changes (region/budget),
   // not on every slider re-rank — refitting each tick is jarring.
