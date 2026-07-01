@@ -5,6 +5,7 @@ logs/
 analyses/
 macros/_generated/
 
-# Macro-expanded scoring math (median-anchored winsorised min-max) nests deeper
-# than sqlfluff's parser depth limit; the model is validated by dbt run + tests.
+# Macro-expanded math (median-anchored winsorised min-max; haversine nearest-city)
+# nests deeper than sqlfluff's parser depth limit; validated by dbt run + tests.
 models/marts/decision/rpt_neighbourhood_score.sql
+models/marts/decision/rpt_area_profile_mvp.sql
