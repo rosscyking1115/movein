@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   APIProvider,
@@ -91,58 +91,46 @@ function MarkerLayer({ areas, selected, onSelect }: Props) {
   // Identity of the current pin SET (region/budget), stable across slider re-ranks.
   const idKey = useMemo(() => pts.map((a) => a.area_id).sort().join(","), [pts]);
 
-  // Collect marker DOM elements in a ref (not state) so attaching them never
-  // triggers a re-render — a state update here would loop with the ref callbacks.
-  const markersRef = useRef<Map<string, Marker>>(new Map());
-  const clusterer = useRef<MarkerClusterer | null>(null);
+  // Marker tracking follows the official vis.gl marker-clustering example:
+  // markers live in STATE so every (async) attach re-runs the sync effect, and
+  // each pill's ref callback is useCallback-stable (see AreaPillMarker) so
+  // React never detaches/reattaches markers on re-renders — the combination
+  // that previously caused either an empty clusterer or an update loop.
+  const [markers, setMarkers] = useState<Record<string, Marker>>({});
 
-  // Sync the clusterer from the ref callbacks, coalesced into one rAF pass.
-  // Markers attach asynchronously (after Google's marker library loads), so an
-  // effect keyed on the pin set fires too early and clusters an empty list —
-  // driving the sync from the attach itself is the only reliable timing.
-  const rafId = useRef<number | null>(null);
-  const syncedKey = useRef("");
-  const scheduleClusterSync = useCallback(() => {
-    if (rafId.current != null) return;
-    rafId.current = requestAnimationFrame(() => {
-      rafId.current = null;
-      const c = clusterer.current;
-      if (!c) return;
-      const key = [...markersRef.current.keys()].sort().join(",");
-      if (key === syncedKey.current) return;
-      syncedKey.current = key;
-      c.clearMarkers();
-      c.addMarkers([...markersRef.current.values()]);
-    });
-  }, []);
-
-  const setMarkerRef = useCallback(
-    (id: string, marker: Marker | null) => {
-      if (marker) markersRef.current.set(id, marker);
-      else markersRef.current.delete(id);
-      scheduleClusterSync();
-    },
-    [scheduleClusterSync],
-  );
-
-  useEffect(() => {
-    if (!map || clusterer.current) return;
-    clusterer.current = new MarkerClusterer({
+  // Created in useMemo (not an effect) exactly like the upstream example —
+  // the markers-sync effect below needs it in the same render pass.
+  const clusterer = useMemo(() => {
+    if (!map) return null;
+    return new MarkerClusterer({
       map,
       renderer: clusterRenderer,
       // Pills are ~36px wide, so cluster on a wider radius than the default 60
       // or neighbouring pills overlap without ever grouping.
       algorithm: new SuperClusterAlgorithm({ radius: 90, maxZoom: 15 }),
     });
-    scheduleClusterSync();
-    return () => {
-      if (rafId.current != null) cancelAnimationFrame(rafId.current);
-      rafId.current = null;
-      clusterer.current?.clearMarkers();
-      clusterer.current = null;
-      syncedKey.current = "";
-    };
-  }, [map, scheduleClusterSync]);
+  }, [map]);
+
+  useEffect(() => {
+    if (!clusterer) return;
+    return () => clusterer.clearMarkers();
+  }, [clusterer]);
+
+  useEffect(() => {
+    if (!clusterer) return;
+    clusterer.clearMarkers();
+    clusterer.addMarkers(Object.values(markers));
+  }, [clusterer, markers]);
+
+  const setMarkerRef = useCallback((marker: Marker | null, id: string) => {
+    setMarkers((prev) => {
+      if ((marker && prev[id]) || (!marker && !prev[id])) return prev;
+      if (marker) return { ...prev, [id]: marker };
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }, []);
 
   // Fit the view to the pins, but only when the SET changes (region/budget),
   // not on every slider re-rank — refitting each tick is jarring.
@@ -166,32 +154,15 @@ function MarkerLayer({ areas, selected, onSelect }: Props) {
 
   return (
     <>
-      {pts.map((a) => {
-        const isSel = selected?.area_id === a.area_id;
-        return (
-          <AdvancedMarker
-            key={a.area_id}
-            position={latLng(a)}
-            ref={(marker) => setMarkerRef(a.area_id, marker)}
-            onClick={() => onSelect(a)}
-            zIndex={isSel ? 9999 : undefined}
-            title={`${a.area_name} · ${fmtScore(a.match_score ?? a.overall_score)}/100`}
-          >
-            {/* Google-Hotels-style price pill: shows the match score, with a tail. */}
-            <div
-              className={`relative cursor-pointer select-none rounded-full px-2.5 py-[3px] text-[12px] font-semibold leading-none shadow-[0_1px_5px_rgba(0,0,0,.3)] transition-transform hover:scale-110
-                after:absolute after:left-1/2 after:top-full after:-mt-[3px] after:h-[7px] after:w-[7px] after:-translate-x-1/2 after:rotate-45 after:content-['']
-                ${
-                  isSel
-                    ? "z-10 scale-110 bg-accent text-white after:bg-accent"
-                    : "border border-rule2 bg-card text-ink after:border-b after:border-r after:border-rule2 after:bg-card"
-                }`}
-            >
-              {fmtScore(a.match_score ?? a.overall_score)}
-            </div>
-          </AdvancedMarker>
-        );
-      })}
+      {pts.map((a) => (
+        <AreaPillMarker
+          key={a.area_id}
+          area={a}
+          isSelected={selected?.area_id === a.area_id}
+          onSelect={onSelect}
+          setMarkerRef={setMarkerRef}
+        />
+      ))}
 
       {selected && selected.latitude != null && (
         <InfoWindow position={latLng(selected)} onCloseClick={() => onSelect(null)} headerDisabled>
@@ -230,5 +201,50 @@ function MarkerLayer({ areas, selected, onSelect }: Props) {
         </InfoWindow>
       )}
     </>
+  );
+}
+
+// One pill per area, as its own component so the marker ref callback can be
+// useCallback-stable. An inline ref in the parent's map() would get a new
+// identity every render, making React detach/reattach every marker each pass —
+// which either loops (state) or desyncs the clusterer (refs).
+function AreaPillMarker({
+  area,
+  isSelected,
+  onSelect,
+  setMarkerRef,
+}: {
+  area: Area;
+  isSelected: boolean;
+  onSelect: (area: Area) => void;
+  setMarkerRef: (marker: Marker | null, id: string) => void;
+}) {
+  const ref = useCallback(
+    (marker: Marker | null) => setMarkerRef(marker, area.area_id),
+    [setMarkerRef, area.area_id],
+  );
+  const handleClick = useCallback(() => onSelect(area), [onSelect, area]);
+
+  return (
+    <AdvancedMarker
+      position={latLng(area)}
+      ref={ref}
+      onClick={handleClick}
+      zIndex={isSelected ? 9999 : undefined}
+      title={`${area.area_name} · ${fmtScore(area.match_score ?? area.overall_score)}/100`}
+    >
+      {/* Google-Hotels-style price pill: shows the match score, with a tail. */}
+      <div
+        className={`relative cursor-pointer select-none rounded-full px-2.5 py-[3px] text-[12px] font-semibold leading-none shadow-[0_1px_5px_rgba(0,0,0,.3)] transition-transform hover:scale-110
+          after:absolute after:left-1/2 after:top-full after:-mt-[3px] after:h-[7px] after:w-[7px] after:-translate-x-1/2 after:rotate-45 after:content-['']
+          ${
+            isSelected
+              ? "z-10 scale-110 bg-accent text-white after:bg-accent"
+              : "border border-rule2 bg-card text-ink after:border-b after:border-r after:border-rule2 after:bg-card"
+          }`}
+      >
+        {fmtScore(area.match_score ?? area.overall_score)}
+      </div>
+    </AdvancedMarker>
   );
 }
