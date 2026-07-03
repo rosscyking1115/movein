@@ -7,11 +7,14 @@ Interactive docs at /docs. Indicators only — never a "safe/unsafe" verdict.
 
 from __future__ import annotations
 
+import logging
 import os
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+
+logger = logging.getLogger("movein.coverage")
 
 from . import data, postcodes, scoring
 from .models import (
@@ -27,12 +30,13 @@ from .models import (
 )
 
 app = FastAPI(
-    title="UK Housing Decision Support API",
+    title="England & Wales Housing Decision Support API",
     version="1.0.0",
     description=(
         "Explainable neighbourhood (MSOA) scores for England & Wales, plus a "
         "postcode resolver and listing price check. Area-level indicators only — "
-        "not a property valuation, never a safe/unsafe label."
+        "not a property valuation, never a safe/unsafe label. Scotland and "
+        "Northern Ireland are on the roadmap, not yet covered."
     ),
 )
 # CORS allowlist from CORS_ALLOW_ORIGINS (comma-separated). Defaults to "*" for
@@ -50,10 +54,17 @@ app.add_middleware(
 def _coverage_guard(location: dict | None) -> dict:
     if not location or not location.get("msoa_code"):
         raise HTTPException(status_code=404, detail="Postcode not found.")
-    if location.get("country") not in ("England", "Wales"):
+    country = location.get("country")
+    if country not in ("England", "Wales"):
+        # Log out-of-coverage lookups (nation only — never the postcode) so demand
+        # for Scotland/NI is visible and can steer what we build next.
+        logger.info("out_of_coverage_lookup country=%s", country)
         raise HTTPException(
             status_code=422,
-            detail=f"Outside coverage — England & Wales only (postcode is in {location.get('country')}).",
+            detail=(
+                f"We don't cover {country} yet — MoveIn is England & Wales for now, "
+                "with Scotland and Northern Ireland on the roadmap."
+            ),
         )
     record = data.get_area(location["msoa_code"])
     if record is None:
