@@ -63,6 +63,15 @@ export default async function MethodologyPage() {
         {meta?.data_vintage ? ` Data vintage: ${meta.data_vintage}.` : ""}
       </p>
 
+      <p className="mt-4 rounded-[12px] border border-rule2 bg-card2 px-5 py-3.5 text-[14px] leading-[1.6] text-ink2">
+        <strong className="text-ink">Coverage:</strong> MoveIn currently covers{" "}
+        <strong className="text-ink">England &amp; Wales</strong>. Scotland and
+        Northern Ireland are on the roadmap — most of the underlying data (crime,
+        energy, flood) is published separately by each nation, so adding them is a
+        data-integration project rather than a switch to flip. Enter a Scottish or
+        NI postcode and we&rsquo;ll say so plainly rather than guess.
+      </p>
+
       <section className="mt-10">
         {INDICATORS.map(([name, source, body]) => (
           <div key={name} className="grid gap-1 border-t border-rule py-4 sm:grid-cols-[160px_1fr] sm:gap-6">
