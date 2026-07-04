@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.rosscyking.mobile"
     },
     "web": {
       "output": "static",
@@ -37,6 +38,19 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6e67271a-3e0d-4c97-9ff3-721d830c7a4b"
+      }
+    },
+    "owner": "rosscyking",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6e67271a-3e0d-4c97-9ff3-721d830c7a4b"
     }
   }
 }
