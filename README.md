@@ -17,6 +17,8 @@ verdict.
 [![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-informational.svg)](LICENSE)
 
+![MoveIn homepage — every 0–100 score shown beside the raw figure behind it (rent, crime rate, EPC), laid out like a surveyor's trade-off receipt](.github/assets/hero.png)
+
 ## Live
 
 | Surface | URL |
