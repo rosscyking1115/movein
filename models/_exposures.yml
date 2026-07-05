@@ -20,8 +20,8 @@ exposures:
       source of truth for every area score and fact.
 
     owner:
-      name: Ross King
-      email: leaffeng1115@gmail.com
+      name: Cheng-Yuan King
+      email: rosscyking1115@gmail.com
 
     depends_on:
       - ref('rpt_neighbourhood_score')   # → area scores + "why this area"
