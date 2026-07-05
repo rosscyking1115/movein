@@ -12,9 +12,9 @@ caveats. Not a price predictor and not a listings site: an honest decision layer
 over fragmented official UK datasets. Indicators only — never a "safe/unsafe"
 verdict.
 
-> *MoveIn* is the product; `uk-housing-decision-support` is the repository.
+> *MoveIn* is the product; `movein` is the repository.
 
-[![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml)
+[![CI](https://github.com/rosscyking1115/movein/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/movein/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-informational.svg)](LICENSE)
 
 ![MoveIn homepage — every 0–100 score shown beside the raw figure behind it (rent, crime rate, EPC), laid out like a surveyor's trade-off receipt](.github/assets/hero.png)
@@ -25,7 +25,7 @@ verdict.
 |---|---|
 | 🌐 **MoveIn website** (Next.js / Vercel) | https://uk-housing-decision-support.vercel.app |
 | ⚙️ **API** (FastAPI / Fly.io) — OpenAPI docs | https://uk-housing-decision-support-api.fly.dev/docs |
-| 📊 **dbt docs** (lineage + column catalogue) | https://rosscyking1115.github.io/uk-housing-decision-support/ |
+| 📊 **dbt docs** (lineage + column catalogue) | https://rosscyking1115.github.io/movein/ |
 
 ## Architecture
 
@@ -100,8 +100,8 @@ and the [Source attribution](#source-attribution) section.
 ### 1. The engine (dbt + DuckDB)
 
 ```bash
-git clone https://github.com/rosscyking1115/uk-housing-decision-support.git
-cd uk-housing-decision-support
+git clone https://github.com/rosscyking1115/movein.git
+cd movein
 python -m venv .venv
 # Windows: .\.venv\Scripts\Activate.ps1   |  macOS/Linux: source .venv/bin/activate
 python -m pip install --upgrade pip && pip install -r requirements.txt
