@@ -2,7 +2,7 @@
 
 Date prepared: 2026-06-27
 
-How `uk-housing-decision-support` evolves from a working Streamlit MVP into a real
+How `movein` (the repo) evolves from a working Streamlit MVP into a real
 product: an **API**, a **website**, a **mobile app**, and the **listing checker**
 (paste a property URL → "is this a good area, and is the price reasonable?").
 
