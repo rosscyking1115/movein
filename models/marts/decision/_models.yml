@@ -3,12 +3,18 @@ version: 2
 models:
   - name: rpt_area_profile_mvp
     description: |
-      First housing decision-support mart at MSOA grain. This prototype
-      exposes Land Registry sale context and explicit null/caveated
-      placeholders for rent, EPC, crime, flood, planning, and commute signals.
-      Grain: one row per area_id.
+      First housing decision-support mart at MSOA grain. Assembles Land Registry
+      sale context, ONS rent + affordability, EPC energy, police crime,
+      planning/flood constraints, and OpenStreetMap amenity access onto the
+      dim_area spine (via the int_area__* intermediate models), with an explicit
+      null placeholder for door-to-door commute time. Grain: one row per area_id.
+      Schema is contract-enforced — this mart is the API's source of truth.
+    config:
+      contract:
+        enforced: true
     columns:
       - name: area_id
+        data_type: varchar
         description: MSOA area key from dim_area.
         tests:
           - not_null
@@ -18,18 +24,28 @@ models:
                 to: ref('dim_area')
                 field: area_id
       - name: area_name
+        data_type: varchar
         description: Human-readable area name.
         tests:
           - not_null
       - name: local_authority_name
+        data_type: varchar
         description: Local authority context.
         tests:
           - not_null
       - name: region
+        data_type: varchar
         description: Region context.
         tests:
           - not_null
+      - name: median_sale_price_gbp
+        data_type: bigint
+        description: >
+          Median sale price (GBP) over the latest year's matched Land Registry
+          sales. Null when no sales matched the area. Read alongside
+          median_sale_price_confidence.
       - name: sales_count_latest_year
+        data_type: bigint
         description: Matched Land Registry sales in the configured latest year.
         tests:
           - not_null
@@ -37,6 +53,7 @@ models:
               arguments:
                 expression: ">= 0"
       - name: median_sale_price_confidence
+        data_type: varchar
         description: >
           Sample-depth confidence for the median sale price: none (no matched
           sales), indicative (below min_reliable_sale_sample), or reliable.
@@ -46,10 +63,12 @@ models:
               arguments:
                 values: ['none', 'indicative', 'reliable']
       - name: official_rent_monthly_gbp
+        data_type: integer
         description: >
           ONS PIPR average monthly private rent (GBP) for the area's local
           authority. Null when no ONS rent matched the local authority.
       - name: rent_source_grain
+        data_type: varchar
         description: >
           Grain the rent figure came from (local_authority for the MVP).
           Non-null whenever official_rent_monthly_gbp is non-null.
@@ -58,19 +77,25 @@ models:
               arguments:
                 values: ['local_authority', 'region', 'country']
       - name: affordability_ratio
+        data_type: double
         description: >
           official_rent_monthly_gbp / default_monthly_net_income_gbp. Above
           ~0.30 means rent exceeds the common 30% affordability guideline for
           the default income scenario.
       - name: rent_1bed_gbp
+        data_type: integer
         description: ONS PIPR average monthly rent for a 1-bed in the local authority. Null if suppressed.
       - name: rent_2bed_gbp
+        data_type: integer
         description: ONS PIPR average monthly rent for a 2-bed in the local authority. Null if suppressed.
       - name: rent_3bed_gbp
+        data_type: integer
         description: ONS PIPR average monthly rent for a 3-bed in the local authority. Null if suppressed.
       - name: rent_4plus_gbp
+        data_type: integer
         description: ONS PIPR average monthly rent for a 4+-bed in the local authority. Null if suppressed.
       - name: epc_median_rating
+        data_type: varchar
         description: >
           Median EPC band (A best - G worst) of certificates in the area,
           derived from the median energy-efficiency score. Null when no EPC
@@ -80,10 +105,12 @@ models:
               arguments:
                 values: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
       - name: epc_certificate_count
+        data_type: bigint
         description: >
           Number of EPC certificates matched to the area — confidence indicator
           for epc_median_rating. Null when none matched.
       - name: crime_rate_per_1000
+        data_type: double
         description: >
           Approximate monthly recorded crimes per 1,000 residents (police
           street-level crimes / months observed / nominal_msoa_population *
@@ -94,10 +121,12 @@ models:
               arguments:
                 expression: ">= 0"
       - name: crime_record_count
+        data_type: bigint
         description: >
           Total police street-level crimes matched to the area over the loaded
           period — confidence indicator for crime_rate_per_1000. Null when none.
       - name: flood_risk_flag
+        data_type: varchar
         description: >
           Flood-risk band (low/medium/high) from the share of the area's
           postcodes inside an Environment Agency flood-risk zone; 'unknown' if
@@ -108,10 +137,12 @@ models:
               arguments:
                 values: ['low', 'medium', 'high', 'unknown']
       - name: flood_postcode_pct
+        data_type: double
         description: >
           Percentage of the area's postcodes whose centroid falls inside a
           flood-risk zone. Null when constraints are not loaded for the area.
       - name: planning_constraint_count
+        data_type: integer
         description: >
           Distinct planning constraint entities (conservation areas, green belt,
           Article 4 areas, tree preservation zones) touching the area's
@@ -122,18 +153,24 @@ models:
               arguments:
                 expression: ">= 0"
       - name: nearest_station_km
+        data_type: double
         description: >
           Km from the MSOA centroid to the nearest rail/metro station
           (OpenStreetMap). Null when none within the search cap.
       - name: nearest_supermarket_km
+        data_type: double
         description: Km to the nearest supermarket. Null when none within the cap.
       - name: nearest_gp_km
+        data_type: double
         description: Km to the nearest GP/health facility. Null when none within the cap.
       - name: nearest_school_km
+        data_type: double
         description: Km to the nearest school. Null when none within the cap.
       - name: nearest_greenspace_km
+        data_type: double
         description: Km to the nearest park/green space. Null when none within the cap.
       - name: walkable_amenity_count
+        data_type: integer
         description: >
           Count of essential amenity types (supermarket, GP, school, pharmacy,
           green space) with at least one within the walking radius (0-5).
@@ -141,7 +178,25 @@ models:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 5"
+      - name: latitude
+        data_type: double
+        description: MSOA population-weighted centroid latitude (WGS84).
+      - name: longitude
+        data_type: double
+        description: MSOA population-weighted centroid longitude (WGS84).
+      - name: nearest_city
+        data_type: varchar
+        description: Name of the nearest major city centre to the area centroid.
+      - name: distance_to_city_km
+        data_type: double
+        description: Haversine distance (km) from the area centroid to nearest_city.
+      - name: commute_minutes_sample
+        data_type: decimal(18,3)
+        description: >
+          Placeholder for door-to-door commute time; always null until that
+          source is loaded, kept explicit so no commute claim is implied.
       - name: confidence_level
+        data_type: varchar
         description: Overall source coverage confidence for the profile.
         tests:
           - not_null
@@ -149,24 +204,32 @@ models:
               arguments:
                 values: ['high', 'medium', 'low']
       - name: confidence_notes
+        data_type: varchar
         description: Caveat text explaining missing or coarse source coverage.
         tests:
           - not_null
       - name: why_this_area
+        data_type: varchar
         description: Short explainability text for the current prototype area profile.
         tests:
           - not_null
 
   - name: rpt_neighbourhood_score
     description: |
-      Explainable neighbourhood scoring (Phase 4). One row per MSOA. Each
-      component is a 0-100 percentile score across all areas (higher = better)
-      derived from rpt_area_profile_mvp; overall_score is the weighted average of
-      the components an area has (default weights from vars, re-weighted per user
-      by the app). Missing components lower confidence and are dropped from the
-      average rather than scored zero.
+      Explainable neighbourhood scoring. One row per MSOA, derived from
+      rpt_area_profile_mvp. Each component is a 0-100 score — continuous
+      indicators use a median-anchored winsorised min-max (the median_anchored
+      macro), EPC and flood use fixed anchors. overall_score is the weighted
+      GEOMETRIC mean of the components an area has (default weights from vars,
+      re-weighted per user by the client). Missing components lower confidence and
+      are dropped from the mean rather than scored zero. Schema is
+      contract-enforced — this mart is the API's source of truth.
+    config:
+      contract:
+        enforced: true
     columns:
       - name: area_id
+        data_type: varchar
         description: MSOA key.
         tests:
           - not_null
@@ -175,47 +238,66 @@ models:
               arguments:
                 to: ref('dim_area')
                 field: area_id
+      - name: area_name
+        data_type: varchar
+        description: Human-readable area name (passed through from rpt_area_profile_mvp).
+        tests:
+          - not_null
+      - name: local_authority_name
+        data_type: varchar
+        description: Local authority context.
+      - name: region
+        data_type: varchar
+        description: Region context.
       - name: affordability_score
+        data_type: double
         description: 0-100 (higher = more affordable). Null when rent is missing.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 100"
       - name: safety_score
+        data_type: double
         description: 0-100 (higher = lower recorded crime). Null when crime is missing.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 100"
       - name: energy_score
-        description: 0-100 (higher = better EPC band). Null when EPC is missing.
+        data_type: decimal(4,1)
+        description: 0-100 (higher = better EPC band, from fixed A-G anchors). Null when EPC is missing.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 100"
       - name: flood_score
+        data_type: double
         description: 0-100 (higher = lower flood exposure). Null when flood is missing.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 100"
       - name: convenience_score
+        data_type: double
         description: 0-100 (higher = more walkable essentials + closer station).
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 100"
       - name: overall_score
-        description: Weighted average of available component scores, 0-100.
+        data_type: double
+        description: Weighted geometric mean of available component scores, 0-100.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 100"
       - name: overall_rank
+        data_type: bigint
         description: Dense rank by overall_score (1 = best) across all areas.
         tests:
           - not_null
       - name: components_available
+        data_type: integer
         description: Count of non-null component scores (0-5).
         tests:
           - not_null
@@ -223,6 +305,7 @@ models:
               arguments:
                 expression: "between 0 and 5"
       - name: confidence_level
+        data_type: varchar
         description: high (5 components), medium (3-4), or low (<3).
         tests:
           - not_null
@@ -230,6 +313,7 @@ models:
               arguments:
                 values: ['high', 'medium', 'low']
       - name: why_this_area
+        data_type: varchar
         description: Strongest/weakest component summary plus coverage.
         tests:
           - not_null
