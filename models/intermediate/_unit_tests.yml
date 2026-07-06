@@ -1,0 +1,34 @@
+version: 2
+
+# dbt unit tests (dbt >= 1.8) — assert model LOGIC against mock inputs, not just
+# invariants on real data. Complements the data tests: data tests catch bad data;
+# unit tests catch bad transformations (a regex/join/filter regression fails here
+# even if production data still happens to look fine).
+
+unit_tests:
+  - name: int_transactions__enriched_parses_and_filters
+    description: >
+      Deterministic check of int_transactions__enriched: outward/area extraction
+      from the postcode, the region join (missing area → 'Unknown'), null-postcode
+      handling, and the ppd_category='standard' filter (non-standard rows dropped).
+    model: int_transactions__enriched
+    given:
+      - input: ref('stg_landreg__transactions')
+        rows:
+          - { transaction_id: 't1', postcode: 'SW1A 1AA', ppd_category: 'standard' }
+          - { transaction_id: 't2', postcode: 'B12 9AA', ppd_category: 'standard' }
+          - { transaction_id: 't3', postcode: 'EC1A 1BB', ppd_category: 'standard' }
+          - { transaction_id: 't4', postcode: null, ppd_category: 'standard' }
+          - { transaction_id: 't5', postcode: 'M21 9HZ', ppd_category: 'additional' }
+      - input: ref('ref_postcode_area_region')
+        rows:
+          - { postcode_area: 'SW', region: 'London' }
+          - { postcode_area: 'B', region: 'West Midlands' }
+          # 'EC' intentionally absent -> region must fall back to 'Unknown'.
+    expect:
+      rows:
+        # 't5' (additional) is filtered out; order-independent match on the rest.
+        - { transaction_id: 't1', postcode: 'SW1A 1AA', ppd_category: 'standard', postcode_outward: 'SW1A', postcode_area: 'SW', region: 'London' }
+        - { transaction_id: 't2', postcode: 'B12 9AA', ppd_category: 'standard', postcode_outward: 'B12', postcode_area: 'B', region: 'West Midlands' }
+        - { transaction_id: 't3', postcode: 'EC1A 1BB', ppd_category: 'standard', postcode_outward: 'EC1A', postcode_area: 'EC', region: 'Unknown' }
+        - { transaction_id: 't4', postcode: null, ppd_category: 'standard', postcode_outward: null, postcode_area: null, region: 'Unknown' }
