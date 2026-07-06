@@ -13,82 +13,11 @@
 -- OpenStreetMap amenity/convenience access, plus a null placeholder for
 -- door-to-door commute time. That keeps the product honest: no journey-time
 -- commute claims are made before that source exists.
-
-with latest_market as (
-
-    select
-        dpg.area_id,
-        count(fct.transaction_id) filter (
-            where fct.transferred_year = {{ var('landreg_end_year') }}
-        ) as sales_count_latest_year,
-        cast(
-            median(fct.price_gbp) filter (
-                where fct.transferred_year = {{ var('landreg_end_year') }}
-            ) as bigint
-        ) as median_sale_price_gbp
-    from {{ ref('dim_postcode_geography') }} as dpg
-    left join {{ ref('fct_transactions') }} as fct
-        on dpg.postcode = upper(trim(fct.postcode))
-    group by dpg.area_id
-
-),
-
-area_energy as (
-
-    select
-        dpg.area_id,
-        count(*) as epc_certificate_count,
-        median(epc.current_energy_efficiency) as epc_median_efficiency
-    from {{ ref('stg_epc__certificates') }} as epc
-    inner join {{ ref('dim_postcode_geography') }} as dpg
-        on epc.postcode = dpg.postcode
-    where dpg.area_id is not null
-    group by dpg.area_id
-
-),
-
-lsoa_to_area as (
-
-    select distinct
-        lsoa_code,
-        area_id
-    from {{ ref('dim_postcode_geography') }}
-    where area_id is not null and lsoa_code is not null
-
-),
-
-area_crime as (
-
-    select
-        l.area_id,
-        count(*) as crime_record_count,
-        count(distinct c.crime_month) as crime_months_observed
-    from {{ ref('stg_crime__street') }} as c
-    inner join lsoa_to_area as l
-        on c.lsoa_code = l.lsoa_code
-    group by l.area_id
-
-),
-
-nearest_city as (
-
-    select area_id, nearest_city, distance_to_city_km
-    from (
-        select
-            cen.area_id,
-            cty.city as nearest_city,
-            round({{ haversine_km('cen.latitude', 'cen.longitude', 'cty.latitude', 'cty.longitude') }}, 1)
-                as distance_to_city_km,
-            row_number() over (
-                partition by cen.area_id
-                order by {{ haversine_km('cen.latitude', 'cen.longitude', 'cty.latitude', 'cty.longitude') }} asc
-            ) as rn
-        from {{ ref('ref_msoa_centroid') }} as cen
-        cross join {{ ref('ref_city_centre') }} as cty
-    )
-    where rn = 1
-
-)
+--
+-- The per-source area aggregations live in the intermediate layer
+-- (int_area__market / __energy / __crime / __nearest_city); this mart assembles
+-- them onto the dim_area spine and derives the presentation columns (EPC band,
+-- affordability ratio, crime rate, confidence notes, "why this area").
 
 select
     area.area_id,
@@ -204,13 +133,13 @@ select
         )
     end as why_this_area
 from {{ ref('dim_area') }} as area
-left join latest_market
+left join {{ ref('int_area__market') }} as latest_market
     on area.area_id = latest_market.area_id
 left join {{ ref('ref_ons_rent') }} as rent
     on area.local_authority_code = rent.area_code
-left join area_energy
+left join {{ ref('int_area__energy') }} as area_energy
     on area.area_id = area_energy.area_id
-left join area_crime
+left join {{ ref('int_area__crime') }} as area_crime
     on area.area_id = area_crime.area_id
 left join {{ ref('stg_constraints__area') }} as cons
     on area.area_id = cons.area_id
@@ -218,6 +147,6 @@ left join {{ ref('stg_amenities__area') }} as amenity
     on area.area_id = amenity.area_id
 left join {{ ref('ref_msoa_centroid') }} as cen
     on area.area_id = cen.area_id
-left join nearest_city as near
+left join {{ ref('int_area__nearest_city') }} as near
     on area.area_id = near.area_id
 order by area.region, area.local_authority_name, area.area_name

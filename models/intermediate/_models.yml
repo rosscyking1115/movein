@@ -25,3 +25,72 @@ models:
           didn't match the seed (e.g. malformed source data).
         tests:
           - not_null
+
+  - name: int_area__market
+    description: |
+      Latest-year Land Registry sale context aggregated to MSOA grain:
+      matched transaction count and median sale price. Extracted from
+      rpt_area_profile_mvp so the market roll-up is a named, testable node.
+    config:
+      materialized: ephemeral
+    columns:
+      - name: area_id
+        description: MSOA code (grain). Grouped from the postcode→geography lookup.
+        tests:
+          - unique
+      - name: sales_count_latest_year
+        description: Matched Land Registry sales in the configured latest year.
+      - name: median_sale_price_gbp
+        description: Median sale price (GBP) over the latest year's matched sales.
+
+  - name: int_area__energy
+    description: |
+      EPC energy profile per MSOA: certificate count and median current-energy
+      efficiency score. rpt_area_profile_mvp bands the median into an A–G rating.
+    config:
+      materialized: ephemeral
+    columns:
+      - name: area_id
+        description: MSOA code (grain). Only postcodes that map to an area are counted.
+        tests:
+          - unique
+          - not_null
+      - name: epc_certificate_count
+        description: Number of EPC certificates matched to the area.
+      - name: epc_median_efficiency
+        description: Median current-energy-efficiency score (0–100) across certificates.
+
+  - name: int_area__crime
+    description: |
+      Police street-crime volume per MSOA, mapped LSOA → area: record count and
+      distinct months observed. rpt_area_profile_mvp converts these into an
+      approximate, caveated crime rate per 1,000 residents.
+    config:
+      materialized: ephemeral
+    columns:
+      - name: area_id
+        description: MSOA code (grain), via the LSOA→area geography mapping.
+        tests:
+          - unique
+          - not_null
+      - name: crime_record_count
+        description: Count of matched street-crime records.
+      - name: crime_months_observed
+        description: Distinct crime months present, used as the rate denominator basis.
+
+  - name: int_area__nearest_city
+    description: |
+      Nearest major city centre to each MSOA centroid (haversine distance),
+      one row per area, for orientation in the area profile.
+    config:
+      materialized: ephemeral
+    columns:
+      - name: area_id
+        description: MSOA code (grain).
+        tests:
+          - unique
+          - not_null
+      - name: nearest_city
+        description: Name of the closest city centre.
+      - name: distance_to_city_km
+        description: Haversine distance (km, 1 dp) to that city centre.

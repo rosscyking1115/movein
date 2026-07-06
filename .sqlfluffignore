@@ -9,3 +9,4 @@ macros/_generated/
 # nests deeper than sqlfluff's parser depth limit; validated by dbt run + tests.
 models/marts/decision/rpt_neighbourhood_score.sql
 models/marts/decision/rpt_area_profile_mvp.sql
+models/intermediate/int_area__nearest_city.sql
