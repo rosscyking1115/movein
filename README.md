@@ -2,8 +2,8 @@
 
 **An analytics-engineering showcase: a tested dbt + DuckDB pipeline that turns
 seven official UK open-data sources into explainable, documented neighbourhood
-indicators — with published lineage, 189 data tests, and a reproducible
-fixture-to-full build.**
+indicators — with published lineage, 197 data tests + a dbt unit test, and a
+reproducible fixture-to-full build.**
 
 The engine rolls fragmented public housing data up to a consistent MSOA grain
 (7,264 England & Wales neighbourhoods) and derives five transparent 0–100
@@ -61,7 +61,7 @@ see the roadmap.)
 | `models/` | dbt models: sources → staging → intermediate → marts (the engine). |
 | `seeds/`, `macros/`, `analyses/` | dbt seeds (fixtures + name lookups), reusable macros (`haversine_km`, `median_anchored`), ad-hoc analyses. |
 | `scripts/` | Data prep/load scripts for the real (non-fixture) sources. |
-| `tests/` | 189 dbt data tests + the API test suite (`tests/test_api.py`). |
+| `tests/` | 197 dbt data tests + a dbt unit test + the API test suite (`tests/test_api.py`). |
 | `api/` | **FastAPI service** over the decision marts (resolve / search / listing-check / areas index / meta). `Dockerfile` + `fly.toml`. |
 | `web/` | **MoveIn website** — Next.js. Search, compare, listing checker, and ~7k programmatic area/town/region/rent pages. See [`web/README.md`](web/README.md) and [`web/DESIGN_BRIEF.md`](web/DESIGN_BRIEF.md). |
 | `data/` | Local DuckDB warehouse + the committed `decision.duckdb` extract the API ships. |
@@ -143,7 +143,7 @@ mkdir -p ~/.dbt && cp profiles.yml.example ~/.dbt/profiles.yml   # one-time
 python scripts/download_raw.py     # --sample for a faster 2-year run
 python scripts/load_to_duckdb.py
 dbt seed
-dbt build                          # full warehouse + 189 data tests, < 5 min on a laptop
+dbt build                          # full warehouse + 197 data tests, < 5 min on a laptop
 ```
 
 ### 2. The API
@@ -166,17 +166,18 @@ deploying both services is covered in [`DEPLOY.md`](DEPLOY.md).
 ## Testing & CI
 
 `ci.yml` runs on every PR and gates `main` via branch protection: Python unit tests
-(incl. the API suite), `dbt build` with **189 data tests**, source-freshness, and
-sqlfluff lint.
+(incl. the API suite), `dbt build` with **197 data tests + a unit test**,
+source-freshness, and sqlfluff lint.
 
 | Layer | Count | What it catches |
 |---|---|---|
 | Source freshness | 1 | Stale upstream data (warn if nothing newer than 35 days). |
-| Built-in row-shape | 137 | Schema bugs, FK orphans, enum drift. |
+| Built-in row-shape | 145 | Schema bugs, FK orphans, enum drift, contract violations. |
 | `dbt-utils` | 21 | Sign/range invariants, multi-column uniqueness, score bounds. |
 | `dbt-expectations` | 14 | Type-cast bugs, statistical drift, format regressions. |
 | Singular (`tests/assert_*.sql`) | 17 | Domain anomalies, coverage and coherence guards. |
-| **dbt total** | **189** | All passing on every `dbt build`. |
+| **dbt data-test total** | **197** | All passing on every `dbt build`. |
+| dbt **unit** test | 1 | Model *logic* on mock inputs (postcode parse + region join + filter). |
 | API (`tests/test_api.py`) | 8 | Endpoint contract, search re-rank, coverage 404/422, mocked postcodes.io. |
 
 ## Modelling & scoring principles
