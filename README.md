@@ -2,7 +2,7 @@
 
 **An analytics-engineering showcase: a tested dbt + DuckDB pipeline that turns
 seven official UK open-data sources into explainable, documented neighbourhood
-indicators — with published lineage, 197 data tests + a dbt unit test, and a
+indicators — with published lineage, 197 data tests + 2 dbt unit tests, and a
 reproducible fixture-to-full build.**
 
 The engine rolls fragmented public housing data up to a consistent MSOA grain
@@ -62,7 +62,7 @@ see the roadmap.)
 | `seeds/`, `macros/`, `analyses/` | dbt seeds (fixtures + name lookups), reusable macros (`haversine_km`, `median_anchored`), ad-hoc analyses. |
 | `scripts/` | Data prep/load scripts for the real (non-fixture) sources. |
 | `orchestration/` | **Dagster asset graph** over the monthly refresh: ingestion (+ a pre-dbt data-quality gate) → dbt → decision extract. |
-| `tests/` | 197 dbt data tests + a dbt unit test + the API test suite (`tests/test_api.py`). |
+| `tests/` | 197 dbt data tests + 2 dbt unit tests + the API test suite (`tests/test_api.py`). |
 | `api/` | **FastAPI service** over the decision marts (resolve / search / listing-check / areas index / meta). `Dockerfile` + `fly.toml`. |
 | `web/` | **MoveIn website** — Next.js. Search, compare, listing checker, and ~7k programmatic area/town/region/rent pages. See [`web/README.md`](web/README.md) and [`web/DESIGN_BRIEF.md`](web/DESIGN_BRIEF.md). |
 | `data/` | Local DuckDB warehouse + the committed `decision.duckdb` extract the API ships. |
@@ -206,7 +206,7 @@ deploying both services is covered in [`DEPLOY.md`](DEPLOY.md).
 ## Testing & CI
 
 `ci.yml` runs on every PR and gates `main` via branch protection: Python unit tests
-(incl. the API suite), `dbt build` with **197 data tests + a unit test**,
+(incl. the API suite), `dbt build` with **197 data tests + 2 unit tests**,
 source-freshness, and sqlfluff lint.
 
 | Layer | Count | What it catches |
@@ -217,7 +217,7 @@ source-freshness, and sqlfluff lint.
 | `dbt-expectations` | 14 | Type-cast bugs, statistical drift, format regressions. |
 | Singular (`tests/assert_*.sql`) | 17 | Domain anomalies, coverage and coherence guards. |
 | **dbt data-test total** | **197** | All passing on every `dbt build`. |
-| dbt **unit** test | 1 | Model *logic* on mock inputs (postcode parse + region join + filter). |
+| dbt **unit** tests | 2 | Model *logic* on mock inputs: enrichment (postcode parse + region join + filter) and the scoring maths (median-anchored min-max, geometric-mean floor, missing-component rule). |
 | API (`tests/test_api.py`) | 8 | Endpoint contract, search re-rank, coverage 404/422, mocked postcodes.io. |
 
 ## Modelling & scoring principles
