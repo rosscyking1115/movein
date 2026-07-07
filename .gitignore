@@ -29,6 +29,11 @@ data/*.parquet
 # Built dbt docs site (published to Pages from CI).
 docs/
 
+# --- Dagster ---
+# `dagster dev` scratch home when DAGSTER_HOME is unset (auto-removed on clean exit).
+.tmp_dagster_home_*/
+.dagster/
+
 # --- Python ---
 .venv/
 venv/

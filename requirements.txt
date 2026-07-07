@@ -26,3 +26,16 @@ chardet==5.2.0       # keep requests import compatibility check quiet when chard
 openpyxl==3.1.5      # read the ONS PIPR .xlsx in scripts/prepare_ons_rent_seed.py
 fastapi==0.138.1     # api/ service (deployed via api/requirements.txt; here for tests)
 httpx==0.28.1        # FastAPI TestClient in tests/test_api.py
+
+# --- orchestration (Dagster) ---
+# Models the monthly refresh as an asset graph — see orchestration/ + its README.
+# dagster-dbt 0.29.12 pins dagster==1.13.12 and needs dbt-core<1.12 (1.11.8 fits).
+dagster==1.13.12
+dagster-dbt==0.29.12
+dagster-webserver==1.13.12
+# Pin the grpc/protobuf stack: grpcio-health-checking>=1.82 ships a protobuf-7.x
+# gencode that fails against dbt's protobuf<7.0 cap. 1.74.0 uses 6.x gencode and
+# resolves cleanly with protobuf 6.33.6.
+grpcio==1.74.0
+grpcio-health-checking==1.74.0
+protobuf==6.33.6
