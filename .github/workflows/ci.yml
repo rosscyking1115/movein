@@ -14,7 +14,7 @@
 #   5. Download two years of Land Registry data (--sample, enough for YoY)
 #   6. Load it into DuckDB
 #   7. dbt source freshness — proves the loaded source is current enough
-#   8. dbt seed + dbt build — all marts + 197 data tests + a unit test on sample
+#   8. dbt seed + dbt build — all marts + 197 data tests + 2 unit tests on sample
 #   9. sqlfluff lint — model SQL must satisfy .sqlfluff rules
 #
 # Branch protection on main requires the "build-and-test" check to pass before
@@ -92,7 +92,7 @@ jobs:
       - name: dbt seed
         run: dbt seed --target dev
 
-      - name: dbt build (runs all marts + 197 data tests + unit test)
+      - name: dbt build (runs all marts + 197 data tests + 2 unit tests)
         run: dbt build --target dev
 
       - name: sqlfluff lint (model SQL only)
