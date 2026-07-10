@@ -1,6 +1,6 @@
 # MoveIn
 
-**An analytics-engineering showcase: a tested dbt + DuckDB pipeline that turns
+**A tested dbt + DuckDB pipeline that turns
 seven official UK open-data sources into explainable, documented neighbourhood
 indicators — with published lineage, 197 data tests + 2 dbt unit tests, and a
 reproducible fixture-to-full build.**
@@ -10,13 +10,12 @@ The engine rolls fragmented public housing data up to a consistent MSOA grain
 indicators — affordability, safety, energy, flood resilience, convenience — each
 kept **beside the raw figure it came from**, with per-area confidence driven by
 data coverage. Missing data lowers confidence; it never silently becomes a zero.
-The "where to live" framing is the *vehicle* — what's on show is the **pipeline,
+The "where to live" framing is the *vehicle* — the substance is the **pipeline,
 the dimensional + decision modelling, the tests, and the explainability layer**.
 
-> **Portfolio note.** This is a personal analytics-engineering project (target
-> roles: analytics engineer / data analyst), not a product — the UK area-data
-> space is already well served (CrystalRoof, Plumplot, PostcodeCheck, …). It
-> exists to demonstrate an end-to-end data stack over official open data.
+> **Scope.** A reference analytics-engineering project, not a product — the UK
+> area-data space is already well served (CrystalRoof, Plumplot, PostcodeCheck, …).
+> It's an end-to-end data stack built over official open data.
 >
 > *MoveIn* is the working name; `movein` is the repository.
 
@@ -232,7 +231,7 @@ source-freshness, and sqlfluff lint.
 
 ## Roadmap
 
-As a portfolio piece, the roadmap is about **engineering depth, not product
+The roadmap is about **engineering depth, not product
 surface.** Built and stable: the dbt + DuckDB engine (this repo), a FastAPI
 service ([`api/`](api/)), and a Next.js site ([`web/`](web/)) as a thin client. A
 Streamlit MVP and an Expo mobile client were also built and are **parked** — the
