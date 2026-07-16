@@ -1,4 +1,4 @@
-# The API image only needs api/ + data/decision.duckdb (see api/Dockerfile),
+# The API image only needs api/, contracts/, and data/decision.duckdb (see api/Dockerfile),
 # but the build context is the repo root. Keep the upload small: drop the huge
 # warehouse, virtualenvs, the web app, and build/cache cruft.
 .git
