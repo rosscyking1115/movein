@@ -8,6 +8,7 @@ COPY api/requirements.txt ./api/requirements.txt
 RUN pip install --no-cache-dir -r api/requirements.txt
 
 COPY api ./api
+COPY contracts ./contracts
 COPY data/decision.duckdb ./data/decision.duckdb
 
 EXPOSE 8080

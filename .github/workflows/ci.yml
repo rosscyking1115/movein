@@ -88,6 +88,19 @@ jobs:
         # test parses the dbt manifest to load the Dagster definitions.
         run: python -m unittest discover -s tests -p "test_*.py"
 
+      - name: API container starts with its runtime contract
+        run: |
+          docker build --file api/Dockerfile --tag housing-api-ci .
+          docker run --detach --name housing-api-ci --publish 127.0.0.1:8080:8080 housing-api-ci
+          trap 'docker logs housing-api-ci; docker rm --force housing-api-ci' EXIT
+          for attempt in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8080/healthz; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
+
       - name: dbt scoring contract rejects invalid weights
         run: |
           if dbt compile --target ci --select rpt_neighbourhood_score --vars '{score_weight_affordability: 6}'; then
