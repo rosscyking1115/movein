@@ -1,6 +1,6 @@
-area_id,planning_constraint_count,flood_risk_flag,flood_postcode_pct
-E02000001,12,low,0.0
-E02000885,3,medium,8.5
-E02000977,9,low,1.2
-W02000420,2,low,0.0
-E02006317,4,low,0.0
+area_id,planning_constraint_count,planning_source_status,planning_source_name,flood_risk_flag,flood_postcode_pct,flood_source_status,flood_source_name
+E02000001,12,covered,Planning Data platform,low,0.0,covered,Environment Agency flood risk zones
+E02000885,3,covered,Planning Data platform,medium,8.5,covered,Environment Agency flood risk zones
+E02000977,9,covered,Planning Data platform,low,1.2,covered,Environment Agency flood risk zones
+W02000422,,not_covered,Planning Data platform,,,not_covered,Environment Agency flood risk zones
+E02006317,4,covered,Planning Data platform,low,0.0,covered,Environment Agency flood risk zones

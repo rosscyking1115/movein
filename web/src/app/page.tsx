@@ -14,8 +14,8 @@ async function safeMeta() {
 
 // Illustrative rows for the thesis preview (not live data — a worked example).
 const HERO_ROWS = [
-  { name: "Affordability", fact: "Typical 2-bed rent £1,050/mo", score: 64 },
-  { name: "Safety", fact: "58 crimes per 1,000 residents", score: 71 },
+  { name: "Affordability", fact: "Official local-authority 2-bed rent £1,050/mo", score: 64 },
+  { name: "Recorded crime", fact: "5.8 monthly crimes per 1,000", score: 71 },
   { name: "Energy efficiency", fact: "Median EPC band C", score: 68 },
   { name: "Getting around", fact: "31 amenities within reach", score: 83 },
 ];
@@ -23,7 +23,7 @@ const HERO_ROWS = [
 const PRINCIPLES = [
   { no: "01", title: "The figure, beside the score", body: "Every indicator shows the raw number it came from — rent, crime rate, EPC, flood band — so nothing is taken on trust." },
   { no: "02", title: "Indicators, not verdicts", body: "We never call a place good, bad, safe or unsafe. Only higher or lower than other areas, on a neutral scale." },
-  { no: "03", title: "Missing data isn't zero", body: "If we don't hold an indicator, we say so and lower confidence — we never score a gap as a zero." },
+  { no: "03", title: "Missing data isn't zero", body: "If we don't hold an indicator, we say so and lower the evidence-quality level — we never score a gap as a zero." },
 ];
 
 const POPULAR: [string, string][] = [
@@ -48,7 +48,7 @@ export default async function Home() {
           Every score, shown next&nbsp;to the fact behind&nbsp;it.
         </h1>
         <p className="mb-[34px] max-w-[600px] text-[19px] leading-[1.6] text-ink2">
-          MoveIn reads a neighbourhood from official open data and lays it out like
+          England &amp; Wales Housing Decision Support reads a neighbourhood from official open data and lays it out like
           a surveyor&rsquo;s schedule — five indicators, each beside the figure it
           came from. We show you the evidence; we never tell you a place is
           &ldquo;good&rdquo; or &ldquo;safe.&rdquo;

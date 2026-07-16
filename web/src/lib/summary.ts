@@ -19,7 +19,7 @@ export function answerSentence(area: Area): string {
   const where = place ? ` in ${place}` : "";
   const facts: string[] = [];
   if (area.official_rent_monthly_gbp != null)
-    facts.push(`typical rent ${rentPerMonth(area.official_rent_monthly_gbp)}`);
+    facts.push(`official local-authority rent ${rentPerMonth(area.official_rent_monthly_gbp)}`);
   if (area.crime_rate_per_1000 != null)
     facts.push(`${rate(area.crime_rate_per_1000)} crimes per 1,000 residents`);
   if (area.epc_median_rating)
@@ -28,7 +28,7 @@ export function answerSentence(area: Area): string {
 
   return (
     `${area.area_name} is ${band(area.overall_score)} neighbourhood${where}, ` +
-    `scoring ${score(area.overall_score)}/100 overall on our affordability, safety, ` +
+    `scoring ${score(area.overall_score)}/100 overall on our affordability, recorded-crime, ` +
     `energy, flood and convenience indicators${tail}`
   );
 }

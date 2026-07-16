@@ -28,23 +28,24 @@ class OrchestrationDefinitionsTests(unittest.TestCase):
         # (not the fixture seeds) or the ingestion assets would be disconnected.
         from orchestration.resources import DBT_EXECUTABLE, REAL_SOURCE_VARS_JSON
 
-        manifest = ROOT / "target" / "manifest.json"
-        if not manifest.exists():
-            subprocess.run(
-                [
-                    DBT_EXECUTABLE,
-                    "parse",
-                    "--quiet",
-                    "--no-partial-parse",
-                    "--vars",
-                    REAL_SOURCE_VARS_JSON,
-                ],
-                cwd=ROOT,
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=300,
-            )
+        # Always replace an ambient manifest: a preceding fixture dbt build
+        # writes a valid manifest whose staging parents are seeds, which is the
+        # wrong lineage contract for the orchestrated real-source graph.
+        subprocess.run(
+            [
+                DBT_EXECUTABLE,
+                "parse",
+                "--quiet",
+                "--no-partial-parse",
+                "--vars",
+                REAL_SOURCE_VARS_JSON,
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
 
     def test_every_dbt_source_is_remapped_onto_its_ingestion_asset(self) -> None:
         from dagster import AssetKey
@@ -104,7 +105,7 @@ class OrchestrationDefinitionsTests(unittest.TestCase):
                 "warehouse_epc",
                 "warehouse_amenities",
                 "warehouse_constraints",
-                "movein_dbt_models",
+                "housing_decision_support_dbt_models",
                 "decision_extract",
             },
             node_names,

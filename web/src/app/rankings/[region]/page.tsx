@@ -31,10 +31,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const region = regionFromSlug((await params).region);
   if (!region) return { title: "Region not found", robots: { index: false } };
-  const title = `Best areas to live in ${region} — ranked`;
+  const title = `Area indicator rankings in ${region}`;
   return {
     title,
-    description: `Neighbourhoods in ${region} ranked on affordability, safety, energy, flood risk and convenience, each shown with the facts behind the score.`,
+    description: `Neighbourhoods in ${region} ranked on affordability, recorded crime, energy, flood risk and convenience, each shown with the facts behind the score.`,
     alternates: { canonical: `/rankings/${regionSlug(region)}` },
   };
 }
@@ -62,7 +62,7 @@ export default async function RegionRanking({ params }: Props) {
 
       <header className="mb-8 max-w-[620px]">
         <h1 className="font-display text-[clamp(34px,4.6vw,52px)] font-bold leading-[1.05] text-ink">
-          Best areas to live in {region}
+          Area indicator rankings in {region}
         </h1>
         <p className="mt-2 text-[17px] text-ink2">
           {ranked.length.toLocaleString("en-GB")} neighbourhoods ranked by overall
@@ -103,7 +103,7 @@ export default async function RegionRanking({ params }: Props) {
 
       <JsonLd
         data={rankingJsonLd({
-          title: `Best areas to live in ${region}`,
+          title: `Area indicator rankings in ${region}`,
           path: `/rankings/${regionSlug(region)}`,
           crumbs: [
             { name: "Home", path: "" },

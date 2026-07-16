@@ -14,7 +14,9 @@ with lsoa_to_area as (
 select
     l.area_id,
     count(*) as crime_record_count,
-    count(distinct c.crime_month) as crime_months_observed
+    count(distinct c.crime_month) as crime_months_observed,
+    min(c.crime_month) as crime_period_start,
+    max(c.crime_month) as crime_period_end
 from {{ ref('stg_crime__street') }} as c
 inner join lsoa_to_area as l
     on c.lsoa_code = l.lsoa_code

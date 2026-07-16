@@ -4,7 +4,7 @@
     )
 }}
 
--- Street-level crime staging interface for the safety-indicator layer.
+-- Street-level crime staging interface for the recorded-crime indicator.
 -- Reads the committed ref_crime_sample fixture by default, or the full
 -- raw_police.street_crime source when built with `--vars 'crime_source: bulk'`.
 -- Grain: one row per recorded crime. Keyed by 2021 LSOA, which rolls up to MSOA.

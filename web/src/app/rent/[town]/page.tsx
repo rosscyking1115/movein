@@ -44,7 +44,7 @@ export default async function RentTownPage({ params }: Props) {
   if (!town) notFound();
 
   const averages = BEDS.map((b) => ({ ...b, avg: averageField(town.areas, b.key) }));
-  // Rank areas by their typical (all-bed) rent, cheapest first.
+  // Rank areas by their official local-authority (all-bed) rent context, cheapest first.
   const ranked = [...town.areas].sort(
     (a, b) => (a.official_rent_monthly_gbp ?? Infinity) - (b.official_rent_monthly_gbp ?? Infinity),
   );

@@ -20,39 +20,39 @@ unit_tests:
       lower-is-better indicators, the absolute EPC and flood anchors, the
       walkable+station convenience blend, the weighted GEOMETRIC mean with its
       floor at 1 (an all-zero area scores 1.0, never 0 or an error), and the
-      missing-component rule (a null indicator is dropped and lowers
-      confidence, never scored as zero).
+      missing-component rule (a null indicator is dropped and lowers evidence
+      quality, never scored as zero).
     model: rpt_neighbourhood_score
     given:
       - input: ref('rpt_area_profile_mvp')
         rows:
           # columns: the six indicators the scorer reads + identity passthrough.
           # A3's walkable_amenity_count is null → convenience must be dropped.
-          - { area_id: 'A1', area_name: 'Best', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.10, crime_rate_per_1000: 10.0, nearest_station_km: 0.5, walkable_amenity_count: 5, epc_median_rating: 'A', flood_postcode_pct: 0.0 }
-          - { area_id: 'A2', area_name: 'Good', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.20, crime_rate_per_1000: 20.0, nearest_station_km: 1.0, walkable_amenity_count: 4, epc_median_rating: 'B', flood_postcode_pct: 25.0 }
-          - { area_id: 'A3', area_name: 'Median', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.30, crime_rate_per_1000: 30.0, nearest_station_km: 1.5, walkable_amenity_count: null, epc_median_rating: 'D', flood_postcode_pct: 50.0 }
-          - { area_id: 'A4', area_name: 'Poor', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.40, crime_rate_per_1000: 40.0, nearest_station_km: 2.0, walkable_amenity_count: 1, epc_median_rating: 'E', flood_postcode_pct: 75.0 }
-          - { area_id: 'A5', area_name: 'Worst', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.60, crime_rate_per_1000: 60.0, nearest_station_km: 3.0, walkable_amenity_count: 0, epc_median_rating: 'G', flood_postcode_pct: 100.0 }
+          - { area_id: 'A1', area_name: 'Best', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.10, crime_rate_per_1000: 10.0, nearest_station_km: 0.5, walkable_amenity_count: 5, epc_median_rating: 'A', flood_postcode_pct: 0.0, rent_source_grain: 'msoa', rent_reference_date: '2026-05-01', median_sale_price_confidence: 'reliable', crime_population_denominator: 8000, crime_population_reference_date: '2024-06-30', crime_period_start: '2026-01', crime_period_end: '2026-06', planning_source_status: 'covered', flood_source_status: 'covered' }
+          - { area_id: 'A2', area_name: 'Good', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.20, crime_rate_per_1000: 20.0, nearest_station_km: 1.0, walkable_amenity_count: 4, epc_median_rating: 'B', flood_postcode_pct: 25.0, rent_source_grain: 'local_authority', median_sale_price_confidence: 'reliable', crime_population_denominator: 8000, planning_source_status: 'covered', flood_source_status: 'covered' }
+          - { area_id: 'A3', area_name: 'Median', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.30, crime_rate_per_1000: 30.0, nearest_station_km: 1.5, walkable_amenity_count: null, epc_median_rating: 'D', flood_postcode_pct: 50.0, rent_source_grain: 'local_authority', median_sale_price_confidence: 'reliable', crime_population_denominator: 8000, planning_source_status: 'covered', flood_source_status: 'covered' }
+          - { area_id: 'A4', area_name: 'Poor', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.40, crime_rate_per_1000: 40.0, nearest_station_km: 2.0, walkable_amenity_count: 1, epc_median_rating: 'E', flood_postcode_pct: 75.0, rent_source_grain: 'local_authority', median_sale_price_confidence: 'reliable', crime_population_denominator: 8000, planning_source_status: 'covered', flood_source_status: 'covered' }
+          - { area_id: 'A5', area_name: 'Worst', local_authority_name: 'LA', region: 'London', affordability_ratio: 0.60, crime_rate_per_1000: 60.0, nearest_station_km: 3.0, walkable_amenity_count: 0, epc_median_rating: 'G', flood_postcode_pct: 100.0, rent_source_grain: 'local_authority', median_sale_price_confidence: 'reliable', crime_population_denominator: 8000, planning_source_status: 'not_covered', flood_source_status: 'covered' }
     expect:
       rows:
         # A1: clipped at p2 on every continuous indicator → 100s across the
         # board; overall = geometric mean of five 100s = 100.
-        - { area_id: 'A1', affordability_score: 100.0, safety_score: 100.0, energy_score: 100.0, flood_score: 100.0, convenience_score: 100.0, overall_score: 100.0, overall_rank: 1, components_available: 5, confidence_level: 'high' }
+        - { area_id: 'A1', affordability_score: 100.0, safety_score: 100.0, energy_score: 100.0, flood_score: 100.0, convenience_score: 100.0, overall_score: 100.0, overall_rank: 1, available_component_count: 5, expected_component_count: 5, all_component_source_dates_known: false, evidence_quality_level: 'mixed' }
         # A2: interpolation below the median, e.g. affordability
         # 100 − 50·(0.20−0.108)/(0.30−0.108) = 76.0; convenience =
         # (walkable 4/5 → 80 + station 76.0)/2 = 78.0; overall =
         # exp(mean(ln{76, 76, 83, 75, 78})) = 77.5.
-        - { area_id: 'A2', affordability_score: 76.0, safety_score: 76.0, energy_score: 83.0, flood_score: 75.0, convenience_score: 78.0, overall_score: 77.5, overall_rank: 2, components_available: 5, confidence_level: 'high' }
+        - { area_id: 'A2', affordability_score: 76.0, safety_score: 76.0, energy_score: 83.0, flood_score: 75.0, convenience_score: 78.0, overall_score: 77.5, overall_rank: 2, available_component_count: 5, expected_component_count: 5, all_component_source_dates_known: false, evidence_quality_level: 'mixed' }
         # A3: the exact median → 50 on every continuous component; EPC 'D' and
         # flood 50% are the absolute mid-anchors. walkable is null → convenience
         # dropped (NOT zeroed): 4 of 5 components, confidence falls to medium,
         # overall = geometric mean of four 50s = 50.
-        - { area_id: 'A3', affordability_score: 50.0, safety_score: 50.0, energy_score: 50.0, flood_score: 50.0, convenience_score: null, overall_score: 50.0, overall_rank: 3, components_available: 4, confidence_level: 'medium' }
+        - { area_id: 'A3', affordability_score: 50.0, safety_score: 50.0, energy_score: 50.0, flood_score: 50.0, convenience_score: null, overall_score: 50.0, overall_rank: 3, available_component_count: 4, expected_component_count: 5, all_component_source_dates_known: false, evidence_quality_level: 'mixed' }
         # A4: interpolation above the median, e.g. affordability
         # 100 − (50 + 50·(0.40−0.30)/(0.584−0.30)) = 32.4; convenience =
         # (walkable 1/5 → 20 + station 32.4)/2 = 26.2.
-        - { area_id: 'A4', affordability_score: 32.4, safety_score: 32.4, energy_score: 33.0, flood_score: 25.0, convenience_score: 26.2, overall_score: 29.6, overall_rank: 4, components_available: 5, confidence_level: 'high' }
+        - { area_id: 'A4', affordability_score: 32.4, safety_score: 32.4, energy_score: 33.0, flood_score: 25.0, convenience_score: 26.2, overall_score: 29.6, overall_rank: 4, available_component_count: 5, expected_component_count: 5, all_component_source_dates_known: false, evidence_quality_level: 'mixed' }
         # A5: clipped at p98 → 0 everywhere. The geometric-mean FLOOR is the
         # point: ln(greatest(0,1)) = 0, so overall = exp(0) = 1.0 — an all-zero
         # area yields 1.0, not 0 and not a ln(0) error.
-        - { area_id: 'A5', affordability_score: 0.0, safety_score: 0.0, energy_score: 0.0, flood_score: 0.0, convenience_score: 0.0, overall_score: 1.0, overall_rank: 5, components_available: 5, confidence_level: 'high' }
+        - { area_id: 'A5', affordability_score: 0.0, safety_score: 0.0, energy_score: 0.0, flood_score: 0.0, convenience_score: 0.0, overall_score: 1.0, overall_rank: 5, available_component_count: 5, expected_component_count: 5, all_component_source_dates_known: false, evidence_quality_level: 'limited' }

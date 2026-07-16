@@ -1,28 +1,46 @@
 version: 2
 
-# Exposures declare downstream consumers of the warehouse. dbt renders them as
-# leaf nodes in the lineage graph, so the dbt-docs site shows the live MoveIn
-# product as a real downstream node instead of the decision marts dangling with
-# no consumers. They also surface in `dbt list --resource-type exposure` and
-# `dbt run --select +exposure:movein_product`.
-
+# Separate downstream leaves make the deployed website, API, and shipped extract
+# independently visible in dbt lineage and selectable by exposure name.
 exposures:
 
-  - name: movein_product
-    label: "MoveIn API + website"
+  - name: housing_decision_support_api
+    label: "England & Wales Housing Decision Support API"
+    type: application
+    maturity: high
+    url: https://uk-housing-decision-support-api.fly.dev/docs
+    description: |
+      The public FastAPI interface serves area scores and their source facts from
+      the committed read-only DuckDB extract.
+    owner: &product_owner
+      name: Cheng-Yuan King
+      email: rosscyking1115@gmail.com
+    depends_on:
+      - ref('rpt_neighbourhood_score')
+      - ref('rpt_area_profile_mvp')
+
+  - name: housing_decision_support_website
+    label: "England & Wales Housing Decision Support website"
     type: application
     maturity: high
     url: https://uk-housing-decision-support.vercel.app/
     description: |
-      The MoveIn API (FastAPI, `api/`) and website (Next.js, `web/`) serve the
-      decision marts to the public. The API ships a slim read-only DuckDB extract
-      built by `scripts/build_decision_db.py` from the marts below — the upstream
-      source of truth for every area score and fact.
-
-    owner:
-      name: Cheng-Yuan King
-      email: rosscyking1115@gmail.com
-
+      The public Next.js website consumes the API and presents each indicator
+      beside the underlying fact and evidence caveats.
+    owner: *product_owner
     depends_on:
-      - ref('rpt_neighbourhood_score')   # → area scores + "why this area"
-      - ref('rpt_area_profile_mvp')      # → the raw per-area facts
+      - ref('rpt_neighbourhood_score')
+      - ref('rpt_area_profile_mvp')
+
+  - name: housing_decision_support_extract
+    label: "Decision DuckDB extract"
+    type: application
+    maturity: high
+    url: https://github.com/rosscyking1115/uk-housing-decision-support/blob/main/data/decision.duckdb
+    description: |
+      The slim read-only DuckDB delivery artifact assembled from both decision
+      marts by scripts/build_decision_db.py and consumed by the API.
+    owner: *product_owner
+    depends_on:
+      - ref('rpt_neighbourhood_score')
+      - ref('rpt_area_profile_mvp')

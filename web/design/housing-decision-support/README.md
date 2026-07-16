@@ -1,18 +1,18 @@
-# Handoff: MoveIn — neighbourhood safety & suitability indicator
+# Handoff: England & Wales Housing Decision Support
 
 ## Overview
-MoveIn is a web app that reads a UK neighbourhood from official open data and presents it as a surveyor-style "schedule" of indicators. Its core thesis: **every score sits next to the raw figure it came from**, and the product never delivers a verdict ("good", "safe") — only relative, evidence-backed indicators. It covers six routed views: Home, Area detail, Search (weighted ranking), Compare, Check-a-listing (price sanity check), Rankings, and Methodology.
+England & Wales Housing Decision Support reads a neighbourhood from official open data and presents it as a surveyor-style "schedule" of indicators. Its core thesis: **every score sits next to the raw figure it came from**, and the product never delivers a verdict ("good", "safe") — only relative, evidence-backed indicators.
 
 ## About the Design Files
-The file in this bundle (`MoveIn.dc.html`) is a **design reference created in HTML** — a working prototype showing the intended look, content, and behavior. It is **not production code to ship as-is**. The task is to **recreate this design in the target codebase's existing environment** (React, Vue, SvelteKit, etc.) using that project's established component library, routing, and data-fetching patterns. If no codebase exists yet, pick the most appropriate framework (the prototype maps cleanly onto React with client routing) and build there.
+The file in this bundle (`HousingDecisionSupport.dc.html`) is a **design reference created in HTML** — a working prototype showing the intended look, content, and behavior. It is **not production code to ship as-is**. The task is to **recreate this design in the target codebase's existing environment** using that project's established component library, routing, and data-fetching patterns.
 
-The prototype is a single-component state machine with mock data baked in. In production, the area dataset and the typical-rent/price figures would come from real APIs (ONS, Land Registry, Police.uk, EPC Register, Environment Agency, OS/OSM).
+This is a historical, non-contractual mock with baked-in data. The production UI and API contracts supersede its labels; official local-authority rent and named area-level comparison figures come from the documented sources.
 
 ## Fidelity
 **High-fidelity (hifi).** Final colors, typography, spacing, and interaction behavior are all specified. Recreate the UI pixel-accurately using the codebase's libraries. Both a **light and dark theme** are fully defined (see Design Tokens) and must be supported.
 
 ## Brand
-- **Name:** MoveIn
+- **Name:** England & Wales Housing Decision Support
 - **Logo (chosen mark — "gable house"):** an inline SVG drawn with theme color tokens, used in the header (26×26) and footer (22×22):
   ```html
   <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true">
@@ -26,7 +26,7 @@ The prototype is a single-component state machine with mock data baked in. In pr
 
 ## Layout shell (all routes)
 - **Max content width:** 1140px, centered, 24px horizontal padding.
-- **Header:** sticky, `top:0`, `z-index:20`, `background var(--paper)`, 1px bottom border `var(--rule)`, height 62px. Left→right: logo button (mark + "MoveIn" wordmark, gap 10px), nav buttons, and a theme toggle pushed right (`margin-left:auto`).
+- **Header:** sticky, `top:0`, `z-index:20`, `background var(--paper)`, 1px bottom border `var(--rule)`, height 62px. Left→right: logo button (mark + descriptive wordmark), nav buttons, and a theme toggle pushed right (`margin-left:auto`).
 - **Nav buttons:** font 14px; active = weight 600, color `--ink`, background `--card2`; inactive = weight 500, color `--muted`, no background. 8px radius, min-height 38px, padding 8px 12px.
 - **Theme toggle:** pill, `--card2` bg, 1px `--rule` border, color `--ink2`, radius 999px, padding 7px 13px, mono uppercase 11px, min-height 34px. Label is "Dark" in light mode / "Light" in dark mode.
 - **Footer:** top border `--rule`, `--card2` bg. Logo + tagline (max 420px) on the left; two link columns ("Explore", "Sources") on the right (gap 48px). Bottom strip: 12px muted note, top border, 18px padding-top.
@@ -62,7 +62,7 @@ The prototype is a single-component state machine with mock data baked in. In pr
 
 ### 5. Check (`route: 'check'`)
 - **Purpose:** Area-level price sanity check for a listing (explicitly *not* a valuation).
-- **Layout:** grid `minmax(0,340px) minmax(0,1fr)`, gap 26px. Left: form card — area `<select>`, deal toggle (To rent / To buy), bedrooms toggle (1/2/3/4+), and a £-prefixed asking-price input (mono). Right: a **price band** card with a horizontal scale (gradient track, center "typical" tick, animated marker positioned by `ratio = asking / typical`, marker left = `clamp(4%, 50% + (ratio-1)*220%, 96%)`), plus a headline+note that changes by band:
+- **Layout:** grid `minmax(0,340px) minmax(0,1fr)`, gap 26px. Left: form card — area `<select>`, deal toggle (To rent / To buy), bedrooms toggle (1/2/3/4+), and a £-prefixed asking-price input (mono). Right: a **price band** card with a horizontal comparison scale and a marker derived from asking/comparison values, plus a headline+note that changes by band:
   - `<0.85` Well below · `<0.95` Below · `≤1.08` Around · `≤1.2` Above · `>1.2` Well above (the last uses `--caution` accent + border).
   - Empty state prompts for an asking price. Below: a mini area receipt with a "Full receipt →" link.
 
@@ -167,7 +167,7 @@ Single component state:
 - **No icons library** is used beyond the inline SVG mark, "→" / "›" / "✕" glyphs.
 
 ## Files
-- `MoveIn.dc.html` — the complete hifi prototype (all 7 routes, both themes, full mock dataset and logic). This is the single source of truth for layout, copy, tokens, and behavior. Open it in a browser to interact with every state.
+- `HousingDecisionSupport.dc.html` — the complete hifi prototype (all 7 routes, both themes, full mock dataset and logic). This is the single source of truth for layout, copy, tokens, and behavior. Open it in a browser to interact with every state.
 
 ## Notes for implementation
 - The "indicators, not verdicts" stance is a **product principle, not decoration** — preserve the neutral bar coloring, the "no data ≠ zero" treatment, the median tick, and the methodology refusals.

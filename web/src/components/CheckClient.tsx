@@ -52,7 +52,7 @@ export function CheckClient() {
   }
 
   const price = result?.price ?? null;
-  const ratio = price?.pct_vs_local == null ? 1 : 1 + price.pct_vs_local / 100;
+  const ratio = price?.pct_vs_comparison == null ? 1 : 1 + price.pct_vs_comparison / 100;
   const markerLeft = Math.max(4, Math.min(96, 50 + (ratio - 1) * 220));
   const caution = price?.band.startsWith("well above") ?? false;
   const bandAccent = caution ? "var(--caution)" : "var(--accent)";
@@ -67,6 +67,9 @@ export function CheckClient() {
         <label htmlFor="ck-postcode" className="mb-1.5 block text-[13px] text-ink2">Postcode</label>
         <input
           id="ck-postcode"
+          name="postcode"
+          autoComplete="off"
+          spellCheck={false}
           required
           value={postcode}
           onChange={(e) => setPostcode(e.target.value)}
@@ -75,7 +78,7 @@ export function CheckClient() {
         />
 
         <div className="mb-1.5 text-[13px] text-ink2">Deal</div>
-        <div role="group" className="mb-[18px] flex gap-1.5">
+        <div role="group" aria-label="Deal type" className="mb-[18px] flex gap-1.5">
           {(["rent", "buy"] as Deal[]).map((d) => (
             <button key={d} type="button" onClick={() => setDeal(d)} aria-pressed={deal === d} className={`flex-1 ${toggleClass(deal === d)}`}>
               {d === "rent" ? "To rent" : "To buy"}
@@ -84,7 +87,7 @@ export function CheckClient() {
         </div>
 
         <div className="mb-1.5 text-[13px] text-ink2">Bedrooms</div>
-        <div role="group" className="mb-[18px] flex flex-wrap gap-1.5">
+        <div role="group" aria-label="Number of bedrooms" className="mb-[18px] flex flex-wrap gap-1.5">
           {BEDS.map((b) => (
             <button key={b.value} type="button" onClick={() => setBedrooms(b.value)} aria-pressed={bedrooms === b.value} className={toggleClass(bedrooms === b.value)}>
               {b.label}
@@ -99,6 +102,10 @@ export function CheckClient() {
           <span className="font-mono text-base text-muted">£</span>
           <input
             id="ck-ask"
+            name="asking-price"
+            type="number"
+            min="1"
+            autoComplete="off"
             required
             inputMode="numeric"
             value={asking}
@@ -111,11 +118,11 @@ export function CheckClient() {
         <button type="submit" disabled={loading} className="mt-[18px] w-full rounded-[10px] bg-accent px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
           {loading ? "Checking…" : "Check this listing"}
         </button>
-        {error && <p className="mt-2 text-sm text-caution">{error}</p>}
+        {error && <p role="alert" className="mt-2 text-sm text-caution">{error}</p>}
       </form>
 
       {/* Result */}
-      <div className="flex flex-col gap-[18px]">
+      <div className="flex flex-col gap-[18px]" aria-live="polite">
         {result && price ? (
           <>
             <div className="rounded-[16px] border bg-card p-6" style={{ borderColor: caution ? "var(--caution)" : "var(--rule2)" }}>
@@ -129,20 +136,20 @@ export function CheckClient() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-muted">Local typical</div>
-                  <div className="font-mono text-xl text-ink">{money(price.local_typical_gbp)}</div>
+                  <div className="text-xs text-muted">Comparison figure</div>
+                  <div className="font-mono text-xl text-ink">{money(price.comparison_gbp)}</div>
                 </div>
               </div>
               {/* Band scale */}
               <div className="relative my-2 h-[46px]">
                 <div className="absolute inset-x-0 top-[18px] h-2 rounded-[5px] border border-rule" style={{ background: "linear-gradient(90deg,var(--card2),var(--bar-track))" }} />
                 <div className="absolute top-[14px] left-1/2 h-4 w-0.5 -translate-x-1/2 bg-rule2" />
-                <div className="absolute top-[34px] left-1/2 -translate-x-1/2 font-mono text-[10px] text-muted">typical</div>
+                <div className="absolute top-[34px] left-1/2 -translate-x-1/2 font-mono text-[10px] text-muted">comparison</div>
                 <div className="absolute top-2 -translate-x-1/2 transition-[left] duration-500 ease-[cubic-bezier(.22,.61,.36,1)]" style={{ left: `${markerLeft}%` }}>
                   <div className="mx-auto h-7 w-[3px] rounded-[2px]" style={{ background: bandAccent }} />
                 </div>
                 <div className="absolute top-[-2px] -translate-x-1/2 whitespace-nowrap font-mono text-xs font-semibold transition-[left] duration-500 ease-[cubic-bezier(.22,.61,.36,1)]" style={{ left: `${markerLeft}%`, color: bandAccent }}>
-                  {pct(price.pct_vs_local)}
+                  {pct(price.pct_vs_comparison)}
                 </div>
               </div>
               <div className="mt-0.5 flex justify-between font-mono text-[10.5px] text-muted">
@@ -174,8 +181,8 @@ export function CheckClient() {
           </>
         ) : (
           <div className="rounded-[16px] border border-dashed border-rule2 bg-card px-6 py-16 text-center text-sm text-muted">
-            Enter a postcode and an asking price to see how it sits against the
-            local typical — with the area schedule beneath it.
+            Enter a postcode and an asking price to compare it with the named
+            official figure — with the area schedule beneath it.
           </div>
         )}
       </div>

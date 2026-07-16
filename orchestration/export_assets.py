@@ -11,7 +11,7 @@ from datetime import timedelta
 from dagster import AssetExecutionContext, FreshnessPolicy, MaterializeResult, asset
 from dagster_dbt import get_asset_key_for_model
 
-from .dbt_assets import movein_dbt_models
+from .dbt_assets import housing_decision_support_dbt_models
 from .resources import DATA_DIR, load_script
 
 
@@ -19,8 +19,8 @@ from .resources import DATA_DIR, load_script
     group_name="export",
     compute_kind="duckdb",
     deps=[
-        get_asset_key_for_model([movein_dbt_models], "rpt_neighbourhood_score"),
-        get_asset_key_for_model([movein_dbt_models], "rpt_area_profile_mvp"),
+        get_asset_key_for_model([housing_decision_support_dbt_models], "rpt_neighbourhood_score"),
+        get_asset_key_for_model([housing_decision_support_dbt_models], "rpt_area_profile_mvp"),
     ],
     # The extract the API serves goes stale on the same monthly cadence as the
     # sources feeding it — same thresholds as the warehouse spine.

@@ -1,6 +1,6 @@
 # Orchestration (Dagster)
 
-Models the MoveIn data refresh as a **Dagster asset graph**, turning a sequence
+Models the housing decision-support data refresh as a **Dagster asset graph**, turning a sequence
 of hand-run scripts + dbt commands into an explicit, lineage-tracked pipeline
 with a **data-quality gate at ingestion**.
 

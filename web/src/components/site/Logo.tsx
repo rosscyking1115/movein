@@ -1,4 +1,4 @@
-// MoveIn "gable house" mark. Roof + walls use --ink, the floor line uses
+// Housing Decision Support "gable house" mark. Roof + walls use --ink, the floor line uses
 // --accent; both recolour automatically per theme.
 export function Logo({ size = 26 }: { size?: number }) {
   return (

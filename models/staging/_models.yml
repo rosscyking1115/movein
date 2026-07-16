@@ -78,7 +78,7 @@ models:
 
   - name: stg_crime__street
     description: |
-      Street-level crime staging interface for the safety-indicator layer.
+      Street-level crime staging interface for the recorded-crime indicator.
       Reads the committed ref_crime_sample fixture by default, or the full
       raw_police.street_crime source with `--vars 'crime_source: bulk'`.
       Grain: one row per recorded crime, keyed by 2021 LSOA.
@@ -107,17 +107,29 @@ models:
       - name: planning_constraint_count
         description: Distinct planning constraint entities touching the MSOA.
         tests:
-          - not_null
           - dbt_utils.expression_is_true:
               arguments:
                 expression: ">= 0"
-      - name: flood_risk_flag
-        description: Flood-risk band from the share of postcodes in a flood zone.
+      - name: planning_source_status
+        description: Explicit jurisdiction/source availability state.
         tests:
           - not_null
           - accepted_values:
               arguments:
-                values: ['low', 'medium', 'high', 'unknown']
+                values: ['covered', 'not_covered', 'source_missing']
+      - name: flood_risk_flag
+        description: Flood-risk band from the share of postcodes in a flood zone.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high']
+      - name: flood_source_status
+        description: Explicit jurisdiction/source availability state.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['covered', 'not_covered', 'source_missing']
 
   - name: stg_amenities__area
     description: |

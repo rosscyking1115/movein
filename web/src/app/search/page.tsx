@@ -6,7 +6,7 @@ import { SearchClient } from "@/components/SearchClient";
 export const metadata: Metadata = {
   title: "Search neighbourhoods by your priorities",
   description:
-    "Rank England & Wales neighbourhoods by what matters to you — affordability, safety, energy, flood risk, convenience — and filter by budget and region.",
+    "Rank England & Wales neighbourhoods by what matters to you — affordability, recorded crime, energy, flood risk, convenience — and filter by budget and region.",
 };
 
 type Props = {

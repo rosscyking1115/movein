@@ -1,5 +1,5 @@
 postcode,postcode_outward,postcode_area,area_id,area_name,lsoa_code,local_authority_code,local_authority_name,region,latitude,longitude,is_current_postcode,source_snapshot_date,source_name,source_url
-CF10 3FH,CF10,CF,W02000420,Cardiff city centre MSOA fixture,W01001731,W06000015,Cardiff,Wales,51.4769,-3.1765,true,2026-05-01,ONS Postcode Directory sample fixture,https://geoportal.statistics.gov.uk/
+CF10 3FH,CF10,CF,W02000422,Cardiff city centre MSOA fixture,W01001731,W06000015,Cardiff,Wales,51.4769,-3.1765,true,2026-05-01,ONS Postcode Directory sample fixture,https://geoportal.statistics.gov.uk/
 EC2A 2FJ,EC2A,EC,E02000001,City of London MSOA fixture,E01000001,E09000001,City of London,London,51.5228,-0.0857,true,2026-05-01,ONS Postcode Directory sample fixture,https://geoportal.statistics.gov.uk/
 E14 9GU,E14,E,E02000885,Canary Wharf MSOA fixture,E01004295,E09000030,Tower Hamlets,London,51.5054,-0.0235,true,2026-05-01,ONS Postcode Directory sample fixture,https://geoportal.statistics.gov.uk/
 SW1P 3AN,SW1P,SW,E02000977,Westminster Millbank MSOA fixture,E01004735,E09000033,Westminster,London,51.4968,-0.1307,true,2026-05-01,ONS Postcode Directory sample fixture,https://geoportal.statistics.gov.uk/

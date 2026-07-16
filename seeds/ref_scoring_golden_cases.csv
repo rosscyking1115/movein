@@ -1,0 +1,11 @@
+case_name,affordability_score,safety_score,energy_score,flood_score,convenience_score,affordability_weight,safety_weight,energy_weight,flood_weight,convenience_weight,expected_score
+equal weights,100,25,64,81,36,1,1,1,1,1,54.2
+missing component is excluded,100,,25,,64,1,1,1,1,1,54.3
+unsupported flood is excluded,100,25,64,,16,1,1,1,1,1,40.0
+disabled safety is excluded,100,1,25,64,81,1,0,1,1,1,60.0
+zero score uses floor,0,0,0,0,0,1,1,1,1,1,1.0
+zero weights are excluded,100,25,64,81,36,0,2,0,1,0,37.0
+custom weights,100,25,64,81,36,1,1,0,0,0,50.0
+null and zero have different semantics,,0,100,,,1,1,1,1,1,10.0
+all eligible user weights are zero,100,25,64,81,36,0,0,0,0,0,
+no positive available weight is null,,,,,,1,1,1,1,1,

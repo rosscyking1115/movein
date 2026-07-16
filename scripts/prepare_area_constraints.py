@@ -37,6 +37,20 @@ FLOOD_MEDIUM_PCT = 5.0
 FLOOD_HIGH_PCT = 20.0
 
 
+def source_status(area_id: str, *, source_available: bool) -> str:
+    """Return explicit coverage for England-only planning/flood datasets."""
+    if area_id.startswith("W"):
+        return "not_covered"
+    if not source_available:
+        return "source_missing"
+    return "covered"
+
+
+def source_available(valid_geometry_rows: int) -> bool:
+    """A file proves source availability only when it contains usable evidence."""
+    return valid_geometry_rows > 0
+
+
 def _load_geometries(con: duckdb.DuckDBPyConnection, table: str, csv_path: Path) -> int:
     con.execute(
         f"""
@@ -75,12 +89,14 @@ def prepare(csv_dir: Path, output_path: Path) -> int:
         raise ValueError(f"No constraint CSVs found in {csv_dir}")
 
     flood_path: Path | None = None
+    planning_geometry_rows = 0
     for csv_path in csv_paths:
         dataset = csv_path.stem
         if dataset == FLOOD_STEM:
             flood_path = csv_path
             continue
         count = _load_geometries(con, "constraint_geom", csv_path)
+        planning_geometry_rows += count
         con.execute(
             f"""
             INSERT INTO planning_hits
@@ -98,8 +114,9 @@ def prepare(csv_dir: Path, output_path: Path) -> int:
         """
     )
 
+    flood_geometry_rows = 0
     if flood_path is not None:
-        _load_geometries(con, "flood_geom", flood_path)
+        flood_geometry_rows = _load_geometries(con, "flood_geom", flood_path)
         con.execute(
             """
             CREATE OR REPLACE TEMP TABLE flood_hits AS
@@ -112,18 +129,43 @@ def prepare(csv_dir: Path, output_path: Path) -> int:
     else:
         con.execute("CREATE OR REPLACE TEMP TABLE flood_hits AS SELECT NULL::VARCHAR AS area_id, 0 AS flood_postcodes WHERE false")
 
+    planning_source_available = source_available(planning_geometry_rows)
+    flood_source_available = source_available(flood_geometry_rows)
+
     con.execute(
         f"""
         COPY (
             SELECT
                 b.area_id,
-                coalesce(p.constraint_count, 0) AS planning_constraint_count,
-                round(100.0 * coalesce(f.flood_postcodes, 0) / b.total_postcodes, 1) AS flood_postcode_pct,
                 CASE
+                    WHEN b.area_id LIKE 'W%' OR {str(not planning_source_available).lower()}
+                        THEN NULL
+                    ELSE coalesce(p.constraint_count, 0)
+                END AS planning_constraint_count,
+                CASE
+                    WHEN b.area_id LIKE 'W%' THEN 'not_covered'
+                    WHEN {str(not planning_source_available).lower()} THEN 'source_missing'
+                    ELSE 'covered'
+                END AS planning_source_status,
+                'Planning Data platform' AS planning_source_name,
+                CASE
+                    WHEN b.area_id LIKE 'W%' OR {str(not flood_source_available).lower()}
+                        THEN NULL
                     WHEN 100.0 * coalesce(f.flood_postcodes, 0) / b.total_postcodes >= {FLOOD_HIGH_PCT} THEN 'high'
                     WHEN 100.0 * coalesce(f.flood_postcodes, 0) / b.total_postcodes >= {FLOOD_MEDIUM_PCT} THEN 'medium'
                     ELSE 'low'
-                END AS flood_risk_flag
+                END AS flood_risk_flag,
+                CASE
+                    WHEN b.area_id LIKE 'W%' OR {str(not flood_source_available).lower()}
+                        THEN NULL
+                    ELSE round(100.0 * coalesce(f.flood_postcodes, 0) / b.total_postcodes, 1)
+                END AS flood_postcode_pct,
+                CASE
+                    WHEN b.area_id LIKE 'W%' THEN 'not_covered'
+                    WHEN {str(not flood_source_available).lower()} THEN 'source_missing'
+                    ELSE 'covered'
+                END AS flood_source_status,
+                'Environment Agency flood risk zones' AS flood_source_name
             FROM area_base AS b
             LEFT JOIN (
                 SELECT area_id, count(*) AS constraint_count FROM planning_hits GROUP BY area_id

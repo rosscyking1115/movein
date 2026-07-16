@@ -1,0 +1,247 @@
+{
+  "contract_version": "2.0.0",
+  "cases": [
+    {
+      "name": "equal weights",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": 25,
+        "energy_score": 64,
+        "flood_score": 81,
+        "convenience_score": 36
+      },
+      "weights": {},
+      "expected": 54.2
+    },
+    {
+      "name": "missing component is excluded",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": null,
+        "energy_score": 25,
+        "flood_score": null,
+        "convenience_score": 64
+      },
+      "weights": {},
+      "expected": 54.3
+    },
+    {
+      "name": "unsupported flood is excluded",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": 25,
+        "energy_score": 64,
+        "flood_score": null,
+        "convenience_score": 16
+      },
+      "weights": {},
+      "expected": 40.0
+    },
+    {
+      "name": "disabled safety is excluded",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": 1,
+        "energy_score": 25,
+        "flood_score": 64,
+        "convenience_score": 81
+      },
+      "weights": {
+        "affordability_score": 1,
+        "safety_score": 0,
+        "energy_score": 1,
+        "flood_score": 1,
+        "convenience_score": 1
+      },
+      "expected": 60.0
+    },
+    {
+      "name": "zero score uses floor",
+      "scores": {
+        "affordability_score": 0,
+        "safety_score": 0,
+        "energy_score": 0,
+        "flood_score": 0,
+        "convenience_score": 0
+      },
+      "weights": {},
+      "expected": 1.0
+    },
+    {
+      "name": "zero weights are excluded",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": 25,
+        "energy_score": 64,
+        "flood_score": 81,
+        "convenience_score": 36
+      },
+      "weights": {
+        "affordability_score": 0,
+        "safety_score": 2,
+        "energy_score": 0,
+        "flood_score": 1,
+        "convenience_score": 0
+      },
+      "expected": 37.0
+    },
+    {
+      "name": "custom weights",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": 25,
+        "energy_score": 64,
+        "flood_score": 81,
+        "convenience_score": 36
+      },
+      "weights": {
+        "affordability_score": 1,
+        "safety_score": 1,
+        "energy_score": 0,
+        "flood_score": 0,
+        "convenience_score": 0
+      },
+      "expected": 50.0
+    },
+    {
+      "name": "null and zero have different semantics",
+      "scores": {
+        "affordability_score": null,
+        "safety_score": 0,
+        "energy_score": 100,
+        "flood_score": null,
+        "convenience_score": null
+      },
+      "weights": {},
+      "expected": 10.0
+    },
+    {
+      "name": "all eligible user weights are zero",
+      "scores": {
+        "affordability_score": 100,
+        "safety_score": 25,
+        "energy_score": 64,
+        "flood_score": 81,
+        "convenience_score": 36
+      },
+      "weights": {
+        "affordability_score": 0,
+        "safety_score": 0,
+        "energy_score": 0,
+        "flood_score": 0,
+        "convenience_score": 0
+      },
+      "expected": null
+    },
+    {
+      "name": "no positive available weight is null",
+      "scores": {
+        "affordability_score": null,
+        "safety_score": null,
+        "energy_score": null,
+        "flood_score": null,
+        "convenience_score": null
+      },
+      "weights": {},
+      "expected": null
+    }
+  ],
+  "ranking_cases": [
+    {
+      "name": "equal scores use area id ascending",
+      "areas": [
+        { "area_id": "W02000002", "score": 50.0 },
+        { "area_id": "E02000002", "score": 50.0 },
+        { "area_id": "E02000001", "score": 50.0 }
+      ],
+      "expected_area_ids": ["E02000001", "E02000002", "W02000002"]
+    }
+  ],
+  "evidence_cases": [
+    {
+      "name": "complete neighbourhood-grain evidence is strong",
+      "inputs": {
+        "available_component_count": 5,
+        "crime_population_denominator": 8000,
+        "crime_population_reference_date": "2024-06-30",
+        "crime_period_start": "2026-01",
+        "crime_period_end": "2026-06",
+        "rent_source_grain": "msoa",
+        "rent_reference_date": "2026-05-01",
+        "median_sale_price_confidence": "reliable",
+        "all_component_source_dates_known": true,
+        "planning_source_status": "covered",
+        "flood_source_status": "covered"
+      },
+      "expected": "strong"
+    },
+    {
+      "name": "coarse rent evidence is mixed",
+      "inputs": {
+        "available_component_count": 5,
+        "crime_population_denominator": 8000,
+        "crime_population_reference_date": "2024-06-30",
+        "crime_period_start": "2026-01",
+        "crime_period_end": "2026-06",
+        "rent_source_grain": "local_authority",
+        "rent_reference_date": "2026-05-01",
+        "median_sale_price_confidence": "reliable",
+        "all_component_source_dates_known": true,
+        "planning_source_status": "covered",
+        "flood_source_status": "covered"
+      },
+      "expected": "mixed"
+    },
+    {
+      "name": "unsupported jurisdiction is limited",
+      "inputs": {
+        "available_component_count": 4,
+        "crime_population_denominator": 8000,
+        "crime_population_reference_date": "2024-06-30",
+        "crime_period_start": "2026-01",
+        "crime_period_end": "2026-06",
+        "rent_source_grain": "local_authority",
+        "rent_reference_date": "2026-05-01",
+        "median_sale_price_confidence": "reliable",
+        "all_component_source_dates_known": true,
+        "planning_source_status": "not_covered",
+        "flood_source_status": "not_covered"
+      },
+      "expected": "limited"
+    },
+    {
+      "name": "missing crime denominator is limited",
+      "inputs": {
+        "available_component_count": 4,
+        "crime_population_denominator": null,
+        "crime_population_reference_date": null,
+        "crime_period_start": "2026-01",
+        "crime_period_end": "2026-06",
+        "rent_source_grain": "local_authority",
+        "rent_reference_date": "2026-05-01",
+        "median_sale_price_confidence": "indicative",
+        "all_component_source_dates_known": true,
+        "planning_source_status": "covered",
+        "flood_source_status": "covered"
+      },
+      "expected": "limited"
+    },
+    {
+      "name": "incomplete component dates are mixed",
+      "inputs": {
+        "available_component_count": 5,
+        "crime_population_denominator": 8000,
+        "crime_population_reference_date": "2024-06-30",
+        "crime_period_start": "2026-01",
+        "crime_period_end": "2026-06",
+        "rent_source_grain": "msoa",
+        "rent_reference_date": "2026-05-01",
+        "median_sale_price_confidence": "reliable",
+        "all_component_source_dates_known": false,
+        "planning_source_status": "covered",
+        "flood_source_status": "covered"
+      },
+      "expected": "mixed"
+    }
+  ]
+}

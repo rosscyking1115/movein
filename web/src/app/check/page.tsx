@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { CheckClient } from "@/components/CheckClient";
 
 export const metadata: Metadata = {
-  title: "Check a listing — is the area good and the price fair?",
+  title: "Check a listing against its official comparison figure",
   description:
-    "Paste a postcode, bedrooms and the asking rent or price. We band it against the local typical and show the full area receipt. Manual entry, no portal scraping.",
+    "Paste a postcode, bedrooms and the asking rent or price. We compare it with the named official rent or sale-price figure and show the full area receipt. Manual entry, no portal scraping.",
 };
 
 export default function CheckPage() {
@@ -15,9 +15,9 @@ export default function CheckPage() {
           Does this listing&rsquo;s price stack up?
         </h1>
         <p className="mt-2 text-[17px] text-ink2">
-          An area-level sanity check — how an asking price sits against what&rsquo;s
-          typical locally. Asking price isn&rsquo;t achieved price; treat this as a
-          prompt to look closer, not a valuation.
+          An area-level sanity check — how an asking price sits against a named
+          official comparison figure. Asking price isn&rsquo;t achieved price; treat
+          this as a prompt to look closer, not a valuation.
         </p>
       </header>
       <CheckClient />

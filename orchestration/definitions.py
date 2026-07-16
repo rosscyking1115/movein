@@ -1,4 +1,4 @@
-"""Top-level Dagster definitions for the MoveIn pipeline.
+"""Top-level Dagster definitions for the housing decision-support pipeline.
 
 Load with:  dagster dev -m orchestration.definitions
 """
@@ -14,7 +14,7 @@ from dagster import (
 )
 
 from . import checks, export_assets, ingest_assets, reference_assets
-from .dbt_assets import movein_dbt_models
+from .dbt_assets import housing_decision_support_dbt_models
 from .resources import dbt_resource
 
 # The whole refresh as one launchable run: ingest → dbt → extract. Steps are
@@ -53,7 +53,7 @@ defs = Definitions(
         ingest_assets.warehouse_transactions,
         *reference_assets.prepared_file_specs,
         *reference_assets.reference_load_assets,
-        movein_dbt_models,
+        housing_decision_support_dbt_models,
         export_assets.decision_extract,
     ],
     asset_checks=[checks.raw_landreg_ppd_is_sane],

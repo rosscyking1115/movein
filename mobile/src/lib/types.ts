@@ -32,7 +32,11 @@ export interface Area {
   overall_score: number | null;
   overall_rank: number | null;
   match_score: number | null;
-  confidence_level: string | null;
+  available_component_count: number | null;
+  expected_component_count: number;
+  all_component_source_dates_known: boolean;
+  evidence_quality_level: "strong" | "mixed" | "limited" | null;
+  evidence_quality_notes: string | null;
   why_this_area: string | null;
   affordability_score: number | null;
   safety_score: number | null;
@@ -104,8 +108,8 @@ export interface ListingCheckRequest {
 
 export interface PriceCheck {
   asking_gbp: number;
-  local_typical_gbp: number | null;
-  pct_vs_local: number | null;
+  comparison_gbp: number | null;
+  pct_vs_comparison: number | null;
   band: string;
   basis: string;
 }

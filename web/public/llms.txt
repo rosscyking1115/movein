@@ -1,28 +1,29 @@
 # UK Housing Decision Support
 
 > Explainable neighbourhood (MSOA) indicators for England & Wales, built from
-> nine official open-data sources. Every score is shown beside the raw fact
+> official open-data sources. Every score is shown beside the raw fact
 > behind it. Indicators, not verdicts — we never label an area "safe" or
 > "unsafe", and we do not value individual properties.
 
 ## What this site does
 
-- Scores ~7,264 neighbourhoods on five 0–100 indicators: affordability, safety,
+- Scores ~7,264 neighbourhoods on five 0–100 indicators: affordability, recorded crime,
   energy efficiency, flood resilience, convenience.
-- The overall score is a weighted average of those five; visitors set the weights.
-- A listing checker bands an asking rent/price against the local typical
-  (manual entry; no portal scraping).
+- The overall score is a weighted geometric mean of the available indicators;
+  visitors set the weights.
+- A listing checker compares an asking rent/price with a named official figure,
+  including its geographic basis (manual entry; no portal scraping).
 
 ## Key pages
 
 - /search: rank areas by user-set priorities, filter by budget and region.
 - /check: check a listing's area and price-vs-local band.
 - /area/{slug}: the full "receipt" for one neighbourhood — scores beside facts.
-- /methodology: scoring method, confidence handling, and data sources.
+- /methodology: scoring method, evidence-quality handling, and data sources.
 
 ## Data & limits
 
 - Sources: HM Land Registry, ONS rents (incl. per-bedroom), EPC, Police API,
   Planning Data API, Environment Agency flood data, OpenStreetMap, ONS geography.
 - Area-level only; some figures are provisional and subject to revision.
-- Missing data lowers an area's confidence; it is never scored as zero.
+- Missing data lowers evidence quality; it is never scored as zero.

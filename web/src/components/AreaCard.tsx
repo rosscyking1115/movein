@@ -5,7 +5,7 @@ import { rentPerMonth, score as fmtScore } from "@/lib/format";
 
 const MINI: { key: ComponentKey; abbr: string }[] = [
   { key: "affordability_score", abbr: "Aff" },
-  { key: "safety_score", abbr: "Saf" },
+  { key: "safety_score", abbr: "Crm" },
   { key: "energy_score", abbr: "Ene" },
   { key: "flood_score", abbr: "Flo" },
   { key: "convenience_score", abbr: "Get" },

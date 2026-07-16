@@ -1,7 +1,7 @@
-# Website (Phase 2)
+# Website
 
-Next.js (App Router) frontend for the UK Housing Decision Support tool. It is a
-pure HTTP client of the Phase 1 API (`../api`) — no direct DuckDB access. The API
+Next.js (App Router) frontend for **England & Wales Housing Decision Support**. It is a
+pure HTTP client of the versioned API (`../api`) — no direct DuckDB access. The API
 is the keystone; this app and the mobile app are two clients of the same contract.
 
 ## Run locally
@@ -25,6 +25,12 @@ npm run dev
 |---|---|---|
 | `API_BASE_URL` | server only | Base URL of the FastAPI service. |
 | `NEXT_PUBLIC_SITE_URL` | metadata/sitemap/JSON-LD | Canonical site origin (no trailing slash). |
+
+The search-results map uses the open-source MapLibre GL JS renderer with
+OpenFreeMap's public OpenStreetMap-based vector tiles. It needs no API key or
+billing account. The hosted tiles are free with no stated request cap, but are
+provided without an availability SLA; the results list remains the primary,
+provider-independent interface.
 
 ## Architecture
 
@@ -59,9 +65,6 @@ npm run dev
 - Each area page leads with a citable answer sentence + score, JSON-LD
   (`Place` / `BreadcrumbList`), and a canonical human slug.
 
-## Not yet built (Phase 2 backlog)
-
-- `/compare` multi-area view; `/town`, `/rent/[town]`, `/rankings/[region]` hubs
-  and the dense internal-link mesh; expand sitemap tranche past the top 1,000.
-- A slim `/v1/areas/index` API endpoint (id, name, region, completeness) would
-  let `generateStaticParams` and the sitemap avoid paginating full `/v1/search`.
+The typed client uses the API's `/v2` contract. The compare, town, rent and
+regional-ranking routes are implemented, and the area index supports the
+programmatic sitemap and link mesh without paginating search.

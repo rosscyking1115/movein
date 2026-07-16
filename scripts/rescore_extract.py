@@ -9,7 +9,7 @@ full warehouse rebuild. The dbt model models/marts/decision/rpt_neighbourhood_sc
 implements the same logic for full real rebuilds; keep the two in sync.
 
 Method (per indicator → 0-100, higher = better):
-  - affordability (rent-to-income, lower better), safety (crime rate, lower
+  - affordability (rent-to-income, lower better), recorded crime (rate, lower
     better), convenience-station (km, lower better): median-anchored winsorised
     min-max — clip to [p2, p98], map p2→0/100, median→50, p98→100/0. This puts
     the typical area at 50 and keeps magnitude (unlike percentile rank).
@@ -28,6 +28,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -35,9 +36,14 @@ import duckdb
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = ROOT / "data" / "decision.duckdb"
+CONTRACT = json.loads((ROOT / "contracts" / "neighbourhood-scoring-v2.json").read_text())
+CONTRACT_VERSION = CONTRACT["schema_version"]
 
 # Equal default weights; the website re-weights client-side from the components.
-WEIGHTS = {"affordability": 1.0, "safety": 1.0, "energy": 1.0, "flood": 1.0, "convenience": 1.0}
+WEIGHTS = {
+    name.removesuffix("_score"): float(config["default_weight"])
+    for name, config in CONTRACT["components"].items()
+}
 
 # Median-anchored winsorised min-max for a higher-is-better value (0-100).
 def _mab(col: str, lo: str, md: str, hi: str) -> str:
@@ -71,8 +77,17 @@ b as (
 raw as (
     select
         p.area_id, p.area_name, p.local_authority_name, p.region,
-        round(greatest(0, least(100, {_lower_better('p.affordability_ratio', 'b.aff_lo', 'b.aff_md', 'b.aff_hi')})), 1) as affordability_score,
-        round(greatest(0, least(100, {_lower_better('p.crime_rate_per_1000', 'b.cr_lo', 'b.cr_md', 'b.cr_hi')})), 1) as safety_score,
+        p.rent_source_grain, p.rent_reference_date, p.median_sale_price_confidence,
+        p.crime_population_denominator, p.crime_population_reference_date,
+        p.crime_period_start, p.crime_period_end, p.planning_source_status,
+        p.flood_source_status,
+        false as all_component_source_dates_known,
+        case when p.affordability_ratio is not null then
+            round(greatest(0, least(100, {_lower_better('p.affordability_ratio', 'b.aff_lo', 'b.aff_md', 'b.aff_hi')})), 1)
+        end as affordability_score,
+        case when p.crime_rate_per_1000 is not null then
+            round(greatest(0, least(100, {_lower_better('p.crime_rate_per_1000', 'b.cr_lo', 'b.cr_md', 'b.cr_hi')})), 1)
+        end as safety_score,
         case p.epc_median_rating
             when 'A' then 100.0 when 'B' then 83.0 when 'C' then 67.0
             when 'D' then 50.0 when 'E' then 33.0 when 'F' then 17.0 when 'G' then 0.0
@@ -119,22 +134,60 @@ select
     affordability_score, safety_score, energy_score, flood_score, convenience_score,
     overall_score,
     dense_rank() over (order by overall_score desc nulls last) as overall_rank,
-    components_available,
-    case when components_available >= 5 then 'high'
-         when components_available >= 3 then 'medium' else 'low' end as confidence_level,
+    components_available as available_component_count,
+    5 as expected_component_count,
+    all_component_source_dates_known,
+    case
+        when components_available < 3
+            or crime_population_denominator is null
+            or flood_source_status is distinct from 'covered'
+            or planning_source_status is distinct from 'covered' then 'limited'
+        when components_available = 5
+            and rent_source_grain = 'msoa'
+            and median_sale_price_confidence = 'reliable'
+            and all_component_source_dates_known
+            and rent_reference_date is not null
+            and crime_population_reference_date is not null
+            and crime_period_start is not null
+            and crime_period_end is not null then 'strong'
+        else 'mixed'
+    end as evidence_quality_level,
+    case
+        when components_available < 3 then concat(
+            'Limited evidence: only ', components_available, ' of 5 scored indicators are available.')
+        when crime_population_denominator is null then
+            'Limited evidence: a compatible population denominator is unavailable for the crime indicator.'
+        when flood_source_status is distinct from 'covered'
+            or planning_source_status is distinct from 'covered' then
+            'Limited evidence: planning or flood coverage is unavailable for this jurisdiction.'
+        when affordability_score is null then
+            'Mixed evidence: the rent indicator is unavailable for this neighbourhood.'
+        when rent_source_grain is distinct from 'msoa' then
+            'Mixed evidence: all available scores are shown, but rent is local-authority context rather than neighbourhood-level evidence.'
+        when median_sale_price_confidence is distinct from 'reliable' then
+            'Mixed evidence: the latest-year sale-price evidence is unavailable or not based on a reliable sample.'
+        when not all_component_source_dates_known then
+            'Mixed evidence: dated provenance is not available for every scored component.'
+        when rent_reference_date is null
+            or crime_population_reference_date is null
+            or crime_period_start is null
+            or crime_period_end is null then
+            'Mixed evidence: one or more source reference periods are unavailable.'
+        else 'Strong evidence: all five scored indicators have compatible coverage and dated provenance.'
+    end as evidence_quality_notes,
     concat('Strongest on ',
         case greatest(affordability_score, safety_score, energy_score, flood_score, convenience_score)
-            when affordability_score then 'affordability' when safety_score then 'safety'
+            when affordability_score then 'affordability' when safety_score then 'recorded crime'
             when energy_score then 'energy efficiency' when flood_score then 'low flood risk'
             else 'convenience' end,
         ', weakest on ',
         case least(affordability_score, safety_score, energy_score, flood_score, convenience_score)
-            when affordability_score then 'affordability' when safety_score then 'safety'
+            when affordability_score then 'affordability' when safety_score then 'recorded crime'
             when energy_score then 'energy efficiency' when flood_score then 'flood risk'
             else 'convenience' end,
         '. Overall combines ', components_available, ' of 5 indicators.') as why_this_area
 from scored
-order by overall_score desc nulls last
+order by overall_score desc nulls last, area_id asc
 """
 
 

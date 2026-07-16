@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0.0",
+  "formula": "weighted_geometric_mean",
+  "component_floor": 1.0,
+  "rounding_decimal_places": 1,
+  "missing_component_policy": "exclude_from_numerator_and_denominator",
+  "zero_weight_policy": "exclude_from_numerator_and_denominator",
+  "allowed_weight": { "minimum": 0.0, "maximum": 5.0, "invalid_policy": "reject" },
+  "non_finite_score_policy": "treat_as_missing",
+  "empty_result": null,
+  "tie_order": [
+    "score_desc",
+    "area_id_asc"
+  ],
+  "components": {
+    "affordability_score": { "default_weight": 1.0, "public_meaning": "Lower official rent-to-income context scores higher." },
+    "safety_score": { "default_weight": 1.0, "public_meaning": "Lower recorded-crime rate scores higher; public copy must call this recorded crime, never safety." },
+    "energy_score": { "default_weight": 1.0, "public_meaning": "Higher median EPC band scores higher using fixed A-G anchors." },
+    "flood_score": { "default_weight": 1.0, "public_meaning": "Lower covered postcode share in England flood-risk zones scores higher; unsupported areas are null." },
+    "convenience_score": { "default_weight": 1.0, "public_meaning": "More nearby amenities and shorter station distance score higher." }
+  },
+  "rent_copy_rules": {
+    "local_authority": "official local-authority rent context",
+    "not_allowed": ["local typical", "neighbourhood typical", "valuation"]
+  },
+  "evidence_quality": {
+    "levels": ["strong", "mixed", "limited"],
+    "expected_component_count": 5,
+    "strong_requires": "all components available, supported jurisdictional coverage, all_component_source_dates_known=true, and no critical coarse-grain dependency",
+    "mixed_when": "most components are available but at least one relies on coarse grain, an indicative sample, or incomplete provenance",
+    "limited_when": "a critical denominator or jurisdictional source is unavailable, or fewer than three components are available"
+  }
+}

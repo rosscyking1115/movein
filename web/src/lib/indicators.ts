@@ -4,7 +4,7 @@ import { km, rate, ratingOrDash, rentPerMonth, score as fmtScore } from "./forma
 
 // Indicator definitions for the area "schedule": each score is paired with the
 // figure behind it and an honest, neutral sentence. Sentences describe relative
-// position ("lower/higher than most areas"), never a verdict.
+// position around the documented midpoint, never a percentile claim or verdict.
 
 export interface ReceiptRow {
   key: ComponentKey;
@@ -44,23 +44,23 @@ const DEFS: Def[] = [
     key: "affordability_score",
     name: "Affordability",
     priorityLabel: "Budget",
-    measure: "Typical rent & sale price",
+    measure: "Local-authority average rent",
     footnote: 1,
-    factLabel: "Typical monthly rent",
+    factLabel: "Local-authority average rent",
     factValue: (a) => rentPerMonth(a.official_rent_monthly_gbp),
-    high: "Housing costs here are lower than in most England & Wales neighbourhoods.",
-    low: "Housing costs here run higher than in most neighbourhoods.",
+    high: "The official local-authority rent context is below the typical-area midpoint.",
+    low: "The official local-authority rent context is above the typical-area midpoint.",
   },
   {
     key: "safety_score",
-    name: "Safety",
+    name: "Recorded crime",
     priorityLabel: "Lower crime",
     measure: "Recorded crime rate",
     footnote: 2,
-    factLabel: "Crimes per 1,000 residents",
+    factLabel: "Monthly crimes per 1,000 residents",
     factValue: (a) => rate(a.crime_rate_per_1000),
-    high: "Recorded crime is lower than in most areas — shown as a rate, not a label.",
-    low: "Recorded crime is higher than in most areas — shown as a rate, not a label.",
+    high: "The recorded-crime rate is below the typical-area midpoint — an indicator, not a label.",
+    low: "The recorded-crime rate is above the typical-area midpoint — an indicator, not a label.",
   },
   {
     key: "energy_score",
@@ -71,19 +71,19 @@ const DEFS: Def[] = [
     factLabel: "Median EPC band",
     factValue: (a) => ratingOrDash(a.epc_median_rating),
     isEpc: true,
-    high: "Homes here tend to be more energy-efficient than average, easing running costs.",
-    low: "Homes here tend to be less energy-efficient than average.",
+    high: "The median EPC band is at or above the D midpoint used by this indicator.",
+    low: "The median EPC band is below the D midpoint used by this indicator.",
   },
   {
     key: "flood_score",
     name: "Flood resilience",
     priorityLabel: "Flood resilience",
-    measure: "Environment Agency flood risk",
+    measure: "Environment Agency flood zones (England)",
     footnote: 4,
     factLabel: "Flood risk band",
     factValue: (a) => a.flood_risk_flag ?? "—",
-    high: "Flood risk here is lower than in most areas.",
-    low: "Flood risk here is higher than in most areas.",
+    high: "The covered flood-zone share is below the indicator midpoint.",
+    low: "The covered flood-zone share is above the indicator midpoint.",
   },
   {
     key: "convenience_score",
@@ -94,16 +94,16 @@ const DEFS: Def[] = [
     factLabel: "Walkable amenities",
     factValue: (a) =>
       a.walkable_amenity_count == null ? "—" : `${a.walkable_amenity_count} within reach`,
-    high: "Shops, services and transport are more within reach than in most areas.",
-    low: "Day-to-day amenities are less within reach than in most areas.",
+    high: "Amenity and station access is above the typical-area midpoint.",
+    low: "Amenity and station access is below the typical-area midpoint.",
   },
 ];
 
 export const SOURCE_NOTES: { no: number; text: string }[] = [
-  { no: 1, text: "Rent from the ONS Price Index of Private Rents; sale prices from HM Land Registry." },
-  { no: 2, text: "Crime from Police.uk open data (street-level, rate per 1,000 residents)." },
+  { no: 1, text: "Average rent is local-authority context from the ONS Price Index of Private Rents; sale prices are MSOA-level HM Land Registry context." },
+  { no: 2, text: "Crime is a monthly Police.uk recorded-crime rate using the compatible ONS mid-2024 MSOA population denominator." },
   { no: 3, text: "Energy rating from the EPC Register (median domestic certificate)." },
-  { no: 4, text: "Flood risk from the Environment Agency / planning.data.gov.uk." },
+  { no: 4, text: "Environment Agency and Planning Data flood coverage is England-only here; Wales is shown as not covered, never as low risk." },
   { no: 5, text: "Amenities and transport from OpenStreetMap." },
 ];
 
@@ -117,7 +117,11 @@ export function buildReceiptRows(area: Area): ReceiptRow[] {
       name: d.name,
       measure: d.measure,
       footnote: d.footnote,
-      plain: has ? (s >= 50 ? d.high : d.low) : "We don't yet hold this indicator for this area.",
+      plain: has
+        ? (s >= 50 ? d.high : d.low)
+        : d.key === "flood_score" && area.flood_source_status === "not_covered"
+          ? "This source does not cover Wales, so no flood score is assigned."
+          : "We don't yet hold this indicator for this area.",
       hasData: has,
       score: s,
       scoreText: fmtScore(s),
@@ -132,18 +136,6 @@ export function buildReceiptRows(area: Area): ReceiptRow[] {
   });
 }
 
-/** Three-bar confidence indicator: how many bars are filled. */
-export function confidenceFill(level: string | null | undefined): number {
-  switch ((level ?? "").toLowerCase()) {
-    case "high":
-      return 3;
-    case "medium":
-      return 2;
-    default:
-      return 1;
-  }
-}
-
 export const RENT_LABELS: { key: keyof Area; label: string }[] = [
   { key: "rent_1bed_gbp", label: "1 bed" },
   { key: "rent_2bed_gbp", label: "2 bed" },
@@ -152,14 +144,31 @@ export const RENT_LABELS: { key: keyof Area; label: string }[] = [
 ];
 
 export function factRows(area: Area): { label: string; value: string }[] {
+  const crimePeriod =
+    area.crime_period_start && area.crime_period_end
+      ? `${area.crime_period_start} to ${area.crime_period_end}`
+      : "—";
+  const crimePopulation =
+    area.crime_population_denominator == null
+      ? "—"
+      : `${area.crime_population_denominator.toLocaleString("en-GB")}${
+          area.crime_population_reference_date
+            ? ` (reference ${area.crime_population_reference_date})`
+            : ""
+        }`;
   return [
     ...(area.nearest_city
       ? [{ label: `${area.nearest_city} city centre`, value: km(area.distance_to_city_km) }]
       : []),
     { label: "Median sale price", value: area.median_sale_price_gbp == null ? "—" : `£${area.median_sale_price_gbp.toLocaleString("en-GB")}` },
-    { label: "Crime per 1,000", value: rate(area.crime_rate_per_1000) },
+    { label: "Monthly crime per 1,000", value: rate(area.crime_rate_per_1000) },
+    { label: "Recorded-crime period", value: crimePeriod },
+    { label: "Crime population denominator", value: crimePopulation },
     { label: "Median EPC", value: ratingOrDash(area.epc_median_rating) },
-    { label: "Flood risk", value: area.flood_risk_flag ?? "—" },
+    {
+      label: "Flood risk",
+      value: area.flood_source_status === "not_covered" ? "Not covered" : area.flood_risk_flag ?? "—",
+    },
     { label: "Nearest station", value: km(area.nearest_station_km) },
     { label: "Nearest supermarket", value: km(area.nearest_supermarket_km) },
     { label: "Nearest GP", value: km(area.nearest_gp_km) },

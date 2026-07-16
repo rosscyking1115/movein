@@ -1,0 +1,143 @@
+{
+  "release_candidate": "correctness-closeout-2026-07-16",
+  "identity": "England & Wales Housing Decision Support",
+  "scoring_contract_version": "2.0.0",
+  "commit_context": {
+    "base_commit_at_evidence_capture": "19aaf76178c064ff0b741f2dc526453900a271db",
+    "candidate_commit": "pending feature-branch commit; final squash commit is recorded in the GitHub release"
+  },
+  "extract": {
+    "area_rows": 7264,
+    "countries": {
+      "England": 6856,
+      "Wales": 408
+    },
+    "component_coverage": {
+      "affordability": 7262,
+      "safety": 7237,
+      "energy": 7264,
+      "flood": 6856,
+      "convenience": 7264,
+      "overall": 7264
+    },
+    "evidence_quality": {
+      "mixed": 6856,
+      "limited": 408,
+      "strong": 0
+    },
+    "all_component_source_dates_known": {
+      "true": 0,
+      "false": 7264
+    }
+  },
+  "source_vintage_and_coverage": [
+    {
+      "source": "HM Land Registry Price Paid Data",
+      "published_use": "sale-market context",
+      "coverage": "England and Wales; 2021-2025 transactions in the build",
+      "grain": "transaction/postcode",
+      "vintage_in_public_extract": "not carried as a dedicated field",
+      "limit": "market context, not a property valuation"
+    },
+    {
+      "source": "ONS Private Rent and House Prices",
+      "published_use": "rent and affordability",
+      "coverage": "local-authority values mapped to 7,262 of 7,264 MSOAs",
+      "grain": "local authority",
+      "vintage_in_public_extract": "May 2026 observation",
+      "limit": "official area comparison figure, not a live listing valuation"
+    },
+    {
+      "source": "ONS Postcode Directory",
+      "published_use": "postcode and area geography",
+      "coverage": "7,264 England and Wales MSOA 2021 areas",
+      "grain": "postcode to MSOA 2021",
+      "vintage_in_public_extract": "not carried as a dedicated field",
+      "limit": "the warehouse retains snapshot provenance; the slim extract does not expose it"
+    },
+    {
+      "source": "ONS MSOA population estimates",
+      "published_use": "recorded-crime denominator",
+      "coverage": "7,264 of 7,264 MSOAs",
+      "grain": "MSOA 2021",
+      "vintage_in_public_extract": "2024-06-30 reference date; workbook released 2025-11-07",
+      "limit": "mid-year resident estimate, not a live population count"
+    },
+    {
+      "source": "EPC open data",
+      "published_use": "energy indicator",
+      "coverage": "7,264 of 7,264 MSOAs",
+      "grain": "certificate aggregated to MSOA",
+      "vintage_in_public_extract": "not carried as a dedicated field",
+      "limit": "area median; certificates may be expired or superseded"
+    },
+    {
+      "source": "Police open data",
+      "published_use": "recorded-crime indicator",
+      "coverage": "7,237 of 7,264 MSOAs have a score; all 7,264 have a compatible denominator",
+      "grain": "monthly recorded events aggregated to MSOA 2021",
+      "vintage_in_public_extract": "2023-05 through 2026-04; start/end months and month count are exposed per area",
+      "limit": "recorded-crime indicator, never a safe/unsafe verdict"
+    },
+    {
+      "source": "Planning Data platform",
+      "published_use": "planning constraints",
+      "coverage": "6,856 English MSOAs covered; 408 Welsh MSOAs explicitly not covered",
+      "grain": "spatial entities aggregated to MSOA",
+      "vintage_in_public_extract": "not carried as a dedicated field",
+      "limit": "the source is England-only"
+    },
+    {
+      "source": "Environment Agency flood-risk zones",
+      "published_use": "flood indicator",
+      "coverage": "6,856 English MSOAs covered; 408 Welsh MSOAs explicitly not covered",
+      "grain": "postcode intersections aggregated to MSOA",
+      "vintage_in_public_extract": "not carried as a dedicated field",
+      "limit": "England-only area context, not property-level risk"
+    },
+    {
+      "source": "OpenStreetMap",
+      "published_use": "amenity and station proximity",
+      "coverage": "7,264 of 7,264 MSOAs",
+      "grain": "amenity points aggregated to MSOA",
+      "vintage_in_public_extract": "not carried as a dedicated field",
+      "limit": "proximity indicator; completeness follows OpenStreetMap coverage"
+    }
+  ],
+  "map_provider": {
+    "renderer": "MapLibre GL JS 5.24.0",
+    "tiles": "OpenFreeMap public instance using OpenStreetMap data",
+    "api_key_required": false,
+    "usage_billing": false,
+    "availability_sla": false,
+    "local_browser_result": "pass: canvas, attribution and successful tiles.openfreemap.org requests; no browser errors"
+  },
+  "verification": {
+    "dbt_data_tests": 222,
+    "dbt_unit_tests": 2,
+    "python_tests": 43,
+    "api_tests_in_python_total": 14,
+    "typescript_tests": 16,
+    "web_lint": "pass",
+    "web_production_build": "pass",
+    "dbt_source_freshness": "warn: the committed 2021-2025 Land Registry build is older than the declared 35-day operational threshold",
+    "dbt_docs_generate": "pass locally; published deployment pending merge",
+    "local_browser_smoke": {
+      "homepage": "pass",
+      "english_area": "pass",
+      "welsh_area": "pass",
+      "listing_check": "pass",
+      "search_map": "pass"
+    },
+    "live_deployment_smoke": "pending merge and deployment",
+    "extract_vs_rescore_rows_compared": 7264
+  },
+  "tool_versions": {
+    "python": "3.13.13",
+    "dbt_core": "1.11.8",
+    "dbt_duckdb": "1.10.1",
+    "node": "24.15.0",
+    "npm": "11.13.0",
+    "nextjs": "16.2.9"
+  }
+}

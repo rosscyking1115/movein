@@ -48,7 +48,7 @@ os.environ["PATH"] = str(VENV_BIN) + os.pathsep + os.environ.get("PATH", "")
 
 # A stale partial-parse cache from the pre-rename project path
 # (project-2-uk-analytics) still bites full builds; disable partial parse so
-# dbt always reparses cleanly here. See MoveIn "Local dbt facts".
+# dbt always reparses cleanly here. See the project runbook's local dbt notes.
 os.environ.setdefault("DBT_PARTIAL_PARSE", "false")
 
 # Windows step workers get cp1252 stdout, so a script print containing a

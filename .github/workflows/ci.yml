@@ -1,4 +1,4 @@
-# PR gate — proves every change still builds + passes 189 data tests + lints clean.
+# PR gate — proves every change still builds + passes 222 data tests + lints clean.
 #
 # Triggers:
 #   - pull_request to main: every PR is gated
@@ -14,8 +14,9 @@
 #   5. Download two years of Land Registry data (--sample, enough for YoY)
 #   6. Load it into DuckDB
 #   7. dbt source freshness — proves the loaded source is current enough
-#   8. dbt seed + dbt build — all marts + 197 data tests + 2 unit tests on sample
-#   9. sqlfluff lint — model SQL must satisfy .sqlfluff rules
+#   8. dbt seed + dbt build — all marts + 222 data tests + 2 unit tests on sample
+#   9. Web golden tests, lint, and production build against the local API
+#  10. sqlfluff lint — model SQL must satisfy .sqlfluff rules
 #
 # Branch protection on main requires the "build-and-test" check to pass before
 # merging. See repo Settings → Branches.
@@ -23,7 +24,7 @@
 # Why a sample, not the full 5-year Parquet:
 #   - Full pull is ~157MB Parquet across 5 years and would burn 3-5min of CI
 #     time per PR. The 2-year sample exercises the same SQL paths, hits all
-#     189 data tests, and proves YoY logic is non-vacuous. Row-count test bounds
+#     the full data-test suite, and proves YoY logic is non-vacuous. Row-count test bounds
 #     were calibrated to pass on either full or sample data.
 
 name: CI
@@ -62,6 +63,13 @@ jobs:
           python-version: "3.13"
           cache: pip
 
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -80,6 +88,13 @@ jobs:
         # test parses the dbt manifest to load the Dagster definitions.
         run: python -m unittest discover -s tests -p "test_*.py"
 
+      - name: dbt scoring contract rejects invalid weights
+        run: |
+          if dbt compile --target ci --select rpt_neighbourhood_score --vars '{score_weight_affordability: 6}'; then
+            echo "Expected the scoring contract to reject weight 6."
+            exit 1
+          fi
+
       - name: Download Land Registry sample (2 years)
         run: python scripts/download_raw.py --sample
 
@@ -90,10 +105,29 @@ jobs:
         run: dbt source freshness --target dev
 
       - name: dbt seed
-        run: dbt seed --target dev
+        run: dbt seed --target dev --threads 1
 
-      - name: dbt build (runs all marts + 197 data tests + 2 unit tests)
-        run: dbt build --target dev
+      - name: dbt build (runs all marts + 222 data tests + 2 unit tests)
+        run: dbt build --target dev --threads 1
+
+      - name: Install web dependencies
+        run: npm ci --prefix web
+
+      - name: Web scoring golden tests and lint
+        run: |
+          npm test --prefix web
+          npm run lint --prefix web
+
+      - name: Web production build against local API
+        run: |
+          python -m uvicorn api.main:app --host 127.0.0.1 --port 8000 &
+          api_pid=$!
+          trap 'kill "$api_pid"' EXIT
+          for attempt in {1..20}; do
+            curl --fail --silent http://127.0.0.1:8000/healthz && break
+            sleep 1
+          done
+          API_BASE_URL=http://127.0.0.1:8000 npm run build --prefix web
 
       - name: sqlfluff lint (model SQL only)
         # Hard gate: a style violation in models/ fails the PR check, same as

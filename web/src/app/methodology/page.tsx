@@ -7,21 +7,21 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "Methodology & data sources",
   description:
-    "How MoveIn scores England & Wales neighbourhoods: five 0–100 indicators, a weighted average you control, explicit confidence, and the official open-data sources behind every number.",
+    "How England & Wales Housing Decision Support scores neighbourhoods: up to five 0–100 indicators, a weighted geometric mean, explicit evidence quality, and official open-data sources.",
 };
 
 const INDICATORS: [string, string, string][] = [
-  ["Affordability", "ONS · HM Land Registry", "Local rent (overall and per-bedroom) and median sale price, relative to other areas."],
-  ["Safety", "Police.uk", "Recorded-crime rate per 1,000 residents. A rate and a caveat — never a safe/unsafe label."],
+  ["Affordability", "ONS · HM Land Registry", "Local-authority average rent (overall and per-bedroom) and MSOA median sale-price context, relative to other areas."],
+  ["Recorded crime", "Police.uk · ONS population", "Monthly recorded-crime rate per 1,000 residents using the compatible mid-2024 MSOA population denominator. A rate and a caveat — never a safe/unsafe label."],
   ["Energy efficiency", "EPC Register", "Median EPC rating: a proxy for running costs and comfort."],
-  ["Flood resilience", "Environment Agency", "Flood-risk data. A resilience indicator, not a property-level survey."],
+  ["Flood resilience", "Environment Agency", "England-only flood-zone context. Wales is explicitly not covered and receives no flood score. This is not a property-level survey."],
   ["Getting around", "OpenStreetMap", "Walkable amenity count and distance to the nearest station, supermarket, GP, school and greenspace."],
 ];
 
 const REFUSALS = [
   "Label an area “safe”, “unsafe”, “good” or “bad”.",
   "Colour scores red-to-green as good/bad — bars stay on a neutral scale.",
-  "Score missing data as zero — a gap lowers confidence instead.",
+  "Score missing data as zero — a gap lowers evidence quality instead.",
   "Value an individual property — this is area-level guidance only.",
 ];
 
@@ -29,10 +29,11 @@ const SOURCES: [string, string][] = [
   ["HM Land Registry Price Paid", "Sale prices and market context (England & Wales)."],
   ["ONS Private Rent & House Price", "Official rent levels, including per-bedroom (PIPR)."],
   ["ONS / geography lookup", "Postcode → LSOA / MSOA / local authority / region."],
+  ["ONS MSOA population estimates", "Compatible mid-2024 population denominator for the monthly crime rate."],
   ["EPC (GOV.UK)", "Energy efficiency ratings aggregated to area level."],
   ["Police.uk API", "Crime indicator profile by area and month."],
   ["Planning Data API", "Planning constraints and context."],
-  ["Environment Agency", "Flood areas and monitoring."],
+  ["Environment Agency", "England flood-risk-zone geometry distributed through the Planning Data Platform."],
   ["OpenStreetMap / Overpass", "Amenities, stations, shops, green space."],
 ];
 
@@ -54,7 +55,7 @@ export default async function MethodologyPage() {
         How the score is built
       </h1>
       <p className="mt-3 text-[18px] leading-[1.6] text-ink2">
-        Five comparable indicators for every neighbourhood (MSOA) in England &amp;
+        Up to five comparable indicators for each neighbourhood (MSOA) in England &amp;
         Wales{meta ? ` — ${meta.areas.toLocaleString("en-GB")} areas` : ""}. Each is
         a 0–100 score where <strong className="text-ink">50 marks the typical area</strong>:
         we clip the extremes (2nd/98th percentile) and stretch the rest so the
@@ -64,12 +65,11 @@ export default async function MethodologyPage() {
       </p>
 
       <p className="mt-4 rounded-[12px] border border-rule2 bg-card2 px-5 py-3.5 text-[14px] leading-[1.6] text-ink2">
-        <strong className="text-ink">Coverage:</strong> MoveIn currently covers{" "}
+        <strong className="text-ink">Coverage:</strong> The service currently covers{" "}
         <strong className="text-ink">England &amp; Wales</strong>. Scotland and
-        Northern Ireland are on the roadmap — most of the underlying data (crime,
-        energy, flood) is published separately by each nation, so adding them is a
-        data-integration project rather than a switch to flip. Enter a Scottish or
-        NI postcode and we&rsquo;ll say so plainly rather than guess.
+        Northern Ireland are outside this completed reference implementation; no
+        geographic expansion is planned. Enter a Scottish or NI postcode and
+        we&rsquo;ll say it is outside coverage rather than guess.
       </p>
 
       <section className="mt-10">
@@ -94,7 +94,7 @@ export default async function MethodologyPage() {
           indicator can&rsquo;t paper over a poor one — a place that&rsquo;s great on
           energy but unaffordable and flood-prone won&rsquo;t float to the top.
           Missing an indicator? We drop it rather than scoring it zero: missing data
-          lowers confidence, it never silently penalises an area.
+          lowers evidence quality, it never silently penalises an area.
         </p>
       </section>
 

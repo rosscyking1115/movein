@@ -20,10 +20,10 @@ async function resolveTown(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const town = await resolveTown((await params).town);
   if (!town) return { title: "Area not found", robots: { index: false } };
-  const title = `Best areas to live in ${town.name} — rent, crime & scores`;
+  const title = `Area indicator rankings in ${town.name}`;
   return {
     title,
-    description: `Every neighbourhood in ${town.name} ranked on affordability, safety, energy, flood risk and convenience, with the rent, crime and amenity facts behind each score.`,
+    description: `Every neighbourhood in ${town.name} ranked on affordability, recorded crime, energy, flood risk and convenience, with the rent, crime and amenity facts behind each score.`,
     alternates: { canonical: `/town/${townSlug(town.name)}` },
   };
 }
@@ -54,7 +54,7 @@ export default async function TownPage({ params }: Props) {
 
       <header className="mb-8 max-w-[620px]">
         <h1 className="font-display text-[clamp(34px,4.6vw,52px)] font-bold leading-[1.05] text-ink">
-          Best areas to live in {town.name}
+          Area indicator rankings in {town.name}
         </h1>
         <p className="mt-2 text-[17px] text-ink2">
           {ranked.length.toLocaleString("en-GB")} neighbourhood
@@ -78,7 +78,7 @@ export default async function TownPage({ params }: Props) {
 
       <JsonLd
         data={rankingJsonLd({
-          title: `Best areas to live in ${town.name}`,
+          title: `Area indicator rankings in ${town.name}`,
           path: `/town/${townSlug(town.name)}`,
           crumbs: [
             { name: "Home", path: "" },

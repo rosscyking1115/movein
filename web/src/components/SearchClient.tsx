@@ -9,7 +9,7 @@ import { areaSlug } from "@/lib/slug";
 import { rentPerMonth, score as fmtScore } from "@/lib/format";
 import { InfoPopover } from "./InfoPopover";
 
-// Google Maps touches window, so load the map client-only.
+// MapLibre touches window, so load the map client-only.
 const SearchMap = dynamic(() => import("./SearchMap"), {
   ssr: false,
   loading: () => <div className="h-[380px] w-full animate-pulse rounded-[14px] border border-rule2 bg-card2" />,
@@ -17,7 +17,7 @@ const SearchMap = dynamic(() => import("./SearchMap"), {
 
 const SLIDERS: { key: ComponentKey; label: string; abbr: string }[] = [
   { key: "affordability_score", label: "Affordability", abbr: "Aff" },
-  { key: "safety_score", label: "Lower crime", abbr: "Saf" },
+  { key: "safety_score", label: "Lower crime", abbr: "Crm" },
   { key: "energy_score", label: "Energy efficiency", abbr: "Ene" },
   { key: "flood_score", label: "Flood resilience", abbr: "Flo" },
   { key: "convenience_score", label: "Getting around", abbr: "Get" },
@@ -27,7 +27,7 @@ const TAGS = ["Ignore", "Minor", "Some", "Matters", "High", "Top"];
 // What each indicator measures + its source, shown in the per-slider info popover.
 const INDICATOR_HELP: Record<ComponentKey, { measures: string; source: string }> = {
   affordability_score: {
-    measures: "How cheap or dear it is to live here — typical private rent and sale prices versus the rest of England & Wales. Higher score = more affordable.",
+    measures: "Official local-authority rent context and MSOA sale-price context versus the rest of England & Wales. Higher score = more affordable.",
     source: "ONS Price Index of Private Rents; HM Land Registry.",
   },
   safety_score: {

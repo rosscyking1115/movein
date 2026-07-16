@@ -3,21 +3,30 @@
 A small **FastAPI** service over the decision marts. It ships the slim read-only
 `data/decision.duckdb` extract, loads the 7,264 MSOA rows once, and serves the
 explainable scores + a postcode resolver + a listing price check. The same
-backend powers the renter app, the planned website, and the mobile app.
+backend powers the website; a mobile client remains parked.
 
 Interactive docs (Swagger) at `/docs`; OpenAPI schema at `/openapi.json` — use it
 to generate typed clients for the web/mobile front ends.
 
-## Endpoints (`/v1`)
+## Endpoints (`/v2`)
 
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/healthz` | Liveness + row count + data vintage |
-| GET | `/v1/meta` | Components, default weights, data vintage |
-| GET | `/v1/areas/{msoa_code}` | One MSOA's scores + facts |
-| GET | `/v1/areas/resolve?postcode=` | Postcode → MSOA (via postcodes.io) + its profile |
-| POST | `/v1/search` | Weights + budget/region filters → re-ranked, paginated areas |
-| POST | `/v1/listing-check` | Postcode + asking rent/price + bedrooms → area + price-vs-local band |
+| GET | `/v2/meta` | Components, default weights, scoring contract, data vintage |
+| GET | `/v2/areas/{msoa_code}` | One MSOA's scores, facts, provenance, and evidence quality |
+| GET | `/v2/areas/resolve?postcode=` | Postcode → MSOA (via postcodes.io) + its profile |
+| POST | `/v2/search` | Weights + budget/region filters → re-ranked, paginated areas |
+| POST | `/v2/listing-check` | Postcode + asking rent/price + bedrooms → area + neutral comparison figure and band |
+
+`/v2/listing-check` returns `comparison_gbp` and `pct_vs_comparison`. For rent,
+the comparison is the named local authority's official rent figure; for sales,
+it is the MSOA median sold-price context. Neither is a valuation or a
+"neighbourhood typical" price.
+
+The `/v1` paths remain hidden compatibility aliases. Maintenance mode has no
+scheduled removal date; removal would require an explicit future major-version
+release and migration note. New clients should use `/v2`.
 
 The weighted ranking re-runs from the stored 0–100 component scores, so clients
 can also re-rank locally for instant slider response.

@@ -15,4 +15,4 @@ where
         or crime_rate_per_1000 is null
         or commute_minutes_sample is null
     )
-    and nullif(trim(confidence_notes), '') is null
+    and nullif(trim(source_coverage_notes), '') is null
