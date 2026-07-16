@@ -27,7 +27,7 @@ SOURCE_TO_INGEST_ASSET = {
 }
 
 
-class MoveInDbtTranslator(DagsterDbtTranslator):
+class HousingDecisionSupportDbtTranslator(DagsterDbtTranslator):
     def get_asset_key(self, dbt_resource_props: Mapping[str, Any]) -> AssetKey:
         if dbt_resource_props["resource_type"] == "source":
             ingest_asset = SOURCE_TO_INGEST_ASSET.get(

@@ -1,0 +1,6 @@
+case_name,available_component_count,crime_population_denominator,crime_population_reference_date,crime_period_start,crime_period_end,rent_source_grain,rent_reference_date,median_sale_price_confidence,all_component_source_dates_known,planning_source_status,flood_source_status,expected_level
+complete neighbourhood-grain evidence is strong,5,8000,2024-06-30,2026-01,2026-06,msoa,2026-05-01,reliable,true,covered,covered,strong
+coarse rent evidence is mixed,5,8000,2024-06-30,2026-01,2026-06,local_authority,2026-05-01,reliable,true,covered,covered,mixed
+unsupported jurisdiction is limited,4,8000,2024-06-30,2026-01,2026-06,local_authority,2026-05-01,reliable,true,not_covered,not_covered,limited
+missing crime denominator is limited,4,,,2026-01,2026-06,local_authority,2026-05-01,indicative,true,covered,covered,limited
+incomplete component dates are mixed,5,8000,2024-06-30,2026-01,2026-06,msoa,2026-05-01,reliable,false,covered,covered,mixed

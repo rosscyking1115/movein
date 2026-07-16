@@ -76,6 +76,9 @@ models:
           - accepted_values:
               arguments:
                 values: ['local_authority', 'region', 'country']
+      - name: rent_reference_date
+        data_type: date
+        description: Observation date of the official rent context.
       - name: affordability_ratio
         data_type: double
         description: >
@@ -112,10 +115,9 @@ models:
       - name: crime_rate_per_1000
         data_type: double
         description: >
-          Approximate monthly recorded crimes per 1,000 residents (police
-          street-level crimes / months observed / nominal_msoa_population *
-          1000). An indicator, never a safe/unsafe label. Null when no crime
-          matched the area.
+          Monthly recorded crimes per 1,000 residents (police street-level
+          crimes / months observed / compatible ONS mid-year MSOA population *
+          1000). An area indicator, never a safe/unsafe label.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
@@ -125,33 +127,75 @@ models:
         description: >
           Total police street-level crimes matched to the area over the loaded
           period — confidence indicator for crime_rate_per_1000. Null when none.
+      - name: crime_months_observed
+        data_type: bigint
+        description: Distinct source months represented in crime_record_count.
+      - name: crime_period_start
+        data_type: varchar
+        description: Earliest source month represented, formatted YYYY-MM.
+      - name: crime_period_end
+        data_type: varchar
+        description: Latest source month represented, formatted YYYY-MM.
+      - name: crime_population_denominator
+        data_type: integer
+        description: ONS mid-2024 resident population for the same 2021 MSOA geography.
+      - name: crime_population_reference_date
+        data_type: date
+        description: Reference date of the population denominator (30 June 2024).
+      - name: crime_population_geography
+        data_type: varchar
+        description: Geography version of the population denominator (MSOA 2021).
+      - name: crime_population_source_name
+        data_type: varchar
+        description: Official source name for the resident-population denominator.
       - name: flood_risk_flag
         data_type: varchar
         description: >
           Flood-risk band (low/medium/high) from the share of the area's
-          postcodes inside an Environment Agency flood-risk zone; 'unknown' if
-          constraints are not loaded for the area.
+          postcodes inside an Environment Agency flood-risk zone. Null when the
+          source does not cover the jurisdiction or is unavailable.
         tests:
-          - not_null
           - accepted_values:
               arguments:
-                values: ['low', 'medium', 'high', 'unknown']
+                values: ['low', 'medium', 'high']
       - name: flood_postcode_pct
         data_type: double
         description: >
           Percentage of the area's postcodes whose centroid falls inside a
-          flood-risk zone. Null when constraints are not loaded for the area.
+          flood-risk zone. Null outside explicit source coverage.
+      - name: flood_source_status
+        data_type: varchar
+        description: covered, not_covered, or source_missing for this MSOA.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['covered', 'not_covered', 'source_missing']
+      - name: flood_source_name
+        data_type: varchar
+        description: Name of the flood dataset used for this field.
       - name: planning_constraint_count
         data_type: integer
         description: >
           Distinct planning constraint entities (conservation areas, green belt,
           Article 4 areas, tree preservation zones) touching the area's
-          postcodes. 0 when none / not loaded.
+          postcodes. Zero means a covered source found no intersecting entity;
+          null means not covered or source missing.
         tests:
-          - not_null
           - dbt_utils.expression_is_true:
               arguments:
                 expression: ">= 0"
+      - name: planning_source_status
+        data_type: varchar
+        description: covered, not_covered, or source_missing for this MSOA.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['covered', 'not_covered', 'source_missing']
+      - name: planning_source_name
+        data_type: varchar
+        description: Name of the planning-constraint dataset used for this field.
       - name: nearest_station_km
         data_type: double
         description: >
@@ -195,17 +239,9 @@ models:
         description: >
           Placeholder for door-to-door commute time; always null until that
           source is loaded, kept explicit so no commute claim is implied.
-      - name: confidence_level
+      - name: source_coverage_notes
         data_type: varchar
-        description: Overall source coverage confidence for the profile.
-        tests:
-          - not_null
-          - accepted_values:
-              arguments:
-                values: ['high', 'medium', 'low']
-      - name: confidence_notes
-        data_type: varchar
-        description: Caveat text explaining missing or coarse source coverage.
+        description: Factual note listing loaded and absent source families.
         tests:
           - not_null
       - name: why_this_area
@@ -221,8 +257,8 @@ models:
       indicators use a median-anchored winsorised min-max (the median_anchored
       macro), EPC and flood use fixed anchors. overall_score is the weighted
       GEOMETRIC mean of the components an area has (default weights from vars,
-      re-weighted per user by the client). Missing components lower confidence and
-      are dropped from the mean rather than scored zero. Schema is
+      re-weighted per user by the client). Missing components lower evidence
+      quality and are dropped from the mean rather than scored zero. Schema is
       contract-enforced — this mart is the API's source of truth.
     config:
       contract:
@@ -293,10 +329,10 @@ models:
                 expression: "between 0 and 100"
       - name: overall_rank
         data_type: bigint
-        description: Dense rank by overall_score (1 = best) across all areas.
+        description: Dense rank by overall_score (1 = highest score) across all areas.
         tests:
           - not_null
-      - name: components_available
+      - name: available_component_count
         data_type: integer
         description: Count of non-null component scores (0-5).
         tests:
@@ -304,14 +340,35 @@ models:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: "between 0 and 5"
-      - name: confidence_level
-        data_type: varchar
-        description: high (5 components), medium (3-4), or low (<3).
+      - name: expected_component_count
+        data_type: integer
+        description: Number of components defined by scoring contract v2 (always 5).
         tests:
           - not_null
           - accepted_values:
               arguments:
-                values: ['high', 'medium', 'low']
+                values: [5]
+                quote: false
+      - name: all_component_source_dates_known
+        data_type: boolean
+        description: >
+          True only when every scored component has a known source reference
+          date. False in this release, so strong evidence cannot be asserted.
+        tests:
+          - not_null
+      - name: evidence_quality_level
+        data_type: varchar
+        description: "Evidence coverage summary: strong, mixed, or limited."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['strong', 'mixed', 'limited']
+      - name: evidence_quality_notes
+        data_type: varchar
+        description: Plain-language reason for the evidence-quality level.
+        tests:
+          - not_null
       - name: why_this_area
         data_type: varchar
         description: Strongest/weakest component summary plus coverage.

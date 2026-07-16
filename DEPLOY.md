@@ -53,6 +53,10 @@ in the Vercel project (Settings → General → Root Directory). Framework
 | `API_BASE_URL` | `https://uk-housing-decision-support-api.fly.dev` | Server-only; the deployed Fly URL. |
 | `NEXT_PUBLIC_SITE_URL` | `https://YOUR-DOMAIN` | Canonical origin, no trailing slash. Drives metadata, canonicals, sitemap, JSON-LD. |
 
+No map key is required. The search map is rendered by MapLibre GL JS from
+OpenFreeMap's keyless public tile service. This removes usage-based map billing;
+the trade-off is that the public tile service has no availability SLA.
+
 Steps:
 
 1. Import the GitHub repo into Vercel, set Root Directory = `web`.
@@ -107,14 +111,14 @@ deploy* → Run workflow).
 | `FLY_API_TOKEN` | `fly tokens create deploy` (scoped to the app). |
 | `VERCEL_DEPLOY_HOOK_URL` | Vercel → Settings → Git → Deploy Hooks (optional — without it, ISR picks up the new data within a day). |
 
-The API exposes the extract's date as `data_vintage` in `/healthz` and `/v1/meta`,
+The API exposes the extract's date as `data_vintage` in `/healthz` and `/v2/meta`,
 so you can confirm a refresh shipped.
 
 ## Architecture notes
 
 - `web` is a pure HTTP client of the API. Client components call same-origin
   `/api/*` BFF routes (`web/src/app/api/*`), which proxy to `API_BASE_URL`.
-- Hubs/sitemap read the whole dataset via `GET /v1/areas/index` (one cacheable
+- Hubs/sitemap read the whole dataset via `GET /v2/areas/index` (one cacheable
   request). Area pages fetch a single area and are ISR-cached for a day.
 - Security headers are set in [`web/next.config.ts`](web/next.config.ts) so they
   apply on any host.

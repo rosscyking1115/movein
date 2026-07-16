@@ -20,7 +20,7 @@ export function ThemeToggle() {
     setState({ mounted: true, dark: next });
     document.documentElement.classList.toggle("dark", next);
     try {
-      localStorage.setItem("movein-theme", next ? "dark" : "light");
+      localStorage.setItem("ew-housing-decision-support-theme", next ? "dark" : "light");
     } catch {
       /* private mode — ignore */
     }

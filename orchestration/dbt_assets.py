@@ -11,14 +11,14 @@ from dagster import AssetExecutionContext
 from dagster_dbt import DbtCliResource, dbt_assets
 
 from .resources import REAL_SOURCE_VARS_JSON, dbt_project
-from .translator import MoveInDbtTranslator
+from .translator import HousingDecisionSupportDbtTranslator
 
 
 @dbt_assets(
     manifest=dbt_project.manifest_path,
-    dagster_dbt_translator=MoveInDbtTranslator(),
+    dagster_dbt_translator=HousingDecisionSupportDbtTranslator(),
 )
-def movein_dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
+def housing_decision_support_dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
     # --vars: the orchestrated build reads the real raw_* sources, matching the
     # vars the manifest was parsed with (resources.REAL_SOURCE_VARS). The
     # fixture-seed default stays the plain-dbt/CI path.

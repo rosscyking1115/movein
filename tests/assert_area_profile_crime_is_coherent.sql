@@ -1,5 +1,5 @@
 -- Risk: a crime rate could appear for an area with no matched crimes, or
---       crimes could aggregate without producing a rate, making the safety
+--       crimes could aggregate without producing a rate, making the recorded-crime
 --       indicator misleading.
 --
 -- Fail rows: any area where the crime rate and record count disagree, or the

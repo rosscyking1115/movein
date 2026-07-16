@@ -33,6 +33,9 @@ export function PostcodeBox() {
       <div className="flex items-center gap-2.5 rounded-[10px] border border-rule2 bg-card py-1.5 pl-4 pr-1.5">
         <span className="font-mono text-[13px] text-muted">Postcode</span>
         <input
+          name="postcode"
+          autoComplete="off"
+          spellCheck={false}
           value={postcode}
           onChange={(e) => setPostcode(e.target.value)}
           placeholder="e.g. M21 9HZ"
@@ -47,7 +50,7 @@ export function PostcodeBox() {
           {loading ? "…" : "Look up"}
         </button>
       </div>
-      {error && <p className="mt-2 text-sm text-caution">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-caution">{error}</p>}
     </form>
   );
 }

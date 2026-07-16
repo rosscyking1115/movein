@@ -1,5 +1,8 @@
 # Website Design Brief — UK Housing Decision Support
 
+Canonical public name: **England & Wales Housing Decision Support**. Do not
+reintroduce the retired product nickname.
+
 A brief for **Claude Design** to lead a **fresh visual identity** for the website
 (`web/`). The site is already built and live; this is a design-led reskin, not a
 rebuild. Read the "Do not break" section as hard as the creative one.
@@ -55,8 +58,8 @@ style choice, it's a defect.
    judgemental scale. (Exception: the **EPC A–G** rating may use its *official*
    government band colours — that's a recognised national standard, not our verdict.)
 3. **Show the fact beside the score.** Provenance is the brand. Never a lone number.
-4. **Show uncertainty honestly.** Missing data lowers *confidence*; it is never
-   scored as zero. Design explicit "—" / "no data" / confidence states; don't hide
+4. **Show uncertainty honestly.** Missing data lowers *evidence quality*; it is never
+   scored as zero. Design explicit "—" / "no data" / evidence states; don't hide
    gaps.
 5. **Area-level, not a property valuation.** Copy and framing stay at neighbourhood
    level. The listing checker is an area-level *sanity check*; "asking ≠ achieved."
@@ -119,7 +122,8 @@ Whatever the direction:
   map/chart is `next/dynamic`, client-only, **below the fold**, lazy. Don't pull
   heavy libs into the shared bundle. Don't regress Lighthouse.
 - **Data you can show (per area):** `area_name`, `local_authority_name`, `region`;
-  scores `overall_score`, `overall_rank`, `confidence_level`, `why_this_area`, and
+  scores `overall_score`, `overall_rank`, `evidence_quality_level`,
+  `evidence_quality_notes`, `available_component_count`, `why_this_area`, and
   `affordability/safety/energy/flood/convenience_score` (0–100); facts
   `official_rent_monthly_gbp`, `rent_1bed/2bed/3bed/4plus_gbp`,
   `median_sale_price_gbp`, `epc_median_rating` (A–G), `crime_rate_per_1000`,
@@ -135,12 +139,12 @@ the surfaces, not the URLs.
 | Route | Job | Key elements |
 |---|---|---|
 | `/` (home) | Sell the premise; route in | Hero (the thesis — lead with the receipt idea, not a generic big-number); postcode jump → area; 3 principles; methodology CTA |
-| `/area/[slug]` **(hero)** | Judge one place honestly | **The trade-off receipt**: overall score + rank + confidence, the "why" line, 5 component rows (neutral bar + the fact), full facts grid (per-bed rents, sale price, EPC, crime, flood, amenities + distances), compare/rank CTAs, town/region/rent mesh links |
+| `/area/[slug]` **(hero)** | Judge one place honestly | **The trade-off receipt**: overall score + rank + evidence quality, the "why" line, up to 5 component rows (neutral bar + the fact), full facts grid (per-bed rents, sale price, EPC, crime, flood, amenities + distances), compare/rank CTAs, town/region/rent mesh links |
 | `/search` | Rank by *my* priorities | 5 weight sliders (live, on-device re-rank), budget + region filters, ranked result cards |
 | `/compare` | Weigh up to 4 places | Side-by-side table: scores section (bold the row leader) + facts section (neutral) |
 | `/check` | Is this listing's area + price sane? | Form (postcode, rent/buy, beds, asking) → price-vs-local band + the area receipt |
 | `/rankings`, `/rankings/[region]` | Browse the best areas | Region index; region leaderboard + local-authority chips |
-| `/town/[town]` | Best areas in a town/LA | Ranked area cards + "rent in X" CTA |
+| `/town/[town]` | Area indicator rankings in a town/LA | Ranked area cards + official-rent-context CTA |
 | `/rent/[town]` | "Rent in X" by bedroom | LA per-bed averages + cheapest-first table |
 | `/methodology` | Earn trust (E-E-A-T) | The 5 indicators, the scoring, "what we deliberately don't do," data sources |
 | `/not-found`, nav, footer | — | Global frame; footer carries the trust line + source links |
@@ -156,7 +160,7 @@ Design these as a coherent set — most pages are made of them:
 - **AreaCard** — result row for search/hubs: match/overall score, place, rent, and
   the five mini component bars (the ranking must be legible, not a black box).
 - **CompareTable** — dense, scannable, responsive (horizontal scroll on mobile).
-- **PriceBand** — listing-check verdict (well below → well above the local typical),
+- **PriceBand** — neutral listing comparison (well below → well above the named figure),
   worded as a prompt to look closer, not a "good/bad deal." Only "well above" gets
   emphasis, and even then as caution, not alarm.
 - **Forms** — postcode box, the slider panel, the listing form (shadcn `Field`s).
@@ -207,11 +211,9 @@ Run the output against the **`web-design-guidelines`** and
 3. **All page surfaces** (§6), responsive to mobile, a11y-complete.
 4. Screenshots of the area page, search, compare, and home for review before merge.
 
-## 12. Open questions (flag, don't block)
+## 12. Resolved design decisions
 
-- **Domain:** site is on `*.vercel.app` for now; final domain TBD (affects nothing
-  visual).
-- **Map:** worth adding a lightweight area map? High visual value, but must be
-  lazy/below-the-fold to protect performance. Treat as optional v2.
-- **Dark mode:** in scope? (Currently light-only.) Designer's call within the
-  identity.
+- **Domain:** the documented canonical deployment remains the Vercel URL.
+- **Map:** implemented on search with MapLibre GL JS and keyless OpenFreeMap
+  tiles; the provider-independent result list remains primary.
+- **Dark mode:** implemented with persisted theme tokens.

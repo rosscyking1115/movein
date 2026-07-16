@@ -77,6 +77,10 @@ models:
         description: Count of matched street-crime records.
       - name: crime_months_observed
         description: Distinct crime months present, used as the rate denominator basis.
+      - name: crime_period_start
+        description: Earliest source month represented, formatted YYYY-MM.
+      - name: crime_period_end
+        description: Latest source month represented, formatted YYYY-MM.
 
   - name: int_area__nearest_city
     description: |

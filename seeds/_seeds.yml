@@ -1,0 +1,57 @@
+version: 2
+
+seeds:
+  - name: ref_scoring_golden_cases
+    description: >
+      Executable dbt mirror of the versioned cross-runtime weighted-geometric-mean
+      cases in contracts/neighbourhood-scoring-v2-cases.json.
+
+  - name: ref_ranking_golden_cases
+    description: >
+      Executable dbt mirror of the shared deterministic score-descending,
+      area-id-ascending ranking case.
+
+  - name: ref_evidence_golden_cases
+    description: >
+      Executable dbt mirror of the versioned cross-runtime evidence-quality cases
+      in contracts/neighbourhood-scoring-v2-cases.json.
+
+  - name: ref_msoa_population
+    description: >
+      Official ONS mid-2024 resident-population denominator at 2021 MSOA grain,
+      prepared by scripts/prepare_msoa_population.py for compatible crime rates.
+    columns:
+      - name: area_id
+        tests:
+          - not_null
+          - unique
+      - name: area_name
+        tests:
+          - not_null
+      - name: population
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+      - name: population_reference_date
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['2024-06-30']
+      - name: geography_version
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['MSOA 2021']
+      - name: source_name
+        tests:
+          - not_null
+      - name: source_url
+        tests:
+          - not_null
+      - name: source_release_date
+        tests:
+          - not_null

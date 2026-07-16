@@ -21,7 +21,7 @@ export function SiteFooter() {
           <div className="max-w-[420px]">
             <div className="flex items-center gap-2.5">
               <Logo size={22} />
-              <span className="font-display text-lg font-bold text-ink">MoveIn</span>
+              <span className="font-display text-lg font-bold text-ink">England &amp; Wales Housing Decision Support</span>
             </div>
             <p className="mt-3 text-sm text-ink2">
               Area-level indicators for England &amp; Wales, built from official open

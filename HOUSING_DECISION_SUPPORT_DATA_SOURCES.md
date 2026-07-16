@@ -1,31 +1,36 @@
 # Housing Decision Support Data Sources
 
-Date checked: 2026-06-25
+Date checked: 2026-07-15
 
-This file lists the practical sources for the UK housing decision-support product. The guiding rule is to use official/open data first, avoid portal scraping, and clearly label source coverage and freshness.
+This file records the source provenance of the completed England-and-Wales reference implementation. The guiding rule is to use official/open data, avoid portal scraping, and label coverage, grain, and freshness without implying an active product roadmap.
 
-## Source Summary
+## Active correctness-release sources (9)
 
-| Source | Use | Access | Grain | MVP Priority | Caveats |
-|---|---|---|---|---|---|
-| HM Land Registry Price Paid Data | Sale prices, volume, market context | Public CSV/TXT/linked data | Transaction/postcode | High | England and Wales only; not live listings; address-data use has restrictions |
-| ONS Private Rent and House Price statistics | Official rent levels and inflation | ONS datasets and bulletin downloads | Country, region, local authority, BRMA depending table | High | Latest values can be provisional and revised |
-| ONS/geography postcode lookup | Postcode to LSOA/MSOA/local authority/region | Official geography lookup downloads | Postcode | High | Must check licensing and update cadence |
-| EPC data | Energy efficiency and likely energy-cost pressure | GOV.UK service, bulk CSV, developer API | Property/certificate/postcode | High | Requires GOV.UK One Login for bulk; certificates may be expired or replaced |
-| Police API | Crime indicator profile | Public JSON API | Street/lat-lon/neighbourhood/month | High | Avoid "safe/unsafe" labels; use rates and caveats |
-| Planning Data API | Planning constraints, designations, applications, brownfield, flood-risk-zone | Public API and bulk downloads | Entity/geometry | Medium-high | Beta service; planning applications spec may change |
-| Environment Agency flood monitoring / flood areas | Flood alerts/warnings and flood area polygons | Public API / spatial data | Flood area/geometry | Medium | Monitoring is real-time alert-oriented; long-term risk needs separate risk datasets |
-| TfL Unified API | London commute estimates and transport access | API key recommended | Stop/journey/location | Medium | London-first; terms and quotas apply |
-| OpenStreetMap / Overpass | Amenities, stations, green space, shops | Public OSM query APIs or extracts | Point/way/relation | Medium | Respect usage policies; use extracts for large refreshes |
-| User-entered listings | Current listing comparison | User input | Listing | High | Avoid scraping Rightmove/Zoopla/SpareRoom without permission |
+| Source | Shipped use | Access | Grain | Caveats |
+|---|---|---|---|---|
+| HM Land Registry Price Paid Data | Sale prices, volume, market context | Public CSV/TXT | Transaction/postcode | England and Wales only; not live listings or a valuation |
+| ONS Private Rent and House Price statistics | Official rent and affordability context | ONS downloads | Local authority | Provisional/revisable and coarser than neighbourhood grain |
+| ONS Postcode Directory | Postcode to LSOA/MSOA/local authority/region | Official lookup download | Postcode | Snapshot provenance applies |
+| ONS MSOA population estimates | Recorded-crime denominator | Official ONS workbook | MSOA 2021 | Mid-2024 resident estimate, not a live count |
+| EPC data | Energy-efficiency indicator | GOV.UK bulk data | Certificate/postcode | Certificates may be expired or replaced |
+| Police open data | Recorded-crime indicator | Public bulk/API data | Event/month | Indicator only; never a safe/unsafe verdict |
+| Planning Data Platform | Planning-constraint coverage | Bulk geometry | Entity/geometry | England only; Wales is `not_covered` |
+| Environment Agency flood-risk zones | Flood indicator, distributed through Planning Data Platform | Bulk geometry | Zone/postcode intersection | England-only area context, not property-level risk |
+| OpenStreetMap | Amenities and station proximity | Geofabrik extract | Point/way/relation | Completeness follows OSM coverage |
 
-MVP geography decision:
+Shipped geography decision:
 
-- Rank MSOAs as the canonical recommendation areas.
+- Rank MSOAs as the canonical indicator areas.
 - Use full postcode as a user/listing lookup key, not as the final recommendation grain.
-- Roll LSOA, postcode, EPC, crime, planning, flood, and local-authority evidence up into MSOA-level area profiles with explicit confidence notes.
+- Roll LSOA, postcode, EPC, crime, planning, flood, and local-authority evidence up into MSOA-level area profiles with explicit coverage and evidence-quality notes.
 
-## Official Sources Checked
+## Evaluated but not implemented
+
+TfL journey planning, OpenTripPlanner/GTFS routing, live rental listings, portal scraping, and user-listing persistence were evaluated during discovery but are not built and have no active roadmap. The public listing check accepts user input for a one-off comparison; it does not ingest or store listing feeds.
+
+## Active source details
+
+Paths named below are implemented repository paths. Historical candidate model names have been removed so this catalogue does not imply unbuilt lineage.
 
 ### HM Land Registry Price Paid Data
 
@@ -45,11 +50,9 @@ How to use:
 - Use sale-price trend, volume, property type mix, and new-build indicators.
 - Refresh using full yearly or complete files with explicit source release metadata.
 
-Models:
-
-- `stg_landreg__transactions`
-- `fct_sale_market`
-- `rpt_area_market_context`
+Implemented paths: `scripts/download_raw.py`, `scripts/load_to_duckdb.py`,
+`stg_landreg__transactions`, `fct_transactions`, `int_area__market`, and
+`rpt_area_profile_mvp`.
 
 ### ONS Private Rent And House Price Statistics
 
@@ -66,15 +69,12 @@ Relevant facts checked:
 How to use:
 
 - Use as the official rent backbone.
-- For MVP, build affordability at local authority or BRMA level depending available table.
+- Publish the available local-authority grain explicitly.
 - Use property size where available.
 - Add a caveat that official rent statistics are not live listing prices.
 
-Models:
-
-- `stg_ons__private_rents`
-- `fct_rent_market`
-- `rpt_area_affordability`
+Implemented paths: `scripts/prepare_ons_rent_seed.py`, `ref_ons_rent`,
+`rpt_area_profile_mvp`, and `rpt_neighbourhood_score`.
 
 ### ONS / Geography Postcode Lookup
 
@@ -87,11 +87,27 @@ How to use:
 - Treat the committed `ref_onspd_sample` seed as a CI fixture, not as production geography coverage.
 - Stamp the source snapshot date, source name, and source URL onto every row.
 
-Models:
+Implemented paths: `scripts/prepare_onspd_seed.py`, `scripts/load_geography.py`,
+`stg_geo__postcodes`, `dim_postcode_geography`, and `dim_area`.
 
-- `stg_geo__postcodes`
-- `dim_postcode_geography`
-- `dim_area`
+### ONS MSOA Population Estimates
+
+URL: https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/middlesuperoutputareamidyearpopulationestimatesnationalstatistics
+
+Relevant facts checked:
+
+- The accredited official-statistics workbook released 7 November 2025 contains mid-2024 estimates for 2021 MSOAs in England and Wales.
+- The population reference date is 30 June 2024 and the source is licensed under the Open Government Licence.
+
+How to use:
+
+- Normalize the `Mid-2024 MSOA 2021` sheet with `scripts/prepare_msoa_population.py`.
+- Use the committed 7,264-row seed as the compatible resident-population denominator for monthly recorded-crime rates.
+- Expose the denominator, reference date, geography version, and source beside the rate.
+
+Implemented paths: `scripts/prepare_msoa_population.py`,
+`ref_msoa_population`, `rpt_area_profile_mvp`, and
+`rpt_neighbourhood_score`.
 
 ### EPC Data
 
@@ -111,11 +127,8 @@ How to use:
 - Estimate energy-cost pressure with caveats.
 - Track certificate recency and replacement status where possible.
 
-Models:
-
-- `stg_epc__certificates`
-- `fct_epc_certificate`
-- `rpt_area_energy_profile`
+Implemented paths: `scripts/prepare_epc_seed.py`, `scripts/load_epc.py`,
+`stg_epc__certificates`, `int_area__energy`, and `rpt_area_profile_mvp`.
 
 ### Police API
 
@@ -130,14 +143,11 @@ Relevant facts checked:
 How to use:
 
 - Aggregate monthly crime categories around area centroids or within area boundaries.
-- Convert counts into rates using population denominators where available.
+- Convert counts into monthly rates using the compatible ONS mid-2024 MSOA population denominator.
 - Do not call areas "safe" or "unsafe"; show indicator levels and uncertainty.
 
-Models:
-
-- `stg_police__street_crime`
-- `fct_crime`
-- `rpt_area_safety_indicators`
+Implemented paths: `scripts/prepare_crime_seed.py`, `scripts/load_crime.py`,
+`stg_crime__street`, `int_area__crime`, and `rpt_area_profile_mvp`.
 
 ### Planning Data API
 
@@ -155,37 +165,30 @@ How to use:
 
 - Start with planning constraints and designations.
 - Use bulk downloads for stable snapshots and local spatial joins.
-- Add planning applications only with strong caveats about coverage.
+- Mark Wales `not_covered`; never turn unsupported coverage into a zero constraint count or low flood flag.
 
-Models:
+Implemented paths: `scripts/prepare_area_constraints.py`,
+`scripts/load_constraints.py`, `stg_constraints__area`, and
+`rpt_area_profile_mvp`.
 
-- `stg_planning__entities`
-- `fct_planning_constraint`
-- `rpt_area_flood_planning_profile`
+### Environment Agency Flood-Risk Zones
 
-### Environment Agency Flood Monitoring
+URL: https://environment.data.gov.uk/
 
-URL: https://environment.data.gov.uk/flood-monitoring/doc/reference
+The shipped input is static England flood-risk-zone geometry distributed through
+the Planning Data Platform, not the live flood-monitoring API. Postcode
+intersections are rolled up to MSOA and published as area context only. Wales is
+`not_covered`; the output is not a property-level survey or prediction.
 
-Relevant facts checked:
-
-- Flood areas include Flood Alert Areas and Flood Warning Areas.
-- The API provides geographic region information and polygons in GeoJSON/WGS84.
-- Flood Alert Areas can cover broad areas where flooding is possible.
-
-How to use:
-
-- Treat this as flood-alert/flood-warning area context.
-- For long-term risk, prefer official flood-risk-zone or risk-of-flooding datasets where licensing and bulk download are suitable.
-- Show flood indicators as risk flags, not precise property-level predictions.
-
-Models:
-
-- `stg_flood__areas`
-- `fct_flood_area_intersections`
-- `rpt_area_flood_planning_profile`
+Implemented paths: `scripts/prepare_area_constraints.py`,
+`scripts/load_constraints.py`, `stg_constraints__area`, and
+`rpt_area_profile_mvp`.
 
 ### Transport / Commute
+
+**Status: evaluated, not implemented, and not on an active roadmap.** The notes
+below record why this source was not included; none of the candidate model names
+from discovery are part of the repository contract.
 
 TfL URL: https://api-portal.tfl.gov.uk/
 
@@ -195,17 +198,8 @@ Relevant facts checked:
 - API requests use an `app_key` query parameter.
 - TfL public open data can be used subject to transport data terms and conditions.
 
-How to use:
-
-- For MVP, start London-first if using TfL journey estimates.
-- For UK-wide MVP, consider simpler public-transport access features first: nearest stations/stops, rail/tube/metro proximity, and estimated drive/cycle/walk times.
-- For robust UK-wide routing, consider OpenTripPlanner with GTFS/NaPTAN/National Rail data, but that is a larger engineering task.
-
-Models:
-
-- `stg_transport__nodes`
-- `fct_commute_sample`
-- `rpt_area_commute`
+The shipped convenience indicator uses OpenStreetMap station proximity and makes
+no commute-time claim.
 
 ### OpenStreetMap / Overpass
 
@@ -222,44 +216,28 @@ How to use:
 - Use for amenities: supermarkets, parks, schools, gyms, libraries, rail stations, bus stops, pharmacies.
 - For larger area refreshes, use extracts rather than hitting public APIs repeatedly.
 
-Models:
-
-- `stg_osm__amenities`
-- `fct_amenity_access`
-- `rpt_area_lifestyle`
+Implemented paths: `scripts/prepare_amenity_access.py`,
+`scripts/load_amenities.py`, `stg_amenities__area`, and
+`rpt_area_profile_mvp`.
 
 ## Data Model Notes
 
-Core dimensions:
+The implemented decision path is:
 
-- `dim_date`
-- `dim_area`
-- `dim_postcode_geography`
-- `dim_source`
-- `dim_transport_node`
+```text
+stg_landreg__transactions ─┐
+stg_geo__postcodes ────────┤
+stg_epc__certificates ─────┤
+stg_crime__street ─────────┤
+stg_constraints__area ─────┼─> rpt_area_profile_mvp ─> rpt_neighbourhood_score
+stg_amenities__area ───────┤
+ref_ons_rent ──────────────┤
+ref_msoa_population ───────┘
+```
 
-Core facts:
-
-- `fct_sale_market`
-- `fct_rent_market`
-- `fct_epc_certificate`
-- `fct_crime`
-- `fct_planning_constraint`
-- `fct_flood_area_intersection`
-- `fct_commute_sample`
-- `fct_amenity_access`
-- `fct_user_listing`
-
-Decision marts:
-
-- `rpt_area_affordability`
-- `rpt_area_commute`
-- `rpt_area_safety_indicators`
-- `rpt_area_energy_profile`
-- `rpt_area_flood_planning_profile`
-- `rpt_area_market_context`
-- `rpt_neighbourhood_score`
-- `rpt_tradeoff_explanations`
+The core spine is `dim_postcode_geography` plus `dim_area`; Land Registry
+transactions also feed the established core/analytics marts. There are no
+transport-node, commute, user-listing, or separate safety-verdict marts.
 
 ## Minimum Data Quality Tests
 
@@ -283,19 +261,14 @@ For scoring:
 - All component scores are within 0 to 100.
 - Final scores are within 0 to 100.
 - Scores have explanation text.
-- Scores have source coverage/confidence fields.
-- Missing data lowers confidence rather than silently becoming zero.
+- Scores have source coverage and evidence-quality fields.
+- Missing or unsupported data lowers evidence quality rather than silently becoming zero.
 
-## MVP Source Order
+## Current preparation paths
 
-1. Geography lookup.
-2. ONS rent data.
-3. Existing Land Registry sale-price data.
-4. EPC data.
-5. Police API.
-6. Planning/flood constraints.
-7. Transport/commute.
-8. OSM amenities.
-9. User-entered listing comparison.
-
-This order gets to a useful renter/mover decision MVP without depending on live rental listing scraping.
+The real-source build prepares geography, ONS rent, Land Registry, EPC, police
+records, ONS MSOA population, planning/flood geometry, and OpenStreetMap
+amenities with the `scripts/prepare_*` / `scripts/load_*` commands documented in
+the root README. Fixture CI selects the committed source seeds. A one-off user
+listing comparison is an API calculation over these area facts, not a tenth
+ingested source.

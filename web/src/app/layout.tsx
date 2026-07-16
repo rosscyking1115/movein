@@ -14,17 +14,17 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "MoveIn — every score, shown next to the fact behind it",
-    template: "%s · MoveIn",
+    default: "England & Wales Housing Decision Support — evidence beside every score",
+    template: "%s · England & Wales Housing Decision Support",
   },
   description:
-    "MoveIn reads an England & Wales neighbourhood from official open data and lays it out like a surveyor's schedule — five indicators, each beside the figure it came from. Indicators, not verdicts.",
-  openGraph: { type: "website", siteName: "MoveIn", locale: "en_GB" },
+    "England and Wales neighbourhood decision support from official open data, with each indicator shown beside the fact behind it. Indicators, not verdicts.",
+  openGraph: { type: "website", siteName: "England & Wales Housing Decision Support", locale: "en_GB" },
   robots: { index: true, follow: true },
 };
 
 // Apply the persisted theme before paint to avoid a flash of the wrong theme.
-const themeScript = `(function(){try{var t=localStorage.getItem('movein-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+const themeScript = `(function(){try{var k='ew-housing-decision-support-theme',t=localStorage.getItem(k);if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

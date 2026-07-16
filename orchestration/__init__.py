@@ -1,4 +1,4 @@
-"""Dagster orchestration for the MoveIn analytics pipeline.
+"""Dagster orchestration for the housing decision-support analytics pipeline.
 
 Models the monthly Land Registry refresh as an asset graph:
 

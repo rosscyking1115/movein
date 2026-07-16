@@ -1,0 +1,4 @@
+case_name,area_id,score,expected_position
+equal scores use area id ascending,W02000002,50.0,3
+equal scores use area id ascending,E02000002,50.0,2
+equal scores use area id ascending,E02000001,50.0,1

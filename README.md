@@ -1,15 +1,15 @@
-# MoveIn
+# England & Wales Housing Decision Support
 
 **A tested dbt + DuckDB pipeline that turns
-seven official UK open-data sources into explainable, documented neighbourhood
-indicators — with published lineage, 197 data tests + 2 dbt unit tests, and a
+nine authoritative/open-data sources into explainable, documented neighbourhood
+indicators — with published lineage, 222 data tests + 2 dbt unit tests, and a
 reproducible fixture-to-full build.**
 
 The engine rolls fragmented public housing data up to a consistent MSOA grain
 (7,264 England & Wales neighbourhoods) and derives five transparent 0–100
-indicators — affordability, safety, energy, flood resilience, convenience — each
-kept **beside the raw figure it came from**, with per-area confidence driven by
-data coverage. Missing data lowers confidence; it never silently becomes a zero.
+indicators — affordability, recorded crime, energy, flood resilience, convenience — each
+kept **beside the raw figure it came from**, with per-area evidence quality driven by
+coverage, provenance and source grain. Missing data lowers evidence quality; it never silently becomes a zero.
 The "where to live" framing is the *vehicle* — the substance is the **pipeline,
 the dimensional + decision modelling, the tests, and the explainability layer**.
 
@@ -17,13 +17,14 @@ the dimensional + decision modelling, the tests, and the explainability layer**.
 > area-data space is already well served (CrystalRoof, Plumplot, PostcodeCheck, …).
 > It's an end-to-end data stack built over official open data.
 >
-> **MoveIn** is the web app; `uk-housing-decision-support` is the repository (the
-> analytics-engineering project behind it).
+> The website and repository now share one descriptive identity: **England &
+> Wales Housing Decision Support**. The repository slug remains
+> `uk-housing-decision-support`.
 
 [![CI](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rosscyking1115/uk-housing-decision-support/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-informational.svg)](LICENSE)
 
-![MoveIn homepage — every 0–100 score shown beside the raw figure behind it (rent, crime rate, EPC), laid out like a surveyor's trade-off receipt](.github/assets/hero.png)
+![England & Wales Housing Decision Support homepage — every 0–100 score shown beside the raw figure behind it, laid out like a surveyor's trade-off receipt](.github/assets/hero.png)
 
 > One of three UK open-data builds on my profile — siblings
 > [tfl-data-engineering](https://github.com/rosscyking1115/tfl-data-engineering)
@@ -36,7 +37,7 @@ the dimensional + decision modelling, the tests, and the explainability layer**.
 
 | Surface | URL |
 |---|---|
-| 🌐 **MoveIn website** (Next.js / Vercel) | https://uk-housing-decision-support.vercel.app |
+| 🌐 **Housing decision-support website** (Next.js / Vercel) | https://uk-housing-decision-support.vercel.app |
 | ⚙️ **API** (FastAPI / Fly.io) — OpenAPI docs | https://uk-housing-decision-support-api.fly.dev/docs |
 | 📊 **dbt docs** (lineage + column catalogue) | https://rosscyking1115.github.io/uk-housing-decision-support/ |
 
@@ -49,17 +50,17 @@ frontend-agnostic and genuinely consumable — they are not the point.
 
 ```text
   dbt + DuckDB engine  ──►  data/decision.duckdb  ──►  API (FastAPI, api/)
-  (7 open-data sources)        (slim extract)            │  /v1 + OpenAPI
+  (9 source families)          (slim extract)            │  /v2 + OpenAPI
                                                          │
                                                   Website (web/, Next.js)
                                                   — a thin demo client
 ```
 
-The transformation lives in exactly one place: the scoring logic in
-[`api/scoring.py`](api/scoring.py) mirrors the warehouse mart
-(`rpt_neighbourhood_score`), so no business logic is reimplemented per client.
-(A Streamlit MVP and an Expo mobile client were also built and are now parked —
-see the roadmap.)
+The transformation is specified by a versioned machine-readable contract and
+golden cases under [`contracts/`](contracts/). The dbt mart, API reweighting and
+TypeScript reweighting are kept in parity by tests.
+(A Streamlit MVP and an Expo mobile client were also built and are now parked;
+the maintenance policy closes the feature roadmap.)
 
 ## Repository layout
 
@@ -69,11 +70,16 @@ see the roadmap.)
 | `seeds/`, `macros/`, `analyses/` | dbt seeds (fixtures + name lookups), reusable macros (`haversine_km`, `median_anchored`), ad-hoc analyses. |
 | `scripts/` | Data prep/load scripts for the real (non-fixture) sources. |
 | `orchestration/` | **Dagster asset graph** over the monthly refresh: ingestion (+ a pre-dbt data-quality gate) → dbt → decision extract. |
-| `tests/` | 197 dbt data tests + 2 dbt unit tests + the API test suite (`tests/test_api.py`). |
+| `tests/` | 222 dbt data tests + 2 dbt unit tests + Python/API regression suites. |
 | `api/` | **FastAPI service** over the decision marts (resolve / search / listing-check / areas index / meta). `Dockerfile` + `fly.toml`. |
-| `web/` | **MoveIn website** — Next.js. Search, compare, listing checker, and ~7k programmatic area/town/region/rent pages. See [`web/README.md`](web/README.md) and [`web/DESIGN_BRIEF.md`](web/DESIGN_BRIEF.md). |
+| `web/` | **Housing decision-support website** — Next.js. Search, compare, listing checker, and ~7k programmatic area/town/region/rent pages. See [`web/README.md`](web/README.md) and [`web/DESIGN_BRIEF.md`](web/DESIGN_BRIEF.md). |
 | `data/` | Local DuckDB warehouse + the committed `decision.duckdb` extract the API ships. |
 | `DEPLOY.md` | Runbook for deploying the API (Fly.io) and website (Vercel). |
+
+The website's search map uses MapLibre GL JS with the keyless OpenFreeMap tile
+service, so it has no usage-based map API bill. The provider is free and
+open-source but offers no availability SLA; all search results remain usable as
+an ordinary list if map tiles are unavailable.
 
 Two reference docs at the repo root carry the modelling detail:
 [`HOUSING_AREA_PROFILE_CONTRACT.md`](HOUSING_AREA_PROFILE_CONTRACT.md) (the
@@ -86,7 +92,7 @@ per-area output contract) and
 A complete, tested analytics-engineering pipeline is the project's credibility:
 sources → staging → intermediate → marts (dimensions / facts / reporting), tested
 at every layer, with lineage and column-level docs published to GitHub Pages on
-every push. Seven official open-data sources are rolled up to MSOA grain.
+every push. Nine authoritative/open-data source families support the output.
 
 | Signal | Coverage | Notes |
 |---|---|---|
@@ -95,15 +101,17 @@ every push. Seven official open-data sources are rolled up to MSOA grain.
 | Rent + affordability (ONS PIPR) | 100% of MSOAs | Local-authority rent incl. **per-bedroom** (1/2/3/4+). |
 | Energy (EPC) | 100% (23.5M certificates) | Per-area median EPC band. |
 | Crime (Police API) | 99.6% (17.1M crimes) | Approx. monthly rate per 1,000 — indicator only. |
-| Flood + planning (planning.data.gov.uk) | 100% | Spatial point-in-polygon; flood band + constraint count. |
+| Population (ONS mid-year estimates) | 7,264 MSOA 2021 areas | Compatible mid-2024 denominator for the monthly crime rate. |
+| Planning constraints (Planning Data Platform) | England only | Wales is explicitly not covered; no favourable zero default. |
+| Flood (Environment Agency zones via Planning Data Platform) | England only | Share of postcodes intersecting a zone; Wales is explicitly not covered. |
 | Convenience (OpenStreetMap) | 100% (437k amenities) | Nearest supermarket/school/GP/park/station + walkable count. |
 
 Each external source is **fixture-default for fast, reproducible CI**, with a
 real-data toggle (`--vars '<source>: …'`) for production builds. Explainable
 scoring (`rpt_neighbourhood_score`) turns these into five 0–100 component scores,
-a weighted overall, per-area confidence from coverage, and a "why this area" line.
-Door-to-door commute *time* is the one remaining planned signal (station proximity
-is already covered).
+a weighted overall, per-area evidence quality, and a "why this area" line.
+Potential additions such as door-to-door commute time are deliberately outside
+the active maintenance scope; station proximity remains the published transport indicator.
 
 Geography, the source toggles, and the full per-source prep commands are detailed
 in [`HOUSING_DECISION_SUPPORT_DATA_SOURCES.md`](HOUSING_DECISION_SUPPORT_DATA_SOURCES.md)
@@ -126,13 +134,13 @@ implemented in [`rpt_neighbourhood_score`](models/marts/decision/rpt_neighbourho
    configurable via dbt `vars`; a client can re-weight from the stored component
    scores without recomputing the marts.
 3. **Missing indicators are dropped, never zeroed** — an absent signal lowers the
-   area's `confidence_level` (`high`/`medium`/`low` from coverage) instead of
+   area's evidence-quality level (`strong`/`mixed`/`limited`) instead of
    silently penalising it.
 4. **Every score ships beside its raw figure** (rent, crime rate, EPC band) and a
    generated `why_this_area` sentence, so the output is auditable.
 
 Because it's one SQL transformation, the logic is covered by the same data tests
-as everything else (score bounds 0–100, coherence, coverage-vs-confidence).
+as everything else (score bounds 0–100, coherence, and coverage/evidence rules).
 
 ## Orchestration (Dagster)
 
@@ -190,7 +198,7 @@ mkdir -p ~/.dbt && cp profiles.yml.example ~/.dbt/profiles.yml   # one-time
 python scripts/download_raw.py     # --sample for a faster 2-year run
 python scripts/load_to_duckdb.py
 dbt seed
-dbt build                          # full warehouse + 197 data tests, < 5 min on a laptop
+dbt build --threads 1              # full warehouse + 222 data tests, < 5 min on a laptop
 ```
 
 ### 2. The API
@@ -199,7 +207,7 @@ dbt build                          # full warehouse + 197 data tests, < 5 min on
 .venv/Scripts/python -m uvicorn api.main:app --reload   # http://127.0.0.1:8000/docs
 ```
 
-### 3. The MoveIn website
+### 3. The housing decision-support website
 
 ```bash
 cd web
@@ -213,19 +221,19 @@ deploying both services is covered in [`DEPLOY.md`](DEPLOY.md).
 ## Testing & CI
 
 `ci.yml` runs on every PR and gates `main` via branch protection: Python unit tests
-(incl. the API suite), `dbt build` with **197 data tests + 2 unit tests**,
-source-freshness, and sqlfluff lint.
+(incl. the API suite), `dbt build --threads 1` with **222 data tests + 2 unit tests**,
+source-freshness, sqlfluff, and the web lint/test/build checks.
 
 | Layer | Count | What it catches |
 |---|---|---|
 | Source freshness | 1 | Stale upstream data (warn if nothing newer than 35 days). |
-| Built-in row-shape | 145 | Schema bugs, FK orphans, enum drift, contract violations. |
+| Built-in row-shape | 146 | Schema bugs, FK orphans, enum drift, contract violations. |
 | `dbt-utils` | 21 | Sign/range invariants, multi-column uniqueness, score bounds. |
 | `dbt-expectations` | 14 | Type-cast bugs, statistical drift, format regressions. |
-| Singular (`tests/assert_*.sql`) | 17 | Domain anomalies, coverage and coherence guards. |
-| **dbt data-test total** | **197** | All passing on every `dbt build`. |
+| Singular (`tests/assert_*.sql`) | 20 | Domain anomalies, coverage, coherence, and cross-runtime golden cases. |
+| **dbt data-test total** | **222** | All passing on every `dbt build`. |
 | dbt **unit** tests | 2 | Model *logic* on mock inputs: enrichment (postcode parse + region join + filter) and the scoring maths (median-anchored min-max, geometric-mean floor, missing-component rule). |
-| API (`tests/test_api.py`) | 8 | Endpoint contract, search re-rank, coverage 404/422, mocked postcodes.io. |
+| API (`tests/test_api.py`) | 14 | Versioned OpenAPI contract, neutral comparison fields, search validation/re-rank, missing-data and jurisdiction coverage, mocked postcodes.io. |
 
 ## Modelling & scoring principles
 
@@ -235,28 +243,15 @@ source-freshness, and sqlfluff lint.
   official exception.
 - Official and open data first; no portal scraping. Listing comparison is user-entered.
 - Area-level guidance over individual-property claims unless the source supports it.
-- Missing data lowers confidence — it never silently becomes a zero.
+- Missing data lowers evidence quality — it never silently becomes a zero.
 
-## Roadmap
+## Maintenance status
 
-The roadmap is about **engineering depth, not product
-surface.** Built and stable: the dbt + DuckDB engine (this repo), a FastAPI
-service ([`api/`](api/)), and a Next.js site ([`web/`](web/)) as a thin client. A
-Streamlit MVP and an Expo mobile client were also built and are **parked** — the
-clients aren't the point.
-
-Analytics-engineering improvements planned (deepening the modelling):
-
-- **Decompose the decision marts** into an `int_area__*` intermediate layer —
-  `rpt_area_profile_mvp` and `rpt_neighbourhood_score` currently carry the joins +
-  scoring inline; splitting them improves testability and lineage granularity.
-- **Model contracts** (`contract: enforced`) on the decision marts — they are the
-  API's schema of record.
-- **Incremental materialisation** for `fct_transactions` over the ~5M Land
-  Registry rows.
-- A **snapshot** (SCD-2) of ONS rent across data vintages.
-- Door-to-door **commute time** as an additional indicator (station proximity is
-  already covered).
+The project is complete as a portfolio reference implementation and has no active
+feature roadmap. Maintenance is limited to source breakages, security and
+dependency updates, correctness defects, and documentation that keeps published
+claims aligned with the implementation. The Streamlit MVP and Expo mobile client
+remain parked. See [`MAINTENANCE.md`](MAINTENANCE.md) for the acceptance policy.
 
 ## Source attribution
 
@@ -271,7 +266,9 @@ commands are catalogued in
 - [ONS Price Index of Private Rents](https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics) — local-authority rent (incl. per bedroom). Values may be provisional and revised.
 - [Energy Performance Certificates](https://get-energy-performance-data.communities.gov.uk/) — per-area median EPC band (23.5M certificates). Certificates may be expired or superseded.
 - [Police street-level crime](https://data.police.uk/data/) — approximate monthly crime rate per 1,000 (LSOA→MSOA), as an indicator only.
-- [Planning Data Platform](https://www.planning.data.gov.uk/) — per-MSOA planning-constraint count and flood-risk band, via spatial point-in-polygon.
+- [ONS mid-year population estimates](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates) — compatible mid-2024 MSOA population denominator for the recorded-crime rate.
+- [Planning Data Platform](https://www.planning.data.gov.uk/) — per-MSOA planning-constraint count via spatial point-in-polygon.
+- [Environment Agency flood-risk zones](https://environment.data.gov.uk/) — per-MSOA flood-risk band from postcode intersections, distributed through the Planning Data Platform.
 - [OpenStreetMap](https://www.openstreetmap.org/) (via [Geofabrik](https://download.geofabrik.de/)) — nearest-amenity + walkable count. © OpenStreetMap contributors, Open Database Licence.
 
 ## License

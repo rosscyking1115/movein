@@ -15,8 +15,8 @@ const SCORE_ROWS: ScoreRow[] = [
 ];
 
 const FACT_ROWS: FactRow[] = [
-  { label: "Typical rent", value: (a) => rentPerMonth(a.official_rent_monthly_gbp) },
-  { label: "2-bed rent", value: (a) => rentPerMonth(a.rent_2bed_gbp) },
+  { label: "Official local-authority rent", value: (a) => rentPerMonth(a.official_rent_monthly_gbp) },
+  { label: "Official local-authority 2-bed rent", value: (a) => rentPerMonth(a.rent_2bed_gbp) },
   { label: "Median sale price", value: (a) => gbp(a.median_sale_price_gbp) },
   { label: "Median EPC", value: (a) => ratingOrDash(a.epc_median_rating) },
   { label: "Crime / 1,000", value: (a) => rate(a.crime_rate_per_1000) },

@@ -1,4 +1,4 @@
-// Server-side client for the Phase 1 FastAPI service (api/).
+// Server-side client for the public FastAPI v2 service (api/).
 // The website is a pure HTTP client of the API — no direct DuckDB access.
 // Client components never import this; they call the same-origin BFF routes
 // under /api/* which proxy here (hides the API origin, sidesteps CORS).
@@ -61,12 +61,12 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const getMeta = cache((): Promise<Meta> => getJson<Meta>("/v1/meta"));
+export const getMeta = cache((): Promise<Meta> => getJson<Meta>("/v2/meta"));
 
 // Deduped per-request so a page + its generateMetadata share one fetch.
 export const getArea = cache(
   (msoa: string): Promise<Area> =>
-    getJson<Area>(`/v1/areas/${encodeURIComponent(msoa)}`),
+    getJson<Area>(`/v2/areas/${encodeURIComponent(msoa)}`),
 );
 
 /** getArea, but a clean null for unknown codes instead of throwing. */
@@ -81,26 +81,26 @@ export async function getAreaOrNull(msoa: string): Promise<Area | null> {
 
 // The whole dataset in one cacheable GET, for the hubs / sitemap / link mesh.
 // React.cache dedupes within a render; the fetch's daily revalidate shares it
-// across renders. (Was 37 POSTs against /v1/search before /v1/areas/index.)
+// across renders. (Was 37 POSTs against /v1/search before the index endpoint.)
 export const getAllAreas = cache(
-  async (): Promise<Area[]> => (await getJson<AreaIndexResponse>("/v1/areas/index")).areas,
+  async (): Promise<Area[]> => (await getJson<AreaIndexResponse>("/v2/areas/index")).areas,
 );
 
 export function resolvePostcode(postcode: string): Promise<ResolveResponse> {
   return getJson<ResolveResponse>(
-    `/v1/areas/resolve?postcode=${encodeURIComponent(postcode)}`,
+    `/v2/areas/resolve?postcode=${encodeURIComponent(postcode)}`,
     0, // resolve is user-driven; don't cache stale postcode lookups
   );
 }
 
 export function search(req: SearchRequest): Promise<SearchResponse> {
-  return postJson<SearchResponse>("/v1/search", req);
+  return postJson<SearchResponse>("/v2/search", req);
 }
 
 export function listingCheck(
   req: ListingCheckRequest,
 ): Promise<ListingCheckResponse> {
-  return postJson<ListingCheckResponse>("/v1/listing-check", req);
+  return postJson<ListingCheckResponse>("/v2/listing-check", req);
 }
 
 export { ApiError };

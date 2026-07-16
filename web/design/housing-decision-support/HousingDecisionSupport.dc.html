@@ -24,14 +24,14 @@
 
   <header style="position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--rule);">
     <div style="max-width:1140px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;gap:28px;">
-      <button onClick="{{ goHome }}" aria-label="MoveIn home" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:6px 0;">
+      <button onClick="{{ goHome }}" aria-label="England and Wales Housing Decision Support home" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:6px 0;">
         <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true" style="display:block;">
           <path d="M4 27 L24 11 L44 27" fill="none" stroke="var(--ink)" stroke-width="4.2" stroke-linejoin="miter"/>
           <line x1="9" y1="27" x2="9" y2="41" stroke="var(--ink)" stroke-width="4.2"/>
           <line x1="39" y1="27" x2="39" y2="41" stroke="var(--ink)" stroke-width="4.2"/>
           <line x1="7" y1="41.5" x2="41" y2="41.5" stroke="var(--accent)" stroke-width="4"/>
         </svg>
-        <span style="font-family:var(--display);font-weight:var(--display-wt);font-size:25px;letter-spacing:.2px;color:var(--ink);line-height:1;">MoveIn</span>
+        <span style="font-family:var(--display);font-weight:var(--display-wt);font-size:18px;letter-spacing:.2px;color:var(--ink);line-height:1;">England &amp; Wales Housing Decision Support</span>
       </button>
       <nav style="display:flex;gap:2px;flex-wrap:wrap;margin-left:4px;">
         <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
@@ -50,7 +50,7 @@
       <div style="padding:74px 0 26px;max-width:780px;">
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:22px;">Official open data · England &amp; Wales</div>
         <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(40px,6.6vw,74px);line-height:1.02;letter-spacing:-.01em;color:var(--ink);margin:0 0 22px;">Every score, shown next&nbsp;to the fact behind&nbsp;it.</h1>
-        <p style="font-size:19px;line-height:1.6;color:var(--ink2);max-width:600px;margin:0 0 34px;">MoveIn reads a neighbourhood from official open data and lays it out like a surveyor's schedule — five indicators, each beside the figure it came from. We show you the evidence; we never tell you a place is &ldquo;good&rdquo; or &ldquo;safe.&rdquo;</p>
+        <p style="font-size:19px;line-height:1.6;color:var(--ink2);max-width:600px;margin:0 0 34px;">England &amp; Wales Housing Decision Support reads a neighbourhood from official open data and lays it out like a surveyor's schedule — five indicators, each beside the figure it came from. We show you the evidence; we never tell you a place is &ldquo;good&rdquo; or &ldquo;safe.&rdquo;</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;max-width:520px;">
           <div style="flex:1;min-width:230px;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--rule2);border-radius:10px;padding:6px 6px 6px 16px;">
             <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);">Postcode</span>
@@ -282,7 +282,7 @@
         </div>
         <div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;">Browse</div>
-          <button onClick="{{ goRankings }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">Best areas in {{ area.region }} →</button>
+          <button onClick="{{ goRankings }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">Indicator rankings in {{ area.region }} →</button>
           <button onClick="{{ area.rentLink }}" style="display:block;background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:5px 0;text-align:left;font-family:'IBM Plex Sans';">Rent in {{ area.town }} by bedroom →</button>
         </div>
         <div>
@@ -423,7 +423,7 @@
     <sc-if value="{{ isCheck }}" hint-placeholder-val="{{ true }}">
     <section key="{{ routeKey }}" style="padding:34px 0 70px;">
       <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,4.6vw,52px);line-height:1.05;color:var(--ink);margin:0 0 8px;">Does this listing's price stack up?</h1>
-      <p style="font-size:17px;color:var(--ink2);max-width:640px;margin:0 0 28px;">An area-level sanity check — how an asking price sits against what's typical locally. Asking price isn't achieved price; treat this as a prompt to look closer, not a valuation.</p>
+      <p style="font-size:17px;color:var(--ink2);max-width:640px;margin:0 0 28px;">An area-level sanity check — how an asking price sits against a named official comparison figure. Asking price isn't achieved price; treat this as a prompt to look closer, not a valuation.</p>
 
       <div style="display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:26px;align-items:start;">
         <div style="background:var(--card);border:1px solid var(--rule2);border-radius:16px;padding:22px;">
@@ -459,7 +459,7 @@
                 <div style="font-size:15px;color:var(--ink2);max-width:380px;line-height:1.5;">{{ band.note }}</div>
               </div>
               <div style="text-align:right;">
-                <div style="font-size:12px;color:var(--muted);">Local typical</div>
+                <div style="font-size:12px;color:var(--muted);">Comparison figure</div>
                 <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;color:var(--ink);">{{ band.typicalText }}</div>
               </div>
             </div>
@@ -467,7 +467,7 @@
             <div style="position:relative;height:46px;margin:8px 0 6px;">
               <div style="position:absolute;top:18px;left:0;right:0;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--card2),var(--bar-track));border:1px solid var(--rule);"></div>
               <div style="position:absolute;top:14px;left:50%;width:2px;height:16px;background:var(--rule2);transform:translateX(-50%);"></div>
-              <div style="position:absolute;top:34px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">typical</div>
+              <div style="position:absolute;top:34px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">comparison</div>
               <div style="position:absolute;top:8px;left:{{ band.markerLeft }};transform:translateX(-50%);transition:left .5s cubic-bezier(.22,.61,.36,1);">
                 <div style="width:3px;height:28px;background:{{ band.accent }};border-radius:2px;margin:0 auto;"></div>
               </div>
@@ -540,7 +540,7 @@
     <section key="{{ routeKey }}" style="padding:34px 0 70px;max-width:780px;">
       <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;">Methodology</div>
       <h1 style="font-family:var(--display);font-weight:var(--display-wt);font-size:clamp(34px,5vw,56px);line-height:1.04;color:var(--ink);margin:0 0 18px;">How we read a neighbourhood — and what we refuse to do.</h1>
-      <p style="font-size:18px;line-height:1.6;color:var(--ink2);margin:0 0 40px;">MoveIn turns official open data into five 0–100 indicators. Every indicator sits beside the raw figure it came from, so you can audit it. We don't blend the figures into a judgement of whether a place is &ldquo;good.&rdquo;</p>
+      <p style="font-size:18px;line-height:1.6;color:var(--ink2);margin:0 0 40px;">England &amp; Wales Housing Decision Support turns official open data into up to five 0–100 indicators. Every indicator sits beside the raw figure it came from, so you can audit it. We don't blend the figures into a judgement of whether a place is &ldquo;good.&rdquo;</p>
 
       <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">The five indicators</div>
       <sc-for list="{{ methodIndicators }}" as="m" hint-placeholder-count="5">
@@ -585,9 +585,9 @@
         <div style="max-width:420px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
             <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true" style="display:block;"><path d="M4 27 L24 11 L44 27" fill="none" stroke="var(--ink)" stroke-width="4.2" stroke-linejoin="miter"/><line x1="9" y1="27" x2="9" y2="41" stroke="var(--ink)" stroke-width="4.2"/><line x1="39" y1="27" x2="39" y2="41" stroke="var(--ink)" stroke-width="4.2"/><line x1="7" y1="41.5" x2="41" y2="41.5" stroke="var(--accent)" stroke-width="4"/></svg>
-            <span style="font-family:var(--display);font-weight:var(--display-wt);font-size:21px;color:var(--ink);">MoveIn</span>
+            <span style="font-family:var(--display);font-weight:var(--display-wt);font-size:18px;color:var(--ink);">England &amp; Wales Housing Decision Support</span>
           </div>
-          <p style="font-size:13.5px;line-height:1.6;color:var(--ink2);margin:0;">MoveIn shows official open data as indicators, never verdicts. Every figure links to its source. Area-level only — this is not a property valuation.</p>
+          <p style="font-size:13.5px;line-height:1.6;color:var(--ink2);margin:0;">England &amp; Wales Housing Decision Support shows official open data as indicators, never verdicts. Every figure links to its source. Area-level only — this is not a property valuation.</p>
         </div>
         <div style="display:flex;gap:48px;flex-wrap:wrap;">
           <div>
@@ -673,7 +673,7 @@ class Component extends DCLogic {
   get IND(){
     return [
       {key:'affordability', name:'Affordability', short:'Aff', measure:'Median rents & sale prices', source:'ONS Private Rents & HM Land Registry, 2024',
-        high:p=>`More affordable than ${p}% of areas in England & Wales`, low:'pricier than most areas in England & Wales', factLabel:'Typical 2-bed rent'},
+        high:p=>`More affordable than ${p}% of areas in England & Wales`, low:'pricier than most areas in England & Wales', factLabel:'Official local-authority 2-bed rent'},
       {key:'safety', name:'Recorded crime', short:'Crime', measure:'Police recorded crime rate', source:'Police.uk / Home Office, 2024',
         high:p=>`Lower recorded crime than ${p}% of areas in England & Wales`, low:'higher recorded crime than most areas', factLabel:'Recorded crime rate'},
       {key:'energy', name:'Home energy', short:'Energy', measure:'Median EPC rating', source:'EPC Register (DLUHC), 2024',
@@ -878,7 +878,7 @@ class Component extends DCLogic {
       return {label:i.name, cells:cAreas.map(a=>{const v=a.s[i.key]; const lead=v!=null&&v===max; return {text:v==null?'—':String(v), w:(v||0)+'%', weight:lead?'700':'400', color:lead?'var(--ink)':'var(--ink2)'};})};
     });
     const compareFactRows=[
-      {label:'Typical 2-bed rent', get:a=>this.mo(a.f.r2)},
+      {label:'Official local-authority 2-bed rent', get:a=>this.mo(a.f.r2)},
       {label:'Median sale price', get:a=>this.gbp(a.f.sale)},
       {label:'Median EPC', get:a=>a.f.epc},
       {label:'Recorded crime /1,000', get:a=>String(a.f.crime)},
@@ -895,16 +895,16 @@ class Component extends DCLogic {
     let band;
     const bandColor={info:'var(--rule2)',caution:'var(--caution)'};
     if(!askingNum){
-      band={headline:'Enter an asking price', note:'We’ll show how it compares to what’s typical for this area, bedroom count and deal type.', typicalText:ck.deal==='rent'?this.mo(typical):this.gbp(typical), askingText:'—', markerLeft:'50%', accent:'var(--muted)', borderColor:'var(--rule2)'};
+      band={headline:'Enter an asking price', note:'We’ll compare it with the named official area-level figure for this bedroom count and deal type.', typicalText:ck.deal==='rent'?this.mo(typical):this.gbp(typical), askingText:'—', markerLeft:'50%', accent:'var(--muted)', borderColor:'var(--rule2)'};
     } else {
       const ratio=askingNum/typical;
       const left=Math.max(4,Math.min(96, 50 + (ratio-1)*220 ))+'%';
       let headline,note,accent='var(--accent)',border='var(--rule2)';
-      if(ratio<0.85){headline='Well below local typical';note='Notably cheaper than the local norm. Worth asking why — condition, lease, or it may simply be keenly priced.';}
-      else if(ratio<0.95){headline='Below local typical';note='A little under the local norm for this size and deal.';}
-      else if(ratio<=1.08){headline='Around local typical';note='In line with what’s typical locally for this size and deal.';}
-      else if(ratio<=1.2){headline='Above local typical';note='A little over the local norm — check what justifies it before you commit.';}
-      else {headline='Well above local typical';note='Markedly higher than the local norm. Treat as a prompt to look closer — asking price isn’t achieved price.';accent='var(--caution)';border='var(--caution)';}
+      if(ratio<0.85){headline='Well below the comparison figure';note='Notably below the named figure. Worth asking why — condition, lease, or it may simply be keenly priced.';}
+      else if(ratio<0.95){headline='Below the comparison figure';note='A little below the named figure for this size and deal.';}
+      else if(ratio<=1.08){headline='Around the comparison figure';note='In line with the named figure for this size and deal.';}
+      else if(ratio<=1.2){headline='Above the comparison figure';note='A little above the named figure — check what justifies it before you commit.';}
+      else {headline='Well above the comparison figure';note='Markedly above the named figure. Treat as a prompt to look closer — asking price isn’t achieved price.';accent='var(--caution)';border='var(--caution)';}
       band={headline, note, typicalText:ck.deal==='rent'?this.mo(typical):this.gbp(typical), askingText:ck.deal==='rent'?this.mo(askingNum):this.gbp(askingNum), markerLeft:left, accent, borderColor:border};
     }
     const checkVM={

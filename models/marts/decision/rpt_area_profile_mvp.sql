@@ -39,6 +39,7 @@ select
     end as median_sale_price_confidence,
     rent.rent_monthly_gbp as official_rent_monthly_gbp,
     rent.rent_grain as rent_source_grain,
+    rent.rent_period as rent_reference_date,
     round(
         rent.rent_monthly_gbp / {{ var('default_monthly_net_income_gbp') }}, 3
     ) as affordability_ratio,
@@ -57,15 +58,25 @@ select
     end as epc_median_rating,
     area_energy.epc_certificate_count,
     round(
-        (area_crime.crime_record_count / area_crime.crime_months_observed)
-        / {{ var('nominal_msoa_population') }} * 1000,
+        (area_crime.crime_record_count / nullif(area_crime.crime_months_observed, 0))
+        / nullif(pop.population, 0) * 1000,
         2
     ) as crime_rate_per_1000,
     area_crime.crime_record_count,
-    coalesce(cons.flood_risk_flag, 'unknown') as flood_risk_flag,
+    area_crime.crime_months_observed,
+    area_crime.crime_period_start,
+    area_crime.crime_period_end,
+    pop.population as crime_population_denominator,
+    pop.population_reference_date as crime_population_reference_date,
+    pop.geography_version as crime_population_geography,
+    pop.source_name as crime_population_source_name,
+    cons.flood_risk_flag,
     cons.flood_postcode_pct,
-    coalesce(cons.planning_constraint_count, 0)
-        as planning_constraint_count,
+    coalesce(cons.flood_source_status, 'source_missing') as flood_source_status,
+    cons.flood_source_name,
+    cons.planning_constraint_count,
+    coalesce(cons.planning_source_status, 'source_missing') as planning_source_status,
+    cons.planning_source_name,
     amenity.nearest_station_km,
     amenity.nearest_supermarket_km,
     amenity.nearest_gp_km,
@@ -77,7 +88,6 @@ select
     near.nearest_city,
     near.distance_to_city_km,
     cast(null as numeric) as commute_minutes_sample,
-    'low' as confidence_level,
     concat(
         'Loaded: Land Registry sales',
         case when rent.rent_monthly_gbp is not null then ', ONS rent' else '' end,
@@ -101,14 +111,14 @@ select
                 then ', amenity access'
             else ''
         end,
-        '. Not yet loaded: door-to-door commute time.'
-    ) as confidence_notes,
+        '. Door-to-door commute time is not included.'
+    ) as source_coverage_notes,
     case
         when coalesce(latest_market.sales_count_latest_year, 0) = 0
             then concat(
                 area.area_name,
-                ' is present in the geography lookup fixture, ',
-                'but has no matched latest-year sale context yet.'
+                ' is present in the geography lookup and has no matched ',
+                'latest-year sale context.'
             )
         when
             latest_market.sales_count_latest_year
@@ -119,8 +129,8 @@ select
                 latest_market.sales_count_latest_year,
                 ' matched ',
                 {{ var('landreg_end_year') }},
-                ' sales, so its median is indicative only; ',
-                'recommendation scoring is not active yet.'
+                ' sales, so its area-level median is indicative context ',
+                'rather than a property valuation.'
             )
         else concat(
             area.area_name,
@@ -128,8 +138,8 @@ select
             latest_market.sales_count_latest_year,
             ' matched ',
             {{ var('landreg_end_year') }},
-            ' sales of Land Registry context, ',
-            'but recommendation scoring is not active yet.'
+            ' sales of Land Registry context. ',
+            'This is area-level context rather than a property valuation.'
         )
     end as why_this_area
 from {{ ref('dim_area') }} as area
@@ -141,6 +151,8 @@ left join {{ ref('int_area__energy') }} as area_energy
     on area.area_id = area_energy.area_id
 left join {{ ref('int_area__crime') }} as area_crime
     on area.area_id = area_crime.area_id
+left join {{ ref('ref_msoa_population') }} as pop
+    on area.area_id = pop.area_id
 left join {{ ref('stg_constraints__area') }} as cons
     on area.area_id = cons.area_id
 left join {{ ref('stg_amenities__area') }} as amenity

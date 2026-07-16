@@ -1,10 +1,11 @@
 @import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 /* Enable class-based dark mode (toggled on <html>, persisted to localStorage). */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
-  MoveIn — a surveyor's-schedule identity. Every score sits beside the figure
+  Housing Decision Support — a surveyor's-schedule identity. Every score sits beside the figure
   behind it; scores stay on a NEUTRAL scale (--bar), never red→green. The only
   colours allowed to imply good/bad are the official EPC A–G bands.
   Tokens are raw CSS variables (swapped per theme) so utilities theme-switch.

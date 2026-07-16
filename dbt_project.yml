@@ -51,10 +51,6 @@ vars:
   # 'bulk' uses police street-level crime loaded by scripts/load_crime.py into
   # police.street_crime. Override locally: dbt build --vars 'crime_source: bulk'
   crime_source: 'fixture'
-  # Nominal MSOA resident population for the crime indicator. MSOAs are designed
-  # to be population-consistent (~7,500-8,000), so a fixed denominator gives a
-  # roughly comparable, clearly-approximate monthly crime rate per 1,000.
-  nominal_msoa_population: 7800
   # Planning/flood constraints source. 'fixture' uses the committed
   # ref_area_constraints_sample seed (CI-safe); 'computed' uses the per-MSOA
   # table loaded by scripts/load_constraints.py from the spatial roll-up in
@@ -76,6 +72,10 @@ vars:
   score_weight_energy: 1.0
   score_weight_flood: 1.0
   score_weight_convenience: 1.0
+  # Canonical v2 contract range. validated_score_weight rejects model vars
+  # outside this range at compile time rather than silently accepting them.
+  score_weight_min: 0.0
+  score_weight_max: 5.0
 
 # Default model materialisations by folder.
 # - staging: views (cheap, recompute on every run)

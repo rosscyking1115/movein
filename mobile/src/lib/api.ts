@@ -53,18 +53,18 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const getMeta = (): Promise<Meta> => getJson<Meta>("/v1/meta");
+export const getMeta = (): Promise<Meta> => getJson<Meta>("/v2/meta");
 
 export const getArea = (msoa: string): Promise<Area> =>
-  getJson<Area>(`/v1/areas/${encodeURIComponent(msoa)}`);
+  getJson<Area>(`/v2/areas/${encodeURIComponent(msoa)}`);
 
 export const resolvePostcode = (postcode: string): Promise<ResolveResponse> =>
-  getJson<ResolveResponse>(`/v1/areas/resolve?postcode=${encodeURIComponent(postcode)}`);
+  getJson<ResolveResponse>(`/v2/areas/resolve?postcode=${encodeURIComponent(postcode)}`);
 
 export const search = (req: SearchRequest): Promise<SearchResponse> =>
-  postJson<SearchResponse>("/v1/search", req);
+  postJson<SearchResponse>("/v2/search", req);
 
 export const listingCheck = (
   req: ListingCheckRequest,
 ): Promise<ListingCheckResponse> =>
-  postJson<ListingCheckResponse>("/v1/listing-check", req);
+  postJson<ListingCheckResponse>("/v2/listing-check", req);

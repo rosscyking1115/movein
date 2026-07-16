@@ -9,7 +9,6 @@ import { answerSentence } from "@/lib/summary";
 import { areaJsonLd } from "@/lib/structured-data";
 import {
   buildReceiptRows,
-  confidenceFill,
   factRows as buildFactRows,
   RENT_LABELS,
   SOURCE_NOTES,
@@ -51,7 +50,6 @@ export default async function AreaPage({ params }: Props) {
   if (slug !== canonical) permanentRedirect(`/area/${canonical}`);
 
   const rows = buildReceiptRows(area);
-  const fill = confidenceFill(area.confidence_level);
   const rentRows = RENT_LABELS.map((r) => ({ label: r.label, value: rentPerMonth(area[r.key] as number | null) }));
   const summary = area.why_this_area ?? answerSentence(area);
 
@@ -89,18 +87,17 @@ export default async function AreaPage({ params }: Props) {
               Rank <span className="font-mono text-ink">{area.overall_rank?.toLocaleString("en-GB") ?? "—"}</span> of 7,264
             </div>
           </div>
-          <div className="border-l border-rule2 pl-6">
-            <div className="mb-2 font-mono text-[11px] uppercase tracking-[.12em] text-muted">Confidence</div>
-            <div className="flex h-6 items-end gap-1">
-              {[24, 18, 12].map((h, i) => (
-                <span
-                  key={h}
-                  className="w-[7px] rounded-[2px]"
-                  style={{ height: h, background: i < fill ? "var(--accent)" : "var(--rule2)" }}
-                />
-              ))}
+          <div className="max-w-[270px] border-l border-rule2 pl-6">
+            <div className="mb-2 font-mono text-[11px] uppercase tracking-[.12em] text-muted">Evidence quality</div>
+            <div className="text-[15px] font-semibold capitalize text-ink">
+              {area.evidence_quality_level ?? "limited"}
             </div>
-            <div className="mt-2 text-[13px] capitalize text-ink2">{area.confidence_level ?? "low"}</div>
+            <div className="mt-1 text-[13px] text-ink2">
+              {area.available_component_count ?? 0} of {area.expected_component_count ?? 5} indicators available
+            </div>
+            {area.evidence_quality_notes && (
+              <p className="mt-2 text-xs leading-[1.45] text-muted">{area.evidence_quality_notes}</p>
+            )}
           </div>
         </div>
       </div>
@@ -125,7 +122,7 @@ export default async function AreaPage({ params }: Props) {
         </MeshCol>
         <MeshCol title="Browse">
           {area.region && (
-            <MeshLink href={`/rankings/${regionSlug(area.region)}`}>Best areas in {area.region}</MeshLink>
+            <MeshLink href={`/rankings/${regionSlug(area.region)}`}>Indicator rankings in {area.region}</MeshLink>
           )}
           {area.local_authority_name && (
             <MeshLink href={`/rent/${townSlug(area.local_authority_name)}`}>

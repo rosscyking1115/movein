@@ -14,12 +14,14 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-logger = logging.getLogger("movein.coverage")
+logger = logging.getLogger("housing_decision_support.coverage")
 
 from . import data, postcodes, scoring
 from .models import (
     Area,
     AreaIndexResponse,
+    LegacyListingCheckResponse,
+    LegacyPriceCheck,
     ListingCheckRequest,
     ListingCheckResponse,
     Meta,
@@ -31,12 +33,12 @@ from .models import (
 
 app = FastAPI(
     title="England & Wales Housing Decision Support API",
-    version="1.0.0",
+    version="2.0.0",
     description=(
         "Explainable neighbourhood (MSOA) scores for England & Wales, plus a "
         "postcode resolver and listing price check. Area-level indicators only — "
-        "not a property valuation, never a safe/unsafe label. Scotland and "
-        "Northern Ireland are on the roadmap, not yet covered."
+        "not a property valuation, never a safe/unsafe label. This completed "
+        "reference implementation covers England and Wales only."
     ),
 )
 # CORS allowlist from CORS_ALLOW_ORIGINS (comma-separated). Defaults to "*" for
@@ -56,14 +58,13 @@ def _coverage_guard(location: dict | None) -> dict:
         raise HTTPException(status_code=404, detail="Postcode not found.")
     country = location.get("country")
     if country not in ("England", "Wales"):
-        # Log out-of-coverage lookups (nation only — never the postcode) so demand
-        # for Scotland/NI is visible and can steer what we build next.
+        # Log only the nation, never the submitted postcode.
         logger.info("out_of_coverage_lookup country=%s", country)
         raise HTTPException(
             status_code=422,
             detail=(
-                f"We don't cover {country} yet — MoveIn is England & Wales for now, "
-                "with Scotland and Northern Ireland on the roadmap."
+                f"{country} is outside this service's coverage. "
+                "This reference implementation covers England & Wales only."
             ),
         )
     record = data.get_area(location["msoa_code"])
@@ -82,18 +83,24 @@ def healthz() -> dict:
     return {"status": "ok", "areas": len(data.areas()), "data_vintage": data.data_vintage()}
 
 
-@app.get("/v1/meta", response_model=Meta, tags=["meta"])
+@app.get("/v1/meta", response_model=Meta, include_in_schema=False)
+@app.get("/v2/meta", response_model=Meta, tags=["meta"])
 def meta() -> Meta:
     return Meta(
         areas=len(data.areas()),
         components=scoring.COMPONENTS,
         default_weights=scoring.DEFAULT_WEIGHTS,
         data_vintage=data.data_vintage(),
-        note="England & Wales MSOAs. Component scores are 0-100 percentile ranks; indicators only.",
+        scoring_contract_version=scoring.CONTRACT_VERSION,
+        note=(
+            "England & Wales MSOAs. Component scores use documented median-anchored "
+            "normalisation or fixed indicator anchors; indicators only."
+        ),
     )
 
 
-@app.get("/v1/areas/resolve", response_model=ResolveResponse, tags=["areas"])
+@app.get("/v1/areas/resolve", response_model=ResolveResponse, include_in_schema=False)
+@app.get("/v2/areas/resolve", response_model=ResolveResponse, tags=["areas"])
 def resolve_postcode(postcode: str = Query(..., min_length=5, description="UK postcode, e.g. SW1A 1AA")) -> ResolveResponse:
     location = postcodes.resolve(postcode)
     record = _coverage_guard(location)
@@ -105,8 +112,9 @@ def resolve_postcode(postcode: str = Query(..., min_length=5, description="UK po
     )
 
 
-# Declared before /v1/areas/{msoa_code} so the literal path wins the match.
-@app.get("/v1/areas/index", response_model=AreaIndexResponse, tags=["areas"])
+# Declared before /v2/areas/{msoa_code} so the literal path wins the match.
+@app.get("/v1/areas/index", response_model=AreaIndexResponse, include_in_schema=False)
+@app.get("/v2/areas/index", response_model=AreaIndexResponse, tags=["areas"])
 def areas_index() -> AreaIndexResponse:
     records = [Area(**data.clean(record)) for record in data.areas().to_dict("records")]
     return AreaIndexResponse(
@@ -116,7 +124,8 @@ def areas_index() -> AreaIndexResponse:
     )
 
 
-@app.get("/v1/areas/{msoa_code}", response_model=Area, tags=["areas"])
+@app.get("/v1/areas/{msoa_code}", response_model=Area, include_in_schema=False)
+@app.get("/v2/areas/{msoa_code}", response_model=Area, tags=["areas"])
 def get_area(msoa_code: str) -> Area:
     record = data.get_area(msoa_code)
     if record is None:
@@ -124,7 +133,8 @@ def get_area(msoa_code: str) -> Area:
     return Area(**record)
 
 
-@app.post("/v1/search", response_model=SearchResponse, tags=["areas"])
+@app.post("/v1/search", response_model=SearchResponse, include_in_schema=False)
+@app.post("/v2/search", response_model=SearchResponse, tags=["areas"])
 def search(request: SearchRequest) -> SearchResponse:
     frame = data.areas().copy()
     if request.max_rent is not None:
@@ -146,7 +156,7 @@ def search(request: SearchRequest) -> SearchResponse:
     return SearchResponse(total=total, limit=request.limit, offset=request.offset, results=results)
 
 
-@app.post("/v1/listing-check", response_model=ListingCheckResponse, tags=["listing"])
+@app.post("/v2/listing-check", response_model=ListingCheckResponse, tags=["listing"])
 def listing_check(request: ListingCheckRequest) -> ListingCheckResponse:
     location = postcodes.resolve(request.postcode)
     record = _coverage_guard(location)
@@ -154,7 +164,10 @@ def listing_check(request: ListingCheckRequest) -> ListingCheckResponse:
     if request.deal == "rent":
         local = record.get(scoring.RENT_BY_BEDS[request.bedrooms])
         bed_label = "average" if request.bedrooms == "any" else f"{request.bedrooms.replace('plus', '+')}-bed"
-        basis = f"{bed_label} rent in {record.get('local_authority_name')}"
+        basis = (
+            f"official local-authority {bed_label} rent context for "
+            f"{record.get('local_authority_name')}"
+        )
     else:
         local = record.get("median_sale_price_gbp")
         basis = f"median sold price in {record.get('area_name')}"
@@ -162,8 +175,8 @@ def listing_check(request: ListingCheckRequest) -> ListingCheckResponse:
     pct, band = scoring.price_verdict(request.asking_gbp, local)
     price = PriceCheck(
         asking_gbp=request.asking_gbp,
-        local_typical_gbp=local,
-        pct_vs_local=pct,
+        comparison_gbp=local,
+        pct_vs_comparison=pct,
         band=band,
         basis=basis,
     )
@@ -173,4 +186,31 @@ def listing_check(request: ListingCheckRequest) -> ListingCheckResponse:
         msoa_name=location.get("msoa_name"),
         area=Area(**record),
         price=price,
+    )
+
+
+@app.post(
+    "/v1/listing-check",
+    response_model=LegacyListingCheckResponse,
+    include_in_schema=False,
+    deprecated=True,
+)
+def legacy_listing_check(request: ListingCheckRequest) -> LegacyListingCheckResponse:
+    """Compatibility alias; v2 publishes neutral comparison-field names."""
+    result = listing_check(request)
+    legacy_price = None
+    if result.price is not None:
+        legacy_price = LegacyPriceCheck(
+            asking_gbp=result.price.asking_gbp,
+            local_typical_gbp=result.price.comparison_gbp,
+            pct_vs_local=result.price.pct_vs_comparison,
+            band=result.price.band,
+            basis=result.price.basis,
+        )
+    return LegacyListingCheckResponse(
+        postcode=result.postcode,
+        msoa_code=result.msoa_code,
+        msoa_name=result.msoa_name,
+        area=result.area,
+        price=legacy_price,
     )

@@ -11,7 +11,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "Neighbourhood rankings by region",
   description:
-    "Browse ranked neighbourhoods across the ten regions of England & Wales by our affordability, safety, energy, flood and convenience indicators.",
+    "Browse ranked neighbourhoods across the ten regions of England & Wales by our affordability, recorded-crime, energy, flood and convenience indicators.",
 };
 
 export default async function RankingsIndex() {

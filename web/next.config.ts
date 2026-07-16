@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 // Baseline security headers, set in next.config so they apply on any host
 // (Vercel, behind Cloudflare, or self-hosted) rather than a vendor config file.
@@ -12,6 +13,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // The versioned scoring contract lives at repository root and is consumed by
+  // SQL, Python, and this client bundle. Keep Turbopack rooted at the repository
+  // so the web implementation does not duplicate scoring constants.
+  turbopack: {
+    root: path.join(process.cwd(), ".."),
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
