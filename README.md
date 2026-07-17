@@ -7,11 +7,12 @@ reproducible fixture-to-full build.**
 
 The engine rolls fragmented public housing data up to a consistent MSOA grain
 (7,264 England & Wales neighbourhoods) and derives five transparent 0–100
-indicators — affordability, recorded crime, energy, flood resilience, convenience — each
-kept **beside the raw figure it came from**, with per-area evidence quality driven by
-coverage, provenance and source grain. Missing data lowers evidence quality; it never silently becomes a zero.
-The "where to live" framing is the *vehicle* — the substance is the **pipeline,
-the dimensional + decision modelling, the tests, and the explainability layer**.
+indicators: affordability, recorded crime, energy, flood resilience and
+convenience. Each is kept beside the raw figure it came from, with per-area
+evidence quality driven by coverage, provenance and source grain. Missing data
+lowers evidence quality; it never silently becomes a zero. The "where to live"
+framing is the vehicle. The substance is the pipeline, the dimensional and
+decision modelling, the tests, and the explainability layer.
 
 > **Scope.** A reference analytics-engineering project, not a product — the UK
 > area-data space is already well served (CrystalRoof, Plumplot, PostcodeCheck, …).
@@ -43,10 +44,10 @@ the dimensional + decision modelling, the tests, and the explainability layer**.
 
 ## Architecture
 
-**The dbt + DuckDB warehouse is the centre of gravity.** It builds a small
+The dbt + DuckDB warehouse is the centre of gravity. It builds a small
 read-only `decision.duckdb` extract that a thin FastAPI service serves; a Next.js
 website is one HTTP client of it. The clients exist to show the modelling is
-frontend-agnostic and genuinely consumable — they are not the point.
+frontend-agnostic and consumable; they are not the point.
 
 ```text
   dbt + DuckDB engine  ──►  data/decision.duckdb  ──►  API (FastAPI, api/)
@@ -148,9 +149,9 @@ Land Registry data refreshes monthly, so the refresh is modelled as a
 **Dagster asset graph** ([`orchestration/`](orchestration/)) rather than a
 sequence of hand-run scripts: six ingestion assets (the Land Registry spine is
 downloaded automatically; five reference sources load from locally prepared
-files) feed the whole dbt project — loaded via `dagster-dbt`, so every model is
-an asset and every dbt test an asset check in the same lineage — and end at
-`decision_extract`, the slim DuckDB file the API ships.
+files) feed the whole dbt project and end at `decision_extract`, the slim
+DuckDB file the API ships. The dbt project loads via `dagster-dbt`, so every
+model is an asset and every dbt test an asset check in the same lineage.
 
 <p align="center">
   <img src="docs-assets/dagster-lineage.svg" alt="Dagster asset lineage: six ingestion sources feeding the dbt transform layer and the decision extract" width="720">
@@ -162,8 +163,8 @@ Two design points worth reading the code for:
   ingestion asset is gated *before* it. The raw Land Registry parquet is
   validated in [`orchestration/checks.py`](orchestration/checks.py) (row-count
   floor, price/date null-flood, malformed-postcode rate), and each reference
-  source carries a `prepared_file_is_sane` check evaluated **before its
-  drop-and-recreate load** — without it, a truncated prepared file would
+  source carries a `prepared_file_is_sane` check evaluated before its
+  drop-and-recreate load — without it, a truncated prepared file would
   replace a good warehouse table. A failed gate halts the graph at the front
   door instead of propagating into the marts.
 - **The orchestrated build is the real refresh.** It parses *and* builds dbt
@@ -175,9 +176,9 @@ Why Dagster and not Airflow: this is a set of data assets with lineage, not a
 task DAG — the asset/materialization model fits, and dbt lineage flows into the
 same graph. Freshness is declared (35-day warn on the warehouse spine and the
 extract, mirroring dbt's source freshness) and a monthly schedule is defined in
-code — but ships **switched off**: the full source archives are large/licensed
+code, but ships **switched off**: the full source archives are large/licensed
 and refreshed manually, so the job runs on demand
-(`dagster dev -m orchestration.definitions`) — pretending a scheduler runs in
+(`dagster dev -m orchestration.definitions`). Pretending a scheduler runs in
 production would be theatre. Details and trade-offs in
 [`orchestration/README.md`](orchestration/README.md).
 
@@ -227,10 +228,10 @@ source-freshness, sqlfluff, and the web lint/test/build checks.
 | Layer | Count | What it catches |
 |---|---|---|
 | Source freshness | 1 | Stale upstream data (warn if nothing newer than 35 days). |
-| Built-in row-shape | 146 | Schema bugs, FK orphans, enum drift, contract violations. |
-| `dbt-utils` | 21 | Sign/range invariants, multi-column uniqueness, score bounds. |
+| Built-in row-shape | 162 | Schema bugs, FK orphans, enum drift, contract violations. |
+| `dbt-utils` | 22 | Sign/range invariants, multi-column uniqueness, score bounds. |
 | `dbt-expectations` | 14 | Type-cast bugs, statistical drift, format regressions. |
-| Singular (`tests/assert_*.sql`) | 20 | Domain anomalies, coverage, coherence, and cross-runtime golden cases. |
+| Singular (`tests/assert_*.sql`) | 24 | Domain anomalies, coverage, coherence, and cross-runtime golden cases. |
 | **dbt data-test total** | **222** | All passing on every `dbt build`. |
 | dbt **unit** tests | 2 | Model *logic* on mock inputs: enrichment (postcode parse + region join + filter) and the scoring maths (median-anchored min-max, geometric-mean floor, missing-component rule). |
 | API (`tests/test_api.py`) | 14 | Versioned OpenAPI contract, neutral comparison fields, search validation/re-rank, missing-data and jurisdiction coverage, mocked postcodes.io. |
