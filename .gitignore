@@ -76,5 +76,5 @@ Thumbs.db
 /SCOTLAND_DISCOVERY_SPIKE.md
 /mobile/DESIGN_HANDOFF.md
 
-# Local Claude Code session config (launch configs, settings).
+# Local editor/agent session config.
 .claude/

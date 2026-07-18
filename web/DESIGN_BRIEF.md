@@ -3,7 +3,7 @@
 Canonical public name: **England & Wales Housing Decision Support**. Do not
 reintroduce the retired product nickname.
 
-A brief for **Claude Design** to lead a **fresh visual identity** for the website
+A brief for the **design lead** to shape a **fresh visual identity** for the website
 (`web/`). The site is already built and live; this is a design-led reskin, not a
 rebuild. Read the "Do not break" section as hard as the creative one.
 
@@ -180,8 +180,8 @@ Design these as a coherent set — most pages are made of them:
 
 ## 9. Accessibility & performance gates (must pass)
 
-Run the output against the **`web-design-guidelines`** and
-**`vercel-react-best-practices`** skills. Minimums:
+Run the output against established web accessibility and React
+performance best practices. Minimums:
 
 - WCAG AA contrast (≥4.5:1 text); visible keyboard focus on every interactive
   element; correct semantics (real `<table>` for compare, `<dl>` for facts, labels
@@ -201,9 +201,9 @@ Run the output against the **`web-design-guidelines`** and
   contract** (the `Area` shape) or how data is fetched.
 - `sitemap.ts`, `robots.ts`, `llms.txt`.
 
-## 11. Deliverables expected from Claude Design
+## 11. Deliverables
 
-1. A **design plan first** (per `frontend-design`): named palette (4–6 hex), the
+1. A **design plan first**: named palette (4–6 hex), the
    type pairing + scale, layout concept, and the **one signature element** — with a
    note on the aesthetic risk taken and why it's not a default.
 2. **Theme tokens** (Tailwind v4 `@theme` + shadcn theme) and the restyled
