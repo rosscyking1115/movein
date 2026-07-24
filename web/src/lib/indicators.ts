@@ -1,6 +1,6 @@
 import type { Area, ComponentKey } from "./types";
 import { epcColor, epcText } from "./epc";
-import { km, rate, ratingOrDash, rentPerMonth, score as fmtScore } from "./format";
+import { km, rate, ratingOrDash, rentPerMonth, salePriceWithEvidence, score as fmtScore } from "./format";
 
 // Indicator definitions for the area "schedule": each score is paired with the
 // figure behind it and an honest, neutral sentence. Sentences describe relative
@@ -160,7 +160,15 @@ export function factRows(area: Area): { label: string; value: string }[] {
     ...(area.nearest_city
       ? [{ label: `${area.nearest_city} city centre`, value: km(area.distance_to_city_km) }]
       : []),
-    { label: "Median sale price", value: area.median_sale_price_gbp == null ? "—" : `£${area.median_sale_price_gbp.toLocaleString("en-GB")}` },
+    {
+      label: "Median sale price",
+      value: salePriceWithEvidence(
+        area.median_sale_price_gbp,
+        area.sales_count_latest_year,
+        area.sale_price_reference_year,
+        area.median_sale_price_confidence,
+      ),
+    },
     { label: "Monthly crime per 1,000", value: rate(area.crime_rate_per_1000) },
     { label: "Recorded-crime period", value: crimePeriod },
     { label: "Crime population denominator", value: crimePopulation },

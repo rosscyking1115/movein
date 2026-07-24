@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Area, ComponentKey } from "@/lib/types";
 import { COMPONENT_LABELS } from "@/lib/types";
 import { areaSlug } from "@/lib/slug";
-import { gbp, km, rate, ratingOrDash, rentPerMonth, score } from "@/lib/format";
+import { km, rate, ratingOrDash, rentPerMonth, salePriceWithEvidence, score } from "@/lib/format";
 
 type ScoreRow = { label: string; rank: (a: Area) => number | null };
 type FactRow = { label: string; value: (a: Area) => string };
@@ -17,7 +17,16 @@ const SCORE_ROWS: ScoreRow[] = [
 const FACT_ROWS: FactRow[] = [
   { label: "Official local-authority rent", value: (a) => rentPerMonth(a.official_rent_monthly_gbp) },
   { label: "Official local-authority 2-bed rent", value: (a) => rentPerMonth(a.rent_2bed_gbp) },
-  { label: "Median sale price", value: (a) => gbp(a.median_sale_price_gbp) },
+  {
+    label: "Median sale price",
+    value: (a) =>
+      salePriceWithEvidence(
+        a.median_sale_price_gbp,
+        a.sales_count_latest_year,
+        a.sale_price_reference_year,
+        a.median_sale_price_confidence,
+      ),
+  },
   { label: "Median EPC", value: (a) => ratingOrDash(a.epc_median_rating) },
   { label: "Crime / 1,000", value: (a) => rate(a.crime_rate_per_1000) },
   { label: "Flood risk", value: (a) => a.flood_risk_flag ?? "—" },

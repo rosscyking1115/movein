@@ -51,3 +51,20 @@ export function salePriceEvidence(
   const label = confidence ? `; ${confidence}` : "";
   return `${salesCount.toLocaleString("en-GB")} matched sales${period}${label}`;
 }
+
+/** The complete, display-safe area sale-price context for public surfaces. */
+export function salePriceWithEvidence(
+  salePrice: number | null | undefined,
+  salesCount: number | null | undefined,
+  referenceYear: number | null | undefined,
+  confidence: string | null | undefined,
+): string {
+  const evidence = salePriceEvidence(salesCount, referenceYear, confidence);
+
+  if (salesCount === 0) return evidence;
+
+  const price = gbp(salePrice);
+  if (price === "—") return evidence;
+
+  return `${price} · ${evidence}`;
+}
